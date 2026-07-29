@@ -1,0 +1,85 @@
+﻿@model CRMSystem.Models.ViewModels.LoginViewModel
+
+@{
+    ViewData["Title"] = "Login";
+    Layout = "_LoginLayout";
+}
+
+<div class="container-fluid login-page p-0">
+
+    <div class="row g-0 min-vh-100">
+
+        <!-- LEFT -->
+        <div class="col-lg-7 d-none d-lg-flex login-left">
+
+            <img src="~/images/login/crm-login.svg"
+                 class="login-image"
+                 alt="CRM Illustration">
+
+        </div>
+
+        <!-- RIGHT -->
+        <div class="col-lg-5 col-12 login-right">
+
+            <div class="login-panel">
+
+                <h1 class="logo mb-2">
+                    CRM System
+                </h1>
+
+                <p class="text-muted mb-4">
+                    Welcome Back! Please sign in to continue.
+                </p>
+
+                <form asp-action="Login" method="post">
+
+                    <div asp-validation-summary="ModelOnly"
+                         class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+
+                        <label asp-for="Email"></label>
+
+                        <input asp-for="Email"
+                               class="form-control"
+                               placeholder="Enter your email">
+
+                        <span asp-validation-for="Email"
+                              class="text-danger"></span>
+
+                    </div>
+
+                    <div class="mb-4">
+
+                        <label asp-for="Password"></label>
+
+                        <input asp-for="Password"
+                               type="password"
+                               class="form-control"
+                               placeholder="Enter your password">
+
+                        <span asp-validation-for="Password"
+                              class="text-danger"></span>
+
+                    </div>
+
+                    <button type="submit"
+                            class="btn btn-primary w-100">
+
+                        Sign In
+
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

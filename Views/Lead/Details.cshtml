@@ -1,0 +1,152 @@
+﻿@model CRMSystem.Models.ViewModels.LeadViewModel
+
+@{
+    ViewData["Title"] = "Lead Details";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold">Lead Details</h2>
+            <p class="text-muted mb-0">
+                View complete information about this lead.
+            </p>
+        </div>
+
+        <div>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i>
+                Back
+            </a>
+
+            <a asp-action="Edit"
+               asp-route-id="@Model.LeadId"
+               class="btn btn-primary">
+
+                <i class="bi bi-pencil-square"></i>
+                Edit
+            </a>
+        </div>
+
+    </div>
+
+    <div class="card shadow-sm">
+
+        <div class="card-header">
+
+            <h5 class="mb-0">
+                Lead Information
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="fw-semibold">Lead Code</label>
+
+                    <p>@Model.LeadCode</p>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="fw-semibold">Company Name</label>
+
+                    <p>@Model.CompanyName</p>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="fw-semibold">Lead Name</label>
+
+                    <p>@Model.LeadName</p>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="fw-semibold">Profession</label>
+
+                    <p>@Model.Profession</p>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="fw-semibold">Email</label>
+
+                    <p>@Model.Email</p>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="fw-semibold">Phone</label>
+
+                    <p>@Model.Phone</p>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="fw-semibold">Address</label>
+
+                    <p>@Model.Address</p>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="fw-semibold">Source</label>
+
+                    <p>@Model.Source</p>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="fw-semibold">Priority</label>
+
+                    <p>@Model.Priority</p>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="fw-semibold">Status</label>
+
+                    <p>@Model.Status</p>
+
+                </div>
+
+                <div class="col-md-12 mb-3">
+
+                    <label class="fw-semibold">Description</label>
+
+                    <p>@Model.Description</p>
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <label class="fw-semibold">Follow Up Date</label>
+
+                    <p>@Model.FollowUpDate?.ToString("dd MMM yyyy")</p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

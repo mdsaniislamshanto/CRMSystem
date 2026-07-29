@@ -1,0 +1,264 @@
+﻿/* ===========================
+   Google Font
+=========================== */
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #F8FAFC;
+    margin: 0;
+    padding: 0;
+}
+
+
+/* ===========================
+   Sidebar
+=========================== */
+
+.sidebar {
+    width: 260px;
+    min-height: 100vh;
+    background: #1E293B;
+    color: #fff;
+    position: fixed;
+    top: 0;
+    left: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    z-index: 1050;
+}
+
+.sidebar-header {
+    padding: 24px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+    .sidebar-header h4 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 1.5rem;
+    }
+
+    .sidebar-header i {
+        margin-right: 8px;
+    }
+
+.sidebar-menu {
+    list-style: none;
+    padding: 20px 15px;
+    margin: 0;
+    flex: 1;
+}
+
+    .sidebar-menu li {
+        margin-bottom: 6px;
+    }
+
+        .sidebar-menu li a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 18px;
+            color: #CBD5E1;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all .25s ease;
+            font-weight: 500;
+        }
+
+            .sidebar-menu li a i {
+                font-size: 18px;
+                width: 20px;
+                text-align: center;
+            }
+
+            .sidebar-menu li a:hover {
+                background: #334155;
+                color: #fff;
+                transform: translateX(4px);
+            }
+
+                .sidebar-menu li a:hover i {
+                    color: #fff;
+                }
+
+            /* Active Menu */
+
+            .sidebar-menu li a.active {
+                background: #2563EB;
+                color: #fff !important;
+                font-weight: 600;
+                box-shadow: 0 4px 12px rgba(37,99,235,.35);
+            }
+
+                .sidebar-menu li a.active i {
+                    color: #fff;
+                }
+
+.menu-title {
+    color: #94A3B8;
+    font-size: .78rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 18px 18px 8px;
+    font-weight: 600;
+}
+
+
+/* ===========================
+   Main Content
+=========================== */
+
+.flex-grow-1 {
+    margin-left: 260px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+
+/* ===========================
+   Navbar
+=========================== */
+
+.navbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: #fff;
+}
+
+.breadcrumb {
+    margin-bottom: 0;
+    background: transparent;
+}
+
+.breadcrumb-item a {
+    text-decoration: none;
+}
+
+.breadcrumb-item.active {
+    color: #64748B;
+}
+
+
+/* ===========================
+   Footer
+=========================== */
+
+footer {
+    background: #fff;
+    border-top: 1px solid #E2E8F0;
+}
+
+
+/* ===========================
+   Dashboard Cards
+=========================== */
+
+.dashboard-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.08);
+    transition: all .3s ease;
+}
+
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,.12);
+    }
+
+.dashboard-icon {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 28px;
+}
+
+.card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.08);
+}
+
+.card-header {
+    background: #fff;
+    border-bottom: 1px solid #E2E8F0;
+    font-weight: 600;
+}
+
+.card h6 {
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.card h2 {
+    font-size: 32px;
+}
+
+
+/* ===========================
+   Tables
+=========================== */
+
+.table {
+    margin-bottom: 0;
+}
+
+    .table thead th {
+        vertical-align: middle;
+    }
+
+    .table td,
+    .table th {
+        vertical-align: middle;
+    }
+
+
+/* ===========================
+   Buttons
+=========================== */
+
+.btn {
+    border-radius: 8px;
+}
+
+.btn-primary {
+    box-shadow: 0 4px 10px rgba(37,99,235,.25);
+}
+
+
+/* ===========================
+   Responsive
+=========================== */
+
+@media (max-width: 992px) {
+
+    .sidebar {
+        width: 220px;
+    }
+
+    .flex-grow-1 {
+        margin-left: 220px;
+    }
+}
+
+@media (max-width: 768px) {
+
+    .sidebar {
+        display: none;
+    }
+
+    .flex-grow-1 {
+        margin-left: 0;
+    }
+}

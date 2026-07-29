@@ -1,0 +1,172 @@
+﻿@model IEnumerable<CRMSystem.Models.ViewModels.LeadViewModel>
+
+@{
+    ViewData["Title"] = "Leads ";
+    Layout = "_AdminLayout";
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+                Lead Management
+            </h2>
+
+            <p class="text-muted mb-0">
+                Manage and monitor all customer leads.
+            </p>
+
+        </div>
+
+        <a asp-action="Create"
+           class="btn btn-primary">
+
+            <i class="bi bi-plus-circle me-1"></i>
+
+            Add Lead
+
+        </a>
+
+    </div>
+
+    <table class="table table-bordered table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Lead Code</th>
+                <th>Lead Name</th>
+                <th>Company</th>
+                <th>Phone</th>
+                <th>Status</th>
+                <th>Priority</th>
+                <th width="180">Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            @if (!Model.Any())
+            {
+                <tr>
+                    <td colspan="7" class="text-center">
+                        No leads found.
+                    </td>
+                </tr>
+            }
+            else
+            {
+                foreach (var lead in Model)
+                {
+                    <tr>
+                        <td>@lead.LeadCode</td>
+                        <td>@lead.LeadName</td>
+                        <td>@lead.CompanyName</td>
+                        <td>@lead.Phone</td>
+                        <td>
+                            @switch (lead.Status)
+                            {
+                                case CRMSystem.Enums.LeadStatus.New:
+                                    <span class="badge bg-primary">New</span>
+                                    break;
+
+                                case CRMSystem.Enums.LeadStatus.Assigned:
+                                    <span class="badge bg-info">Assigned</span>
+                                    break;
+
+                                case CRMSystem.Enums.LeadStatus.Accepted:
+                                    <span class="badge bg-success">Accepted</span>
+                                    break;
+
+                                case CRMSystem.Enums.LeadStatus.InProgress:
+                                    <span class="badge bg-warning text-dark">In Progress</span>
+                                    break;
+
+                                case CRMSystem.Enums.LeadStatus.Completed:
+                                    <span class="badge bg-success">Completed</span>
+                                    break;
+
+                                case CRMSystem.Enums.LeadStatus.Rejected:
+                                    <span class="badge bg-danger">Rejected</span>
+                                    break;
+
+                                default:
+                                    <span class="badge bg-secondary">@lead.Status</span>
+                                    break;
+                            }
+                        </td>
+                        <td>
+                            @switch (lead.Priority)
+                            {
+                                case CRMSystem.Enums.LeadPriority.High:
+                                    <span class="badge bg-danger">High</span>
+                                    break;
+
+                                case CRMSystem.Enums.LeadPriority.Medium:
+                                    <span class="badge bg-warning text-dark">Medium</span>
+                                    break;
+
+                                case CRMSystem.Enums.LeadPriority.Low:
+                                    <span class="badge bg-success">Low</span>
+                                    break;
+
+                                default:
+                                    <span class="badge bg-secondary">@lead.Priority</span>
+                                    break;
+                            }
+                        </td>
+                        <td>
+
+                            <a asp-action="Details"
+                               asp-route-id="@lead.LeadId"
+                               class="btn btn-sm btn-info text-white">
+
+                                <i class="bi bi-eye"></i>
+
+                            </a>
+
+                            <a asp-action="Edit"
+                               asp-route-id="@lead.LeadId"
+                               class="btn btn-sm btn-warning">
+
+                                <i class="bi bi-pencil-square"></i>
+
+                            </a>
+
+                            <form asp-action="Archive"
+                                  asp-route-id="@lead.LeadId"
+                                  method="post"
+                                  class="d-inline">
+
+                                @Html.AntiForgeryToken()
+
+                                <button type="submit"
+                                        class="btn btn-sm btn-danger"
+                                        onclick="return confirm('Are you sure you want to archive this lead?');">
+
+                                    <i class="bi bi-archive"></i>
+
+                                </button>
+
+                            </form>
+
+                            <a asp-action="Assign"
+                               asp-route-id="@lead.LeadId"
+                               class="btn btn-sm btn-warning"
+                               title="Assign Lead">
+
+                                <i class="bi bi-person-check-fill"></i>
+
+                            </a>
+
+                        </td>
+                    </tr>
+                }
+            }
+
+        </tbody>
+
+    </table>
+
+</div>

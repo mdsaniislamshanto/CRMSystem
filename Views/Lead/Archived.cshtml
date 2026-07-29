@@ -1,0 +1,103 @@
+﻿@model IEnumerable<CRMSystem.Models.ViewModels.LeadViewModel>
+
+@{
+    ViewData["Title"] = "Archived Leads";
+    Layout = "_AdminLayout";
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold mb-1">Archived Leads</h2>
+
+            <p class="text-muted mb-0">
+                View all archived leads.
+            </p>
+        </div>
+
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i>
+            Back to Leads
+        </a>
+
+    </div>
+
+    <table class="table table-bordered table-hover">
+
+        <thead class="table-dark">
+            <tr>
+                <th>Lead Code</th>
+                <th>Lead Name</th>
+                <th>Company</th>
+                <th>Phone</th>
+                <th>Status</th>
+                <th>Priority</th>
+                <th width="180">Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            @if (!Model.Any())
+            {
+                <tr>
+                    <td colspan="7" class="text-center">
+                        No archived leads found.
+                    </td>
+                </tr>
+            }
+            else
+            {
+                foreach (var lead in Model)
+                {
+                    <tr>
+
+                        <td>@lead.LeadCode</td>
+                        <td>@lead.LeadName</td>
+                        <td>@lead.CompanyName</td>
+                        <td>@lead.Phone</td>
+
+                        <td>@lead.Status</td>
+
+                        <td>@lead.Priority</td>
+
+                        <td>
+
+                            <a asp-action="Details"
+                               asp-route-id="@lead.LeadId"
+                               class="btn btn-sm btn-info text-white">
+
+                                <i class="bi bi-eye"></i>
+
+                            </a>
+
+                            <form asp-action="Restore"
+                                  asp-route-id="@lead.LeadId"
+                                  method="post"
+                                  class="d-inline">
+
+                                @Html.AntiForgeryToken()
+
+                                <button type="submit"
+                                        class="btn btn-sm btn-success"
+                                        onclick="return confirm('Are you sure you want to restore this lead?');">
+
+                                    <i class="bi bi-arrow-counterclockwise"></i>
+
+                                </button>
+
+                            </form>
+
+                        </td>
+
+                    </tr>
+                }
+            }
+
+        </tbody>
+
+    </table>
+
+</div>

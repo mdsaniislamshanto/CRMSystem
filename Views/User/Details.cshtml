@@ -1,0 +1,226 @@
+﻿@model CRMSystem.Models.ViewModels.UserDetailsViewModel
+
+@{
+    ViewData["Title"] = "User Details";
+    ViewData["Breadcrumb"] = "Users / Details";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">User Details</h3>
+            <p class="text-muted mb-0">
+                View complete information about this user.
+            </p>
+        </div>
+
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+    </div>
+
+    <!-- Profile Information -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header fw-semibold">
+            Profile Information
+        </div>
+
+        <div class="card-body">
+
+            <div class="row mb-3">
+                <div class="col-md-4 fw-semibold">
+                    Employee Code
+                </div>
+
+                <div class="col-md-8">
+                    @Model.EmployeeCode
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4 fw-semibold">
+                    Full Name
+                </div>
+
+                <div class="col-md-8">
+                    @Model.FullName
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 fw-semibold">
+                    Role
+                </div>
+
+                <div class="col-md-8">
+                    @Model.RoleName
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Contact Information -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header fw-semibold">
+            Contact Information
+        </div>
+
+        <div class="card-body">
+
+            <div class="row mb-3">
+                <div class="col-md-4 fw-semibold">
+                    Email
+                </div>
+
+                <div class="col-md-8">
+                    @Model.Email
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 fw-semibold">
+                    Phone Number
+                </div>
+
+                <div class="col-md-8">
+                    @Model.PhoneNumber
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Account Information -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header fw-semibold">
+            Account Information
+        </div>
+
+        <div class="card-body">
+
+            <div class="row mb-3">
+                <div class="col-md-4 fw-semibold">
+                    Email Verified
+                </div>
+
+                <div class="col-md-8">
+
+                    @if (Model.IsEmailVerified)
+                    {
+                        <span class="badge bg-success">
+                            Verified
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">
+                            Not Verified
+                        </span>
+                    }
+
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4 fw-semibold">
+                    Status
+                </div>
+
+                <div class="col-md-8">
+
+                    @if (Model.IsActive)
+                    {
+                        <span class="badge bg-success">
+                            Active
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">
+                            Inactive
+                        </span>
+                    }
+
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4 fw-semibold">
+                    Last Login
+                </div>
+
+                <div class="col-md-8">
+                    @(Model.LastLoginAt?.ToString("dd MMM yyyy hh:mm tt") ?? "Never")
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 fw-semibold">
+                    Last Password Changed
+                </div>
+
+                <div class="col-md-8">
+                    @(Model.LastPasswordChangedAt?.ToString("dd MMM yyyy hh:mm tt") ?? "Never")
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Work Summary -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header fw-semibold">
+            Work Summary
+        </div>
+
+        <div class="card-body text-center text-muted">
+
+            <i class="bi bi-bar-chart fs-2"></i>
+
+            <p class="mt-2 mb-0">
+                This section will display assigned leads, feedback statistics,
+                and performance metrics in a future update.
+            </p>
+
+        </div>
+    </div>
+
+    <!-- Recent Assigned Leads -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header fw-semibold">
+            Recent Assigned Leads
+        </div>
+
+        <div class="card-body text-center text-muted">
+
+            <i class="bi bi-list-check fs-2"></i>
+
+            <p class="mt-2 mb-0">
+                Recent lead assignments will appear here.
+            </p>
+
+        </div>
+    </div>
+
+    <!-- Activity Timeline -->
+    <div class="card shadow-sm">
+        <div class="card-header fw-semibold">
+            Activity Timeline
+        </div>
+
+        <div class="card-body text-center text-muted">
+
+            <i class="bi bi-clock-history fs-2"></i>
+
+            <p class="mt-2 mb-0">
+                User activities will be displayed here.
+            </p>
+
+        </div>
+    </div>
+
+</div>

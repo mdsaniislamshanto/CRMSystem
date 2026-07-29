@@ -1,0 +1,204 @@
+﻿@model CRMSystem.ViewModels.AdminDashboardViewModel
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "_AdminLayout";
+}
+
+<!-- ==============================
+     Row 1 :
+================================ -->
+
+<div class="container-fluid">
+
+    <!-- Dashboard Header -->
+    <div class="mb-4">
+        <h2 class="fw-bold">Admin Dashboard</h2>
+        <p class="text-muted mb-0">
+            Welcome back, @Context.Session.GetString("FullName")
+        </p>
+    </div>
+
+    <!-- Row 1 : Summary Cards -->
+    <div class="row g-4">
+
+        <!-- Total Users -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card dashboard-card">
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <h6 class="text-muted">Total Users</h6>
+                            <h2 class="fw-bold mb-0">25</h2>
+                        </div>
+
+                        <div class="dashboard-icon bg-primary">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Sales Officers -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card dashboard-card">
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <h6 class="text-muted">Sales Officers</h6>
+                            <h2 class="fw-bold mb-0">8</h2>
+                        </div>
+
+                        <div class="dashboard-icon bg-success">
+                            <i class="bi bi-person-workspace"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Leads -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card dashboard-card">
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <h6 class="text-muted">Total Leads</h6>
+                            <h2 class="fw-bold mb-0">150</h2>
+                        </div>
+
+                        <div class="dashboard-icon bg-warning">
+                            <i class="bi bi-list-task"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Assigned Leads -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card dashboard-card">
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <h6 class="text-muted">Assigned Leads</h6>
+                            <h2 class="fw-bold mb-0">18</h2>
+                        </div>
+
+                        <div class="dashboard-icon bg-danger">
+                            <i class="bi bi-hourglass-split"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ==============================
+     Row 2 : Charts
+================================ -->
+
+<div class="row mt-4">
+
+    <!-- Lead Status -->
+
+    <div class="col-lg-6">
+
+        <div class="card dashboard-card h-100">
+
+            <div class="card-header bg-white">
+
+                <h5 class="mb-0">
+
+                    Lead Status
+
+                </h5>
+
+            </div>
+
+            <div class="card-body">
+
+                <div style="height:300px; position:relative;">
+
+                    <canvas id="leadStatusChart"></canvas>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Monthly Trend -->
+
+    <div class="col-lg-6">
+
+        <div class="card dashboard-card h-100">
+
+            <div class="card-header bg-white">
+
+                <h5 class="mb-0">
+
+                    Monthly Lead Trend
+
+                </h5>
+
+            </div>
+
+            <div class="card-body">
+
+                <div style="height:300px; position:relative;">
+
+                    <canvas id="monthlyTrendChart"></canvas>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts
+{
+    <script>
+        const leadStatusData = {
+
+            newLeads: @Model.NewLeads,
+
+            assignedLeads: @Model.AssignedLeads,
+
+            acceptedLeads: @Model.AcceptedLeads,
+
+            inProgressLeads: @Model.InProgressLeads,
+
+            completedLeads: @Model.CompletedLeads,
+
+            rejectedLeads: @Model.RejectedLeads
+
+                };
+    </script>
+}

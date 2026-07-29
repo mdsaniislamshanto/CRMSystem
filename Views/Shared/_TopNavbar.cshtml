@@ -1,0 +1,129 @@
+﻿@using Microsoft.AspNetCore.Http
+
+<nav class="navbar navbar-expand-lg bg-white shadow-sm px-4 py-3">
+
+    <div class="container-fluid">
+
+        <!-- Left Side -->
+        <div class="d-flex align-items-center">
+
+            <button class="btn btn-light me-3" id="sidebarToggle">
+
+                <i class="bi bi-list fs-4"></i>
+
+            </button>
+
+            <div>
+
+                <nav aria-label="breadcrumb">
+
+                    <ol class="breadcrumb mb-1">
+
+                        <li class="breadcrumb-item">
+
+                            <a asp-controller="Admin"
+                               asp-action="Index"
+                               class="text-decoration-none">
+
+                                Dashboard
+
+                            </a>
+
+                        </li>
+
+                        @if (ViewData["Title"] != null && ViewData["Title"]?.ToString() != "Admin Dashboard")
+                        {
+                            <li class="breadcrumb-item active"
+                                aria-current="page">
+
+                                @ViewData["Title"]
+
+                            </li>
+                        }
+
+                    </ol>
+
+                </nav>
+
+            </div>
+
+        </div>
+
+        <!-- Right Side -->
+        <div class="d-flex align-items-center">
+
+            <!-- Search -->
+            <div class="me-4">
+
+                <input type="text"
+                       class="form-control"
+                       placeholder="Search..." />
+
+            </div>
+
+            <!-- Notification -->
+            <button class="btn btn-light position-relative me-3">
+
+                <i class="bi bi-bell fs-5"></i>
+
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+
+                    0
+
+                </span>
+
+            </button>
+
+            <!-- Profile -->
+            <div class="dropdown">
+
+                <button class="btn btn-light dropdown-toggle"
+                        data-bs-toggle="dropdown">
+
+                    <i class="bi bi-person-circle me-2"></i>
+
+                    @Context.Session.GetString("FullName")
+
+                </button>
+
+                <ul class="dropdown-menu dropdown-menu-end">
+
+                    <li>
+
+                        <a class="dropdown-item"
+                           asp-controller="Admin"
+                           asp-action="Index">
+
+                            Dashboard
+
+                        </a>
+
+                    </li>
+
+                    <li>
+
+                        <hr class="dropdown-divider">
+
+                    </li>
+
+                    <li>
+
+                        <a class="dropdown-item text-danger"
+                           asp-controller="Auth"
+                           asp-action="Logout">
+
+                            Logout
+
+                        </a>
+
+                    </li>
+
+                </ul>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</nav>

@@ -1,0 +1,181 @@
+﻿@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+}
+
+<div class="sidebar">
+
+    <!-- Logo -->
+    <div class="sidebar-header">
+
+        <h4 class="m-0">
+            <i class="bi bi-bar-chart-fill"></i>
+            CRM System
+        </h4>
+
+    </div>
+
+    <!-- Navigation -->
+    <ul class="sidebar-menu">
+
+        <!-- Dashboard -->
+
+        <li>
+
+            <a asp-controller="Admin"
+               asp-action="Index"
+               class="@(currentController == "Admin" ? "active" : "")">
+
+                <i class="bi bi-house-door-fill"></i>
+
+                Dashboard
+
+            </a>
+
+        </li>
+
+        <!-- User Management -->
+
+        <li class="menu-title">
+
+            User Management
+
+        </li>
+
+        <li>
+
+            <a asp-controller="User"
+               asp-action="Index"
+               class="@(currentController == "User" ? "active" : "")">
+
+                <i class="bi bi-people-fill"></i>
+
+                Users
+
+            </a>
+
+        </li>
+
+        <!-- Lead Management -->
+
+        <li class="menu-title">
+
+            Lead Management
+
+        </li>
+
+        <!-- Active Leads -->
+
+        <li>
+
+            <a asp-controller="Lead"
+               asp-action="Index"
+               class="@(currentController == "Lead" && currentAction == "Index" ? "active" : "")">
+
+                <i class="bi bi-list-task"></i>
+
+                Leads
+
+            </a>
+
+        </li>
+
+        <!-- Archived Leads -->
+
+        <li>
+
+            <a asp-controller="Lead"
+               asp-action="Archived"
+               class="@(currentController == "Lead" && currentAction == "Archived" ? "active" : "")">
+
+                <i class="bi bi-archive-fill"></i>
+
+                Archived Leads
+
+            </a>
+
+        </li>
+
+        <!-- Assign Lead -->
+
+        <li>
+
+            <a asp-controller="Lead"
+               asp-action="Assign"
+               class="@(currentController == "Lead" && currentAction == "Assign" ? "active" : "")">
+
+                <i class="bi bi-person-check-fill"></i>
+
+                Assign Lead
+
+            </a>
+
+        </li>
+
+        <!-- Sales Officers -->
+
+        <li>
+
+            <a asp-controller="Sales"
+               asp-action="Index"
+               class="@(currentController == "Sales" ? "active" : "")">
+
+                <i class="bi bi-person-workspace"></i>
+
+                Sales Officers
+
+            </a>
+
+        </li>
+
+        <!-- Reports -->
+
+        <li>
+
+            <a asp-controller="Reports"
+               asp-action="Index"
+               class="@(currentController == "Reports" ? "active" : "")">
+
+                <i class="bi bi-graph-up-arrow"></i>
+
+                Reports
+
+            </a>
+
+        </li>
+
+        <!-- Settings -->
+
+        <li>
+
+            <a asp-controller="Settings"
+               asp-action="Index"
+               class="@(currentController == "Settings" ? "active" : "")">
+
+                <i class="bi bi-gear-fill"></i>
+
+                Settings
+
+            </a>
+
+        </li>
+
+        <!-- Logout -->
+
+        <li class="mt-auto">
+
+            <a asp-controller="Auth"
+               asp-action="Logout"
+               class="text-danger">
+
+                <i class="bi bi-box-arrow-right"></i>
+
+                Logout
+
+            </a>
+
+        </li>
+
+    </ul>
+
+</div>

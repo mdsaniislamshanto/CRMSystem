@@ -1,0 +1,198 @@
+﻿@model IEnumerable<CRMSystem.Models.ViewModels.UserViewModel>
+
+@{
+    ViewData["Title"] = "Users";
+    Layout = "_AdminLayout";
+}
+
+<div class="container mt-4">
+
+    <!-- Page Header -->
+    <div class="mb-4">
+
+        <h2 class="fw-bold mb-1">
+            User Management
+        </h2>
+
+        <p class="text-muted mb-0">
+            Manage system users, roles and account information.
+        </p>
+
+    </div>
+
+    <!-- Search & Filter Toolbar -->
+  <div class="card shadow-sm border-0 mb-4">
+
+    <div class="card-body">
+
+            <form id="userSearchForm"
+                  asp-action="Index"
+                  method="get">
+
+            <div class="row g-3 align-items-center">
+
+                <!-- Search -->
+                <div class="col-lg-4">
+
+                        <input id="searchInput"
+                               type="text"
+                               name="searchTerm"
+                               value="@Context.Request.Query["searchTerm"]"
+                               class="form-control"
+                               placeholder="Search by employee code, name or email..." />
+
+                </div>
+
+                <!-- Role Filter -->
+                <div class="col-lg-2">
+
+                        <select id="roleFilter"
+                                class="form-select">
+
+                            <option value="">All Roles</option>
+                            <option value="Administrator">Administrator</option>
+                            <option value="Sales Officer">Sales Officer</option>
+                            <option value="Account">Account</option>
+
+                        </select>
+
+                </div>
+
+                <!-- Status Filter -->
+                <div class="col-lg-2">
+
+                        <select id="statusFilter"
+                                class="form-select">
+
+                        <option selected>All Status</option>
+                        <option>Active</option>
+                        <option>Inactive</option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- Add User Button -->
+                <div class="col-lg-4 text-lg-end">
+
+                    <a asp-action="Create"
+                       class="btn btn-primary">
+
+                        <i class="bi bi-plus-circle me-1"></i>
+
+                        Add User
+
+                    </a>
+
+                </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+  @*   // User Table Container *@
+    <div id="userTableContainer">
+
+        <partial name="_UserTable"
+                 model="Model" />
+
+    </div>
+
+
+</div>
+
+
+@* SweetAlert2 for confirmation dialogs *@
+
+@section Scripts
+{
+    <script>
+        function confirmToggle(button) {
+
+            const form = button.closest("form");
+
+            const isDeactivate = button.classList.contains("btn-danger");
+
+            Swal.fire({
+                title: isDeactivate ? "Deactivate User?" : "Activate User?",
+                text: isDeactivate
+                    ? "This user will no longer be able to log in."
+                    : "This user will be able to log in again.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: isDeactivate ? "#d33" : "#198754",
+                cancelButtonColor: "#6c757d",
+                confirmButtonText: isDeactivate ? "Yes, Deactivate" : "Yes, Activate",
+                cancelButtonText: "Cancel"
+            }).then((result) => {
+
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+
+            });
+
+        }
+
+        // Debounced Search Functionality using Fetch API and Partial Views
+        const searchInput = document.getElementById("searchInput");
+        const userTableContainer = document.getElementById("userTableContainer");
+
+        let debounceTimer;
+
+        async function loadUsers() {
+
+            const searchTerm = searchInput.value;
+            const role = document.getElementById("roleFilter").value;
+            const status = document.getElementById("statusFilter").value;
+
+            const response = await fetch(
+                `/User/SearchUsers?searchTerm=${encodeURIComponent(searchTerm)}&role=${encodeURIComponent(role)}&status=${encodeURIComponent(status)}`
+            );
+
+            const html = await response.text();
+
+            userTableContainer.innerHTML = html;
+        }
+
+        // Search Event
+        searchInput.addEventListener("input", function() {
+
+            clearTimeout(debounceTimer);
+
+            debounceTimer = setTimeout(function() {
+
+                loadUsers();
+
+            }, 250);
+
+        });
+
+        // Role Filter Event
+        const roleFilter = document.getElementById("roleFilter");
+
+        roleFilter.addEventListener("change", function() {
+
+            loadUsers();
+
+        });
+
+
+        // Status Filter Event
+        const statusFilter = document.getElementById("statusFilter");
+
+        statusFilter.addEventListener("change", function() {
+
+            loadUsers();
+
+        });
+ 
+     
+
+    </script>
+}
