@@ -11,10 +11,14 @@ namespace CRMSystem.Services
     public class LeadService : ILeadService
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEmailService _emailService;
 
-        public LeadService(ApplicationDbContext context)
+        public LeadService(
+            ApplicationDbContext context,
+            IEmailService emailService)
         {
             _context = context;
+            _emailService = emailService;
         }
 
 
@@ -236,6 +240,9 @@ namespace CRMSystem.Services
         //for assigning a lead to a sales officer
         public async Task AssignLeadAsync(AssignLeadViewModel model, long adminId)
         {
+           
+
+
             var lead = await _context.Leads
                 .FirstOrDefaultAsync(l => l.LeadId == model.LeadId);
 
@@ -269,6 +276,50 @@ namespace CRMSystem.Services
             lead.Status = LeadStatus.Assigned;
 
             await _context.SaveChangesAsync();
+
+            // Get Sales Officer Information
+            var salesOfficer = await _context.Users
+                .FirstOrDefaultAsync(u => u.UserId == model.SalesOfficerId);
+
+            // Get Admin Information
+            var admin = await _context.Users
+                .FirstOrDefaultAsync(u => u.UserId == adminId);
+
+            // Send Email prev
+            //if (salesOfficer != null && admin != null)
+            //{
+            //    //temp
+            //    throw new Exception("Email section reached.");
+
+
+            //    await _emailService.SendLeadAssignmentEmailAsync(
+            //        salesOfficer.Email,
+            //        $"{salesOfficer.FirstName} {salesOfficer.LastName}",
+            //        lead.LeadCode,
+            //        lead.LeadName,
+            //        $"{admin.FirstName} {admin.LastName}",
+            //        assignment.AssignedAt
+            //        
+
+            //test
+            if (salesOfficer == null)
+            {
+                throw new Exception("Sales Officer not found.");
+            }
+
+            if (admin == null)
+            {
+                throw new Exception("Admin not found.");
+            }
+
+            await _emailService.SendLeadAssignmentEmailAsync(
+                salesOfficer.Email,
+                $"{salesOfficer.FirstName} {salesOfficer.LastName}",
+                lead.LeadCode,
+                lead.LeadName,
+                $"{admin.FirstName} {admin.LastName}",
+                assignment.AssignedAt);
         }
+        
     }
 }

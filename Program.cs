@@ -3,9 +3,14 @@ using CRMSystem.Data.Seeders;
 using CRMSystem.Services;
 using CRMSystem.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using CRMSystem.Configurations;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+//For email 
+builder.Services.Configure<EmailSettings>(
+    builder.Configuration.GetSection("EmailSettings"));
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -18,6 +23,9 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 // Register UserService for dependency injection
 builder.Services.AddScoped<IUserService, UserService>();
+
+//Register EmailServices for dependency injection
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 // Add session services
 builder.Services.AddSession(options =>

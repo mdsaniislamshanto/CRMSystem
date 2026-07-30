@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using CRMSystem.Services.Interfaces;
+﻿using CRMSystem.Constants;
 using CRMSystem.Models.ViewModels;
+using CRMSystem.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CRMSystem.Controllers
 {
@@ -148,6 +149,7 @@ namespace CRMSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Assign(AssignLeadViewModel model)
         {
+            
             if (!ModelState.IsValid)
             {
                 var viewModel = await _leadService.GetAssignLeadViewModelAsync(model.LeadId);
@@ -162,18 +164,20 @@ namespace CRMSystem.Controllers
                 return View(model);
             }
 
-            var adminId = HttpContext.Session.GetInt32("UserId");
+            var userId = HttpContext.Session.GetString(SessionKeys.UserId);
 
-            if (adminId == null)
+            if (string.IsNullOrEmpty(userId))
             {
                 return RedirectToAction("Login", "Auth");
             }
 
-            await _leadService.AssignLeadAsync(model, adminId.Value);
+            await _leadService.AssignLeadAsync(model, long.Parse(userId));
 
             TempData["Success"] = "Lead assigned successfully.";
 
             return RedirectToAction(nameof(Index));
+
+
         }
     }
 }
