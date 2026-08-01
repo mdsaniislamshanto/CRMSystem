@@ -5,24 +5,18 @@
 namespace CRMSystem.Migrations
 {
     /// <inheritdoc />
-    public partial class AddUniqueLeadCode : Migration
+    public partial class AddSeedData : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateIndex(
-                name: "IX_Leads_LeadCode",
-                table: "Leads",
-                column: "LeadCode",
-                unique: true);
+
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropIndex(
-                name: "IX_Leads_LeadCode",
-                table: "Leads");
+
         }
     }
 }

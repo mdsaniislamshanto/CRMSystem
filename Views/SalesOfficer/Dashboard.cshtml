@@ -1,0 +1,91 @@
+﻿@{
+    ViewData["Title"] = "Sales Officer Dashboard";
+}
+
+<div class="container-fluid mt-4">
+
+    <h2 class="mb-4">
+        Welcome, Sales Officer 👋
+    </h2>
+
+    <div class="row">
+
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <h5>Total Assigned</h5>
+                    <h2>0</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <h5>Pending</h5>
+                    <h2>0</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <h5>Accepted</h5>
+                    <h2>0</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <h5>Completed</h5>
+                    <h2>0</h2>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card shadow mt-4">
+
+        <div class="card-header bg-primary text-white">
+            Quick Actions
+        </div>
+
+        <div class="card-body">
+
+            <a asp-controller="SalesOfficer"
+               asp-action="MyAssignedLeads"
+               class="btn btn-primary">
+
+                My Assigned Leads
+
+            </a>
+
+        </div>
+
+    </div>
+
+    <div class="card shadow mt-4">
+
+        <div class="card-header bg-secondary text-white">
+
+            Recent Activity
+
+        </div>
+
+        <div class="card-body">
+
+            <p class="text-muted">
+
+                No recent activity available.
+
+            </p>
+
+        </div>
+
+    </div>
+
+</div>

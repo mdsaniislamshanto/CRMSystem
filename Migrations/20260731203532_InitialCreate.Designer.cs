@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CRMSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260726140928_ConvertToDataAnnotations")]
-    partial class ConvertToDataAnnotations
+    [Migration("20260731203532_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -175,7 +175,71 @@ namespace CRMSystem.Migrations
 
                     b.HasIndex("CreatedBy");
 
+                    b.HasIndex("LeadCode")
+                        .IsUnique();
+
                     b.ToTable("Leads");
+                });
+
+            modelBuilder.Entity("CRMSystem.Models.Entities.LeadAssignment", b =>
+                {
+                    b.Property<long>("AssignmentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("AssignmentId"));
+
+                    b.Property<DateTime?>("AcceptedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("AssignedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<long>("AssignedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("AssignmentStatus")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<long>("LeadId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("SalesOfficerId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("AssignmentId");
+
+                    b.HasIndex("AssignedBy");
+
+                    b.HasIndex("LeadId");
+
+                    b.HasIndex("SalesOfficerId");
+
+                    b.ToTable("LeadAssignments");
                 });
 
             modelBuilder.Entity("CRMSystem.Models.Entities.Role", b =>
@@ -327,70 +391,9 @@ namespace CRMSystem.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("CRMSystem.Models.LeadAssignment", b =>
-                {
-                    b.Property<long>("AssignmentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("AssignmentId"));
-
-                    b.Property<DateTime?>("AcceptedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime>("AssignedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<long>("AssignedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("AssignmentStatus")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<long?>("CreatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<long?>("DeletedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<long>("LeadId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("SalesOfficerId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<long?>("UpdatedBy")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("AssignmentId");
-
-                    b.HasIndex("AssignedBy");
-
-                    b.HasIndex("LeadId");
-
-                    b.HasIndex("SalesOfficerId");
-
-                    b.ToTable("LeadAssignments");
-                });
-
             modelBuilder.Entity("CRMSystem.Models.Entities.Feedback", b =>
                 {
-                    b.HasOne("CRMSystem.Models.LeadAssignment", "LeadAssignment")
+                    b.HasOne("CRMSystem.Models.Entities.LeadAssignment", "LeadAssignment")
                         .WithMany()
                         .HasForeignKey("AssignmentId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -410,6 +413,33 @@ namespace CRMSystem.Migrations
                     b.Navigation("CreatedByUser");
                 });
 
+            modelBuilder.Entity("CRMSystem.Models.Entities.LeadAssignment", b =>
+                {
+                    b.HasOne("CRMSystem.Models.Entities.User", "AssignedByUser")
+                        .WithMany()
+                        .HasForeignKey("AssignedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CRMSystem.Models.Entities.Lead", "Lead")
+                        .WithMany()
+                        .HasForeignKey("LeadId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CRMSystem.Models.Entities.User", "SalesOfficer")
+                        .WithMany()
+                        .HasForeignKey("SalesOfficerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AssignedByUser");
+
+                    b.Navigation("Lead");
+
+                    b.Navigation("SalesOfficer");
+                });
+
             modelBuilder.Entity("CRMSystem.Models.Entities.User", b =>
                 {
                     b.HasOne("CRMSystem.Models.Entities.Role", "Role")
@@ -419,33 +449,6 @@ namespace CRMSystem.Migrations
                         .IsRequired();
 
                     b.Navigation("Role");
-                });
-
-            modelBuilder.Entity("CRMSystem.Models.LeadAssignment", b =>
-                {
-                    b.HasOne("CRMSystem.Models.Entities.User", "AssignedByUser")
-                        .WithMany()
-                        .HasForeignKey("AssignedBy")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("CRMSystem.Models.Entities.Lead", "Lead")
-                        .WithMany()
-                        .HasForeignKey("LeadId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("CRMSystem.Models.Entities.User", "SalesOfficer")
-                        .WithMany()
-                        .HasForeignKey("SalesOfficerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AssignedByUser");
-
-                    b.Navigation("Lead");
-
-                    b.Navigation("SalesOfficer");
                 });
 
             modelBuilder.Entity("CRMSystem.Models.Entities.Role", b =>

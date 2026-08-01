@@ -320,6 +320,33 @@ namespace CRMSystem.Services
                 $"{admin.FirstName} {admin.LastName}",
                 assignment.AssignedAt);
         }
-        
+
+        //for Sales Officer Login করার পরে শুধুমাত্র তার নিজের Assigned Leads দেখতে পারবে
+        public async Task<List<MyAssignedLeadViewModel>> GetAssignedLeadsAsync(long salesOfficerId)
+        {
+            return await _context.LeadAssignments
+                .Include(a => a.Lead)
+                .Where(a => a.SalesOfficerId == salesOfficerId && !a.IsDeleted)
+                .OrderByDescending(a => a.AssignedAt)
+                .Select(a => new MyAssignedLeadViewModel
+                {
+                    AssignmentId = a.AssignmentId,
+                    LeadId = a.LeadId,
+                    CompanyName = a.Lead!.CompanyName ?? string.Empty,
+                    LeadName = a.Lead.LeadName,
+                    Email = a.Lead.Email ?? string.Empty,
+                    Phone = a.Lead.Phone,
+                    AssignedAt = a.AssignedAt,
+                    AcceptedAt = a.AcceptedAt,
+                    AssignmentStatus = a.AssignmentStatus
+                })
+                .ToListAsync();
+        }
+
+
+        public async Task AcceptLeadAsync(long assignmentId, long salesOfficerId)
+        {
+            await Task.CompletedTask;
+        }
     }
 }

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CRMSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260729185521_CheckPendingChanges")]
-    partial class CheckPendingChanges
+    [Migration("20260801163337_AddLeadCaptureLog")]
+    partial class AddLeadCaptureLog
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -242,6 +242,71 @@ namespace CRMSystem.Migrations
                     b.ToTable("LeadAssignments");
                 });
 
+            modelBuilder.Entity("CRMSystem.Models.Entities.LeadCaptureLog", b =>
+                {
+                    b.Property<long>("CaptureLogId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("CaptureLogId"));
+
+                    b.Property<int>("CaptureSource")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CaptureStatus")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<string>("ExternalLeadId")
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<long>("LeadId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("PayloadJson")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("ProcessedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("ReceivedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("CaptureLogId");
+
+                    b.HasIndex("LeadId");
+
+                    b.ToTable("LeadCaptureLogs");
+                });
+
             modelBuilder.Entity("CRMSystem.Models.Entities.Role", b =>
                 {
                     b.Property<long>("RoleId")
@@ -418,19 +483,19 @@ namespace CRMSystem.Migrations
                     b.HasOne("CRMSystem.Models.Entities.User", "AssignedByUser")
                         .WithMany()
                         .HasForeignKey("AssignedBy")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("CRMSystem.Models.Entities.Lead", "Lead")
                         .WithMany()
                         .HasForeignKey("LeadId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("CRMSystem.Models.Entities.User", "SalesOfficer")
                         .WithMany()
                         .HasForeignKey("SalesOfficerId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("AssignedByUser");
@@ -438,6 +503,17 @@ namespace CRMSystem.Migrations
                     b.Navigation("Lead");
 
                     b.Navigation("SalesOfficer");
+                });
+
+            modelBuilder.Entity("CRMSystem.Models.Entities.LeadCaptureLog", b =>
+                {
+                    b.HasOne("CRMSystem.Models.Entities.Lead", "Lead")
+                        .WithMany()
+                        .HasForeignKey("LeadId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Lead");
                 });
 
             modelBuilder.Entity("CRMSystem.Models.Entities.User", b =>

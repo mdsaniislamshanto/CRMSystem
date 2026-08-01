@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CRMSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260727175638_AddUniqueLeadCode")]
-    partial class AddUniqueLeadCode
+    [Migration("20260731203907_AddSeedData")]
+    partial class AddSeedData
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -418,19 +418,19 @@ namespace CRMSystem.Migrations
                     b.HasOne("CRMSystem.Models.Entities.User", "AssignedByUser")
                         .WithMany()
                         .HasForeignKey("AssignedBy")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("CRMSystem.Models.Entities.Lead", "Lead")
                         .WithMany()
                         .HasForeignKey("LeadId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("CRMSystem.Models.Entities.User", "SalesOfficer")
                         .WithMany()
                         .HasForeignKey("SalesOfficerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("AssignedByUser");

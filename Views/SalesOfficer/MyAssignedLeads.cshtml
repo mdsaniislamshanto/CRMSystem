@@ -1,0 +1,143 @@
+﻿@model List<CRMSystem.Models.ViewModels.MyAssignedLeadViewModel>
+
+@{
+    ViewData["Title"] = "My Assigned Leads";
+}
+
+<div class="container mt-4">
+
+    <div class="card shadow">
+
+        <div class="card-header bg-primary text-white">
+
+            <h4 class="mb-0">
+                My Assigned Leads
+            </h4>
+
+        </div>
+
+        <div class="card-body">
+
+            @if (!Model.Any())
+            {
+                <div class="alert alert-info">
+
+                    No assigned leads found.
+
+                </div>
+            }
+            else
+            {
+                <table class="table table-bordered table-hover">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th>Lead ID</th>
+
+                            <th>Company</th>
+
+                            <th>Lead Name</th>
+
+                            <th>Email</th>
+
+                            <th>Phone</th>
+
+                            <th>Assigned At</th>
+
+                            <th>Status</th>
+
+                            <th>Action</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var lead in Model)
+                        {
+                            <tr>
+
+                                <td>@lead.LeadId</td>
+
+                                <td>@lead.CompanyName</td>
+
+                                <td>@lead.LeadName</td>
+
+                                <td>@lead.Email</td>
+
+                                <td>@lead.Phone</td>
+
+                                <td>@lead.AssignedAt.ToString("dd MMM yyyy hh:mm tt")</td>
+
+                                <td>
+
+                                    @if (lead.AssignmentStatus == CRMSystem.Enums.AssignmentStatus.Pending)
+                                    {
+                                        <span class="badge bg-warning">
+                                            Pending
+                                        </span>
+                                    }
+                                    else if (lead.AssignmentStatus == CRMSystem.Enums.AssignmentStatus.Accepted)
+                                    {
+                                        <span class="badge bg-success">
+                                            Accepted
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">
+                                            @lead.AssignmentStatus
+                                        </span>
+                                    }
+
+                                </td>
+
+                                <td>
+
+                                    @if (lead.AssignmentStatus == CRMSystem.Enums.AssignmentStatus.Pending)
+                                    {
+                                        <form asp-action="AcceptLead"
+                                              method="post">
+
+                                            @Html.AntiForgeryToken()
+
+                                            <input type="hidden"
+                                                   name="assignmentId"
+                                                   value="@lead.AssignmentId" />
+
+                                            <button type="submit"
+                                                    class="btn btn-success btn-sm">
+
+                                                Accept
+
+                                            </button>
+
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-success">
+
+                                            ✔ Accepted
+
+                                        </span>
+                                    }
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+            }
+
+        </div>
+
+    </div>
+
+</div>

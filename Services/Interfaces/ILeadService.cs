@@ -19,5 +19,9 @@ namespace CRMSystem.Services.Interfaces
         Task RestoreLeadAsync(long id);
         Task<AssignLeadViewModel?> GetAssignLeadViewModelAsync(long leadId);
         Task AssignLeadAsync(AssignLeadViewModel model, long adminId);
+
+        Task<List<MyAssignedLeadViewModel>> GetAssignedLeadsAsync(long salesOfficerId);
+
+        Task AcceptLeadAsync(long assignmentId, long salesOfficerId);
     }
 }

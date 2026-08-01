@@ -17,6 +17,7 @@ namespace CRMSystem.Data
         public DbSet<Lead> Leads { get; set; }
         public DbSet<LeadAssignment> LeadAssignments { get; set; }
         public DbSet<Feedback> Feedbacks { get; set; }
+        public DbSet<LeadCaptureLog> LeadCaptureLogs { get; set; }
 
 
 
@@ -27,23 +28,23 @@ namespace CRMSystem.Data
             modelBuilder.Entity<Lead>()
                 .HasIndex(l => l.LeadCode)
                 .IsUnique();
-            modelBuilder.Entity<LeadAssignment>()
-                .HasOne(la => la.Lead)
-                .WithMany()
-                .HasForeignKey(la => la.LeadId)
-                .OnDelete(DeleteBehavior.Restrict);
+            //modelBuilder.Entity<LeadAssignment>()
+            //    .HasOne(la => la.Lead)
+            //    .WithMany()
+            //    .HasForeignKey(la => la.LeadId)
+            //    .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<LeadAssignment>()
-                .HasOne(la => la.SalesOfficer)
-                .WithMany()
-                .HasForeignKey(la => la.SalesOfficerId)
-                .OnDelete(DeleteBehavior.Restrict);
+            //modelBuilder.Entity<LeadAssignment>()
+            //    .HasOne(la => la.SalesOfficer)
+            //    .WithMany()
+            //    .HasForeignKey(la => la.SalesOfficerId)
+            //    .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<LeadAssignment>()
-                .HasOne(la => la.AssignedByUser)
-                .WithMany()
-                .HasForeignKey(la => la.AssignedBy)
-                .OnDelete(DeleteBehavior.Restrict);
+            //modelBuilder.Entity<LeadAssignment>()
+            //    .HasOne(la => la.AssignedByUser)
+            //    .WithMany()
+            //    .HasForeignKey(la => la.AssignedBy)
+            //    .OnDelete(DeleteBehavior.Restrict);
         }
 
 
