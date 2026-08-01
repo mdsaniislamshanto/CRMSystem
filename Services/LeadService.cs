@@ -47,21 +47,7 @@ namespace CRMSystem.Services
         //for creating a new lead in the database
         public async Task CreateLeadAsync(CreateLeadViewModel model)
         {
-            var lead = new Lead
-            {
-                CompanyName = model.CompanyName,
-                LeadName = model.LeadName,
-                Profession = model.Profession,
-                Email = model.Email,
-                Phone = model.Phone,
-                Address = model.Address,
-                Source = model.Source,
-                Priority = model.Priority,
-                Status = LeadStatus.New,
-                Description = model.Description,
-                FollowUpDate = model.FollowUpDate,
-                CreatedBy = 1
-            };
+            var lead = CreateLeadEntity(model);
 
             // First Save
             _context.Leads.Add(lead);
@@ -72,6 +58,23 @@ namespace CRMSystem.Services
 
             // Save Again
             await _context.SaveChangesAsync();
+        }
+
+
+        // For Auto Lead Capture
+        public async Task<long> CreateLeadFromCaptureAsync(AutoLeadCreateViewModel model)
+        {
+            var lead = CreateLeadEntity(model);
+
+            _context.Leads.Add(lead);
+
+            await _context.SaveChangesAsync();
+
+            lead.LeadCode = $"L{lead.LeadId:D6}";
+
+            await _context.SaveChangesAsync();
+
+            return lead.LeadId;
         }
 
 
@@ -347,6 +350,49 @@ namespace CRMSystem.Services
         public async Task AcceptLeadAsync(long assignmentId, long salesOfficerId)
         {
             await Task.CompletedTask;
+        }
+
+
+        // Create Lead Entity from Manual Lead Form
+        private Lead CreateLeadEntity(CreateLeadViewModel model)
+        {
+            return new Lead
+            {
+                CompanyName = model.CompanyName,
+                LeadName = model.LeadName,
+                Profession = model.Profession,
+                Email = model.Email,
+                Phone = model.Phone,
+                Address = model.Address,
+                Source = model.Source,
+                Priority = model.Priority,
+                Status = LeadStatus.New,
+                Description = model.Description,
+                FollowUpDate = model.FollowUpDate,
+                CreatedBy = 1
+            };
+        }
+
+
+        // Create Lead Entity from Auto Lead Capture
+        private Lead CreateLeadEntity(AutoLeadCreateViewModel model)
+        {
+            return new Lead
+            {
+                CompanyName = model.CompanyName,
+                LeadName = model.LeadName,
+                Profession = model.Profession,
+                Email = model.Email,
+                Phone = model.Phone,
+                Address = model.Address,
+                Source = model.Source,
+                Priority = model.Priority,
+                Status = LeadStatus.New,
+                Description = model.Description,
+
+                // Temporary (পরে System User ব্যবহার করব)
+                CreatedBy = 1
+            };
         }
     }
 }

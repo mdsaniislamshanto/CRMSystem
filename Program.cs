@@ -45,6 +45,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))
     ));
 
+// Register LeadCaptureService for dependency injection
+builder.Services.AddScoped<ILeadCaptureService, LeadCaptureService>();
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())

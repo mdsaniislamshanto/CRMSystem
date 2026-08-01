@@ -8,6 +8,10 @@ namespace CRMSystem.Services.Interfaces
 
         Task CreateLeadAsync(CreateLeadViewModel model);
 
+        //For Auto Lead Capture
+        Task<long> CreateLeadFromCaptureAsync(AutoLeadCreateViewModel model);
+
+
         Task<LeadViewModel?> GetLeadByIdAsync(long id);
 
         Task<EditLeadViewModel?> GetLeadForEditAsync(long id);
@@ -23,5 +27,8 @@ namespace CRMSystem.Services.Interfaces
         Task<List<MyAssignedLeadViewModel>> GetAssignedLeadsAsync(long salesOfficerId);
 
         Task AcceptLeadAsync(long assignmentId, long salesOfficerId);
+
+
+     
     }
 }
