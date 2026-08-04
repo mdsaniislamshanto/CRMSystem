@@ -69,6 +69,12 @@ namespace CRMSystem.Controllers
                 case RoleKeys.Account:
                     return RedirectToAction("Index", "Account");
 
+                case RoleKeys.SalesManager:
+                    return RedirectToAction("Index", "SalesManager");
+
+                case RoleKeys.HR:
+                    return RedirectToAction("Index", "HR");
+
                 default:
                     _authService.Logout();
                     return RedirectToAction(nameof(Login));

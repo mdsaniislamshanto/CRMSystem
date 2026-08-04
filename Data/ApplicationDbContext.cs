@@ -18,6 +18,7 @@ namespace CRMSystem.Data
         public DbSet<LeadAssignment> LeadAssignments { get; set; }
         public DbSet<Feedback> Feedbacks { get; set; }
         public DbSet<LeadCaptureLog> LeadCaptureLogs { get; set; }
+        public DbSet<SystemSettings> SystemSettings { get; set; }
 
 
 

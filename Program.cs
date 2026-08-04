@@ -48,6 +48,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Register LeadCaptureService for dependency injection
 builder.Services.AddScoped<ILeadCaptureService, LeadCaptureService>();
 
+// Register SettingsService for dependency injection
+builder.Services.AddScoped<ISettingsService, SettingsService>();
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())

@@ -1,6 +1,6 @@
-﻿using CRMSystem.Models.Entities;
+﻿using CRMSystem.Constants;
+using CRMSystem.Models.Entities;
 using Microsoft.EntityFrameworkCore;
-using BCrypt.Net;
 
 
 namespace CRMSystem.Data.Seeders
@@ -11,44 +11,72 @@ namespace CRMSystem.Data.Seeders
         {
             await SeedRolesAsync(context);
             await SeedAdminUserAsync(context);
+
+            // Seed default system settings
+            await SystemSettingsSeeder.SeedAsync(context);
         }
 
         private static async Task SeedRolesAsync(ApplicationDbContext context)
         {
-            if (await context.Roles.AnyAsync())
-                return;
-
             var roles = new List<Role>
+    {
+        new Role
+        {
+            RoleId = 1,
+            RoleKey = RoleKeys.Admin,
+            RoleName = "Administrator",
+            Description = "System Administrator",
+            DisplayOrder = 1
+        },
+
+        new Role
+        {
+            RoleId = 2,
+            RoleKey = RoleKeys.SalesOfficer,
+            RoleName = "Sales Officer",
+            Description = "Sales Officer",
+            DisplayOrder = 2
+        },
+
+        new Role
+        {
+            RoleId = 3,
+            RoleKey = RoleKeys.Account,
+            RoleName = "Account Department",
+            Description = "Account Department",
+            DisplayOrder = 3
+        },
+
+        new Role
+        {
+            RoleId = 4,
+            RoleKey = RoleKeys.SalesManager,
+            RoleName = "Sales Manager",
+            Description = "Sales Manager",
+            DisplayOrder = 4
+        },
+
+        new Role
+        {
+            RoleId = 5,
+            RoleKey = RoleKeys.HR,
+            RoleName = "HR Department",
+            Description = "Human Resource Department",
+            DisplayOrder = 5
+        }
+    };
+
+            foreach (var role in roles)
             {
-                new Role
-                {
-                    RoleId = 1,
-                    RoleKey = "ADMIN",
-                    RoleName = "Administrator",
-                    Description = "System Administrator",
-                    DisplayOrder = 1
-                },
+                bool exists = await context.Roles
+                    .AnyAsync(r => r.RoleKey == role.RoleKey);
 
-                new Role
+                if (!exists)
                 {
-                    RoleId = 2,
-                    RoleKey = "SALES_OFFICER",
-                    RoleName = "Sales Officer",
-                    Description = "Sales Officer",
-                    DisplayOrder = 2
-                },
-
-                new Role
-                {
-                    RoleId = 3,
-                    RoleKey = "ACCOUNT",
-                    RoleName = "Account",
-                    Description = "Account Department",
-                    DisplayOrder = 3
+                    await context.Roles.AddAsync(role);
                 }
-            };
+            }
 
-            await context.Roles.AddRangeAsync(roles);
             await context.SaveChangesAsync();
         }
 

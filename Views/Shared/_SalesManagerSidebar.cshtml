@@ -1,0 +1,160 @@
+﻿@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+}
+
+<div class="sidebar">
+
+    <!-- Logo -->
+    <div class="sidebar-header">
+
+        <h4 class="m-0">
+            <i class="bi bi-graph-up-arrow"></i>
+            CRM System
+        </h4>
+
+    </div>
+
+    <!-- Navigation -->
+    <ul class="sidebar-menu">
+
+        <!-- Dashboard -->
+        <li>
+
+            <a asp-controller="SalesManager"
+               asp-action="Index"
+               class="@(currentController == "SalesManager" && currentAction == "Index" ? "active" : "")">
+
+                <i class="bi bi-speedometer2"></i>
+
+                Dashboard
+
+            </a>
+
+        </li>
+
+        <!-- Lead Management -->
+        <li class="menu-title">
+
+            Lead Management
+
+        </li>
+
+        <li>
+
+            <a asp-controller="SalesManager"
+               asp-action="LeadQueue">
+
+                <i class="bi bi-list-task"></i>
+
+                Lead Queue
+
+            </a>
+
+        </li>
+
+        <li>
+
+            <a asp-controller="SalesManager"
+               asp-action="AssignLead">
+
+                <i class="bi bi-person-check-fill"></i>
+
+                Assign Leads
+
+            </a>
+
+        </li>
+
+        <li>
+
+            <a asp-controller="SalesManager"
+               asp-action="ArchivedLeads">
+
+                <i class="bi bi-archive-fill"></i>
+
+                Archived Leads
+
+            </a>
+
+        </li>
+
+        <!-- Team -->
+        <li class="menu-title">
+
+            Team Management
+
+        </li>
+
+        <li>
+
+            <a asp-controller="SalesManager"
+               asp-action="SalesOfficers">
+
+                <i class="bi bi-people-fill"></i>
+
+                Sales Officers
+
+            </a>
+
+        </li>
+
+        <li>
+
+            <a asp-controller="SalesManager"
+               asp-action="Performance">
+
+                <i class="bi bi-bar-chart-fill"></i>
+
+                Performance
+
+            </a>
+
+        </li>
+
+        <!-- Reports -->
+        <li>
+
+            <a asp-controller="SalesManager"
+               asp-action="Reports">
+
+                <i class="bi bi-file-earmark-bar-graph-fill"></i>
+
+                Reports
+
+            </a>
+
+        </li>
+
+        <!-- Settings -->
+        <li>
+
+            <a asp-controller="SalesManager"
+               asp-action="Settings">
+
+                <i class="bi bi-gear-fill"></i>
+
+                Settings
+
+            </a>
+
+        </li>
+
+        <!-- Logout -->
+        <li class="mt-auto">
+
+            <a asp-controller="Auth"
+               asp-action="Logout"
+               class="text-danger">
+
+                <i class="bi bi-box-arrow-right"></i>
+
+                Logout
+
+            </a>
+
+        </li>
+
+    </ul>
+
+</div>

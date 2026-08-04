@@ -1,4 +1,5 @@
 ﻿using CRMSystem.Constants;
+using CRMSystem.Enums;
 using CRMSystem.Models.ViewModels;
 using CRMSystem.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -7,12 +8,17 @@ namespace CRMSystem.Controllers
 {
     public class LeadController : Controller
     {
-      private readonly ILeadService _leadService;
+        private readonly ILeadService _leadService;
+        private readonly ILeadCaptureService _leadCaptureService;
 
-      public LeadController(ILeadService leadService)
-      {
-          _leadService = leadService;
-      }
+        public LeadController(
+               ILeadService leadService,
+               ILeadCaptureService leadCaptureService)
+        {
+            _leadService = leadService;
+            _leadCaptureService = leadCaptureService;
+        }
+
         public async Task<IActionResult> Index()
         {
             ViewData["Title"] = "Lead Management";
@@ -30,7 +36,7 @@ namespace CRMSystem.Controllers
         }
 
 
-      
+
         // GET: Lead/Details/5
         public async Task<IActionResult> Details(long id)
         {
@@ -149,7 +155,7 @@ namespace CRMSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Assign(AssignLeadViewModel model)
         {
-            
+
             if (!ModelState.IsValid)
             {
                 var viewModel = await _leadService.GetAssignLeadViewModelAsync(model.LeadId);
@@ -178,6 +184,36 @@ namespace CRMSystem.Controllers
             return RedirectToAction(nameof(Index));
 
 
+        }
+
+
+        // Demo Auto Lead Generation
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> GenerateDemoLead()
+        {
+            var model = new AutoLeadCreateViewModel
+            {
+                LeadName = "Demo Customer",
+                CompanyName = "Facebook Demo Ltd.",
+                Email = "demo@example.com",
+                Phone = "01712345678",
+                Profession = "Business Owner",
+                Address = "Dhaka",
+                Source = LeadSource.Facebook,
+                Priority = LeadPriority.Medium,
+                Description = "This is a simulated Facebook Lead."
+            };
+
+            await _leadCaptureService.CaptureLeadAsync(
+                model,
+                LeadCaptureSource.FacebookLeadAds,
+                "FB-DEMO-001",
+                null);
+
+            TempData["Success"] = "Demo Lead generated successfully.";
+
+            return RedirectToAction(nameof(Index));
         }
     }
 }
