@@ -1,4 +1,5 @@
-﻿@{
+﻿@model CRMSystem.Models.ViewModels.SalesManagerDashboardViewModel
+@{
     ViewData["Title"] = "Sales Manager Dashboard";
     Layout = "_SalesManagerLayout";
 }
@@ -37,7 +38,7 @@
                     </h6>
 
                     <h2 class="fw-bold text-primary">
-                        0
+                        @Model.TotalNewLeads
                     </h2>
 
                     <small class="text-muted">
@@ -62,7 +63,7 @@
                     </h6>
 
                     <h2 class="fw-bold text-warning">
-                        0
+                        @Model.TotalUnassignedLeads
                     </h2>
 
                     <small class="text-muted">
@@ -87,7 +88,7 @@
                     </h6>
 
                     <h2 class="fw-bold text-success">
-                        0
+                        @Model.AssignedToday
                     </h2>
 
                     <small class="text-muted">
@@ -112,7 +113,7 @@
                     </h6>
 
                     <h2 class="fw-bold text-info">
-                        0
+                        @Model.CompletedToday
                     </h2>
 
                     <small class="text-muted">
@@ -148,7 +149,7 @@
 
                 <i class="bi bi-person-plus-fill me-2"></i>
 
-                <strong>0</strong> Lead(s) are waiting for assignment.
+                <strong>@Model.PendingAssignments</strong> Lead(s) are waiting for assignment.
 
             </div>
 
@@ -156,7 +157,7 @@
 
                 <i class="bi bi-clock-history me-2"></i>
 
-                <strong>0</strong> Sales Officer(s) missed the 1-hour Lead Acceptance SLA.
+                <strong>@Model.MissedAcceptanceSLA</strong> Sales Officer(s) missed the 1-hour Lead Acceptance SLA.
 
             </div>
 
@@ -164,7 +165,7 @@
 
                 <i class="bi bi-chat-left-text-fill me-2"></i>
 
-                <strong>0</strong> Sales Officer(s) missed the 3-hour First Feedback SLA.
+                <strong>@Model.MissedFirstFeedbackSLA</strong> Sales Officer(s) missed the 3-hour First Feedback SLA.
 
             </div>
 
@@ -172,7 +173,7 @@
 
                 <i class="bi bi-calendar-check-fill me-2"></i>
 
-                <strong>0</strong> Follow-up(s) are due today.
+                <strong>@Model.DueFollowUps</strong> Follow-up(s) are due today.
 
             </div>
 
@@ -180,9 +181,48 @@
 
                 <i class="bi bi-archive-fill me-2"></i>
 
-                <strong>0</strong> Lead(s) archived today.
+                <strong>@Model.ArchivedToday</strong> Lead(s) archived today.
 
             </div>
+
+        </div>
+
+    </div>
+
+    <!-- Auto Assignment Status -->
+    <div class="card shadow-sm border-0 mt-4">
+
+        <div class="card-header">
+
+            <h5 class="mb-0">
+
+                <i class="bi bi-robot me-2"></i>
+
+                Auto Assignment Status
+
+            </h5>
+
+        </div>
+
+        <div class="card-body d-flex justify-content-between align-items-center">
+
+            <div>
+
+                <h6 class="mb-1">
+                    Current Status
+                </h6>
+
+                <small class="text-muted">
+                    Automatic lead assignment for Sales Officers.
+                </small>
+
+            </div>
+
+            <span class="badge @(Model.AutoAssignmentEnabled ? "bg-success" : "bg-danger") fs-6">
+
+                @(Model.AutoAssignmentEnabled ? "ON" : "OFF")
+
+            </span>
 
         </div>
 

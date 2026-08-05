@@ -76,7 +76,7 @@ namespace CRMSystem.Controllers
 
             var result = await _userService.CreateUserAsync(model);
 
-            if (!result.Success)
+            if (!result.IsSuccess)
             {
                 ModelState.AddModelError(string.Empty, result.Message);
 
@@ -121,7 +121,7 @@ namespace CRMSystem.Controllers
 
             var result = await _userService.UpdateUserAsync(model);
 
-            if (!result.Success)
+            if (!result.IsSuccess)
             {
                 ModelState.AddModelError(string.Empty, result.Message);
 

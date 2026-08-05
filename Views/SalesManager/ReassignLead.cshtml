@@ -1,0 +1,180 @@
+﻿@model CRMSystem.Models.ViewModels.ReassignLeadViewModel
+
+@{
+    ViewData["Title"] = "Reassign Lead";
+    Layout = "_SalesManagerLayout";
+}
+
+<div class="container-fluid mt-4">
+
+    <div class="card shadow-sm border-0">
+
+        <div class="card-header bg-primary text-white">
+
+            <h4 class="mb-0">
+
+                Reassign Lead
+
+            </h4>
+
+        </div>
+
+        <div class="card-body">
+
+            <form asp-action="ReassignLead"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <input asp-for="LeadId" type="hidden" />
+                <input asp-for="AssignmentId" type="hidden" />
+
+                <div asp-validation-summary="ModelOnly"
+                     class="text-danger mb-3">
+                </div>
+
+                <div class="row">
+
+                    <!-- Lead Code -->
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label">
+
+                            Lead Code
+
+                        </label>
+
+                        <input asp-for="LeadCode"
+                               class="form-control"
+                               readonly />
+
+                    </div>
+
+                    <!-- Lead Name -->
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label">
+
+                            Lead Name
+
+                        </label>
+
+                        <input asp-for="LeadName"
+                               class="form-control"
+                               readonly />
+
+                    </div>
+
+                    <!-- Current Sales Officer -->
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label">
+
+                            Current Sales Officer
+
+                        </label>
+
+                        <input asp-for="CurrentSalesOfficer"
+                               class="form-control"
+                               readonly />
+
+                    </div>
+
+                    <!-- New Sales Officer -->
+
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="NewSalesOfficerId"
+                               class="form-label">
+                        </label>
+
+                        <select asp-for="NewSalesOfficerId"
+                                asp-items="Model.SalesOfficers"
+                                class="form-select">
+
+                            <option value="">
+                                -- Select Sales Officer --
+                            </option>
+
+                        </select>
+
+                        <span asp-validation-for="NewSalesOfficerId"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+
+                    <!-- Sales Status -->
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="Status" class="form-label"></label>
+
+                        <select asp-for="Status"
+                                asp-items="Html.GetEnumSelectList<CRMSystem.Enums.LeadStatus>()"
+                                class="form-select">
+                        </select>
+
+                        <span asp-validation-for="Status"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <!-- Reason -->
+
+                    <div class="col-md-12 mb-3">
+
+                        <label asp-for="Reason"
+                               class="form-label">
+                        </label>
+
+                        <textarea asp-for="Reason"
+                                  class="form-control"
+                                  rows="4"
+                                  placeholder="Enter reason for reassignment (optional)">
+                        </textarea>
+
+                    </div>
+
+                </div>
+
+                <hr />
+
+                <div class="d-flex justify-content-end gap-2">
+
+                    <a asp-action="LeadQueue"
+                       class="btn btn-secondary">
+
+                        <i class="bi bi-arrow-left"></i>
+
+                        Cancel
+
+                    </a>
+
+                    <button type="submit"
+                            class="btn btn-primary">
+
+                        <i class="bi bi-arrow-repeat"></i>
+
+                        Reassign Lead
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+}

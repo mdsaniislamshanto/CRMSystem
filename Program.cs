@@ -51,6 +51,19 @@ builder.Services.AddScoped<ILeadCaptureService, LeadCaptureService>();
 // Register SettingsService for dependency injection
 builder.Services.AddScoped<ISettingsService, SettingsService>();
 
+// Register Sales Manager Dashboard Service
+builder.Services.AddScoped<ISalesManagerDashboardService, SalesManagerDashboardService>();
+
+// Register LeadService
+builder.Services.AddScoped<ILeadService, LeadService>();
+
+// Register AssignmentService
+builder.Services.AddScoped<IAssignmentService, AssignmentService>();
+
+// Register LeadCaptureService
+builder.Services.AddScoped<ILeadCaptureService, LeadCaptureService>();
+
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())

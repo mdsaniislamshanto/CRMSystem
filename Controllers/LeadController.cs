@@ -10,13 +10,16 @@ namespace CRMSystem.Controllers
     {
         private readonly ILeadService _leadService;
         private readonly ILeadCaptureService _leadCaptureService;
+        private readonly IAssignmentService _assignmentService;
 
         public LeadController(
                ILeadService leadService,
-               ILeadCaptureService leadCaptureService)
+               ILeadCaptureService leadCaptureService,
+               IAssignmentService assignmentService)
         {
             _leadService = leadService;
             _leadCaptureService = leadCaptureService;
+            _assignmentService = assignmentService;
         }
 
         public async Task<IActionResult> Index()

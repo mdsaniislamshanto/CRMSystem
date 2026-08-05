@@ -1,4 +1,5 @@
-﻿using CRMSystem.Data;
+﻿using CRMSystem.Constants;
+using CRMSystem.Data;
 using CRMSystem.Enums;
 using CRMSystem.Models.Entities;
 using CRMSystem.Models.ViewModels;
@@ -394,5 +395,105 @@ namespace CRMSystem.Services
                 CreatedBy = 1
             };
         }
+
+        // ==========================
+        // Get Reassign Lead ViewModel
+        // ==========================
+        public async Task<ReassignLeadViewModel?> GetReassignLeadViewModelAsync(long leadId)
+        {
+            // Get Lead
+            var lead = await _context.Leads
+                .FirstOrDefaultAsync(l => l.LeadId == leadId);
+
+            if (lead == null)
+            {
+                return null;
+            }
+
+            // Get Current Assignment
+            var assignment = await _context.LeadAssignments
+                .Include(a => a.SalesOfficer)
+                   .FirstOrDefaultAsync(a =>
+            a.LeadId == leadId &&
+            (a.AssignmentStatus == AssignmentStatus.Pending ||
+            a.AssignmentStatus == AssignmentStatus.Accepted ||
+            a.AssignmentStatus == AssignmentStatus.Declined));
+
+            if (assignment == null)
+            {
+                return null;
+            }
+
+            // Get Sales Officers
+            var salesOfficers = await _context.Users
+                .Include(u => u.Role)
+                .Where(u =>
+                    u.IsActive &&
+                    !u.IsDeleted &&
+                    u.Role!.RoleKey == RoleKeys.SalesOfficer &&
+                    u.UserId != assignment.SalesOfficerId)
+                .Select(u => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+                {
+                    Value = u.UserId.ToString(),
+                    Text = u.FullName
+                })
+                .ToListAsync();
+
+            return new ReassignLeadViewModel
+            {
+                LeadId = lead.LeadId,
+                AssignmentId = assignment.AssignmentId,
+                LeadCode = lead.LeadCode,
+                LeadName = lead.LeadName,
+                CurrentSalesOfficer = assignment.SalesOfficer.FullName,
+                SalesOfficers = salesOfficers
+            };
+        }
+
+        // ==========================
+        // Reassign Lead
+        // ==========================
+        public async Task ReassignLeadAsync(
+            ReassignLeadViewModel model,
+            long salesManagerId)
+        {
+            // Get Current Assignment
+            var currentAssignment = await _context.LeadAssignments
+                .FirstOrDefaultAsync(a => a.AssignmentId == model.AssignmentId);
+
+            if (currentAssignment == null)
+            {
+                return;
+            }
+
+            // Mark Current Assignment as Reassigned
+            currentAssignment.AssignmentStatus = AssignmentStatus.Reassigned;
+
+            // Create New Assignment
+            var newAssignment = new LeadAssignment
+            {
+                LeadId = model.LeadId,
+                SalesOfficerId = model.NewSalesOfficerId,
+                AssignedBy = salesManagerId,
+                AssignedAt = DateTime.UtcNow,
+                AcceptedAt = null,
+                AssignmentStatus = AssignmentStatus.Pending
+            };
+
+            _context.LeadAssignments.Add(newAssignment);
+
+            // Update Lead Status
+            var lead = await _context.Leads
+                .FirstOrDefaultAsync(l => l.LeadId == model.LeadId);
+
+            if (lead != null)
+            {
+                lead.Status = model.Status;
+            }
+
+            await _context.SaveChangesAsync();
+        }
     }
+
+
 }

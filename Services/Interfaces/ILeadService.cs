@@ -28,7 +28,12 @@ namespace CRMSystem.Services.Interfaces
 
         Task AcceptLeadAsync(long assignmentId, long salesOfficerId);
 
+        Task<ReassignLeadViewModel?> GetReassignLeadViewModelAsync(long leadId);
 
-     
+        Task ReassignLeadAsync(ReassignLeadViewModel model, long salesManagerId);
+
+
+
+
     }
 }

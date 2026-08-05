@@ -4,6 +4,7 @@ using CRMSystem.Models.ViewModels;
 using CRMSystem.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using CRMSystem.Models.DTOs;
 
 
 namespace CRMSystem.Services
@@ -113,7 +114,7 @@ namespace CRMSystem.Services
             {
                 return new ServiceResult
                 {
-                    Success = false,
+                    IsSuccess = false,
                     Message = "Employee Code already exists."
                 };
             }
@@ -123,7 +124,7 @@ namespace CRMSystem.Services
             {
                 return new ServiceResult
                 {
-                    Success = false,
+                    IsSuccess = false,
                     Message = "Email already exists."
                 };
             }
@@ -148,7 +149,7 @@ namespace CRMSystem.Services
 
             return new ServiceResult
             {
-                Success = true,
+                IsSuccess = true,
                 Message = "User created successfully."
             };
         }
@@ -217,7 +218,7 @@ namespace CRMSystem.Services
             {
                 return new ServiceResult
                 {
-                    Success = false,
+                    IsSuccess = false,
                     Message = "User not found."
                 };
             }
@@ -230,7 +231,7 @@ namespace CRMSystem.Services
             {
                 return new ServiceResult
                 {
-                    Success = false,
+                    IsSuccess = false,
                     Message = "Phone number already exists."
                 };
             }
@@ -244,7 +245,7 @@ namespace CRMSystem.Services
 
             return new ServiceResult
             {
-                Success = true,
+                IsSuccess = true,
                 Message = "User updated successfully."
             };
         }
@@ -291,7 +292,7 @@ namespace CRMSystem.Services
             {
                 return new ServiceResult
                 {
-                    Success = false,
+                    IsSuccess = false,
                     Message = "User not found."
                 };
             }
@@ -304,7 +305,7 @@ namespace CRMSystem.Services
             {
                 return new ServiceResult
                 {
-                    Success = false,
+                    IsSuccess = false,
                     Message = "You cannot deactivate your own account."
                 };
             }
@@ -315,7 +316,7 @@ namespace CRMSystem.Services
 
             return new ServiceResult
             {
-                Success = true,
+                IsSuccess = true,
                 Message = user.IsActive
                     ? "User activated successfully."
                     : "User deactivated successfully."

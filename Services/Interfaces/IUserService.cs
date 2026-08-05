@@ -1,4 +1,5 @@
 ﻿using CRMSystem.Models.ViewModels;
+using CRMSystem.Models.DTOs;
 
 namespace CRMSystem.Services.Interfaces
 {

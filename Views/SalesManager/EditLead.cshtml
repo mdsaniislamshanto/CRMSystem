@@ -1,0 +1,237 @@
+﻿@model CRMSystem.Models.ViewModels.EditLeadViewModel
+
+@{
+    ViewData["Title"] = "Edit Lead";
+    Layout = "_SalesManagerLayout";
+}
+
+<div class="container-fluid mt-4">
+
+    <div class="card shadow-sm border-0">
+
+        <div class="card-header bg-primary text-white">
+
+            <h4 class="mb-0">
+                Edit Lead
+            </h4>
+
+        </div>
+
+        <div class="card-body">
+
+            <form asp-action="EditLead" method="post">
+
+                @Html.AntiForgeryToken()
+
+                <input asp-for="LeadId" type="hidden" />
+
+                <div asp-validation-summary="ModelOnly"
+                     class="text-danger mb-3">
+                </div>
+
+                <div class="row">
+
+                    <!-- Lead Code -->
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="LeadCode"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="LeadCode"
+                               class="form-control"
+                               readonly />
+
+                    </div>
+
+                    <!-- Company -->
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="CompanyName"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="CompanyName"
+                               class="form-control" />
+
+                    </div>
+
+                    <!-- Lead Name -->
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="LeadName"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="LeadName"
+                               class="form-control" />
+
+                        <span asp-validation-for="LeadName"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <!-- Profession -->
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="Profession"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="Profession"
+                               class="form-control" />
+
+                    </div>
+
+                    <!-- Email -->
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="Email"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="Email"
+                               class="form-control" />
+
+                        <span asp-validation-for="Email"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <!-- Phone -->
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="Phone"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="Phone"
+                               class="form-control" />
+
+                        <span asp-validation-for="Phone"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <!-- Address -->
+                    <div class="col-md-12 mb-3">
+
+                        <label asp-for="Address"
+                               class="form-label">
+                        </label>
+
+                        <textarea asp-for="Address"
+                                  class="form-control"
+                                  rows="3">
+                        </textarea>
+
+                    </div>
+
+                    <!-- Source (Read Only) -->
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Source
+                        </label>
+
+                        <input value="@Model.Source"
+                               class="form-control"
+                               readonly />
+
+                    </div>
+
+                    <!-- Priority -->
+                    <div class="col-md-4 mb-3">
+
+                        <label asp-for="Priority"
+                               class="form-label">
+                        </label>
+
+                        <select asp-for="Priority"
+                                asp-items="Html.GetEnumSelectList<CRMSystem.Enums.LeadPriority>()"
+                                class="form-select">
+                        </select>
+
+                    </div>
+
+                    <!-- Status (Read Only) -->
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Status
+                        </label>
+
+                        <input value="@Model.Status"
+                               class="form-control"
+                               readonly />
+
+                    </div>
+
+                    <!-- Description -->
+                    <div class="col-md-12 mb-3">
+
+                        <label asp-for="Description"
+                               class="form-label">
+                        </label>
+
+                        <textarea asp-for="Description"
+                                  class="form-control"
+                                  rows="4">
+                        </textarea>
+
+                    </div>
+
+                    <!-- Follow Up -->
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="FollowUpDate"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="FollowUpDate"
+                               type="datetime-local"
+                               class="form-control" />
+
+                    </div>
+
+                </div>
+
+                <hr />
+
+                <div class="d-flex justify-content-end gap-2">
+
+                    <a asp-action="LeadQueue"
+                       class="btn btn-secondary">
+
+                        <i class="bi bi-arrow-left"></i>
+
+                        Cancel
+
+                    </a>
+
+                    <button type="submit"
+                            class="btn btn-primary">
+
+                        <i class="bi bi-check-circle-fill"></i>
+
+                        Update Lead
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+}
