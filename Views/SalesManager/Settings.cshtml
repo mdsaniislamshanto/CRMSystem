@@ -1,6 +1,85 @@
-﻿@{
+﻿@model CRMSystem.Models.ViewModels.AutoAssignmentSettingsViewModel
+
+@{
     ViewData["Title"] = "Settings";
     Layout = "_SalesManagerLayout";
 }
 
-<h2>Settings</h2>
+<div class="container-fluid">
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+
+            <i class="bi bi-check-circle-fill me-2"></i>
+
+            @TempData["Success"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+
+        </div>
+    }
+
+    <div class="card shadow-sm">
+
+        <div class="card-header">
+
+            <h4 class="mb-0">
+                System Settings
+            </h4>
+
+        </div>
+
+        <div class="card-body">
+
+            <form asp-action="Settings"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <input asp-for="SettingId"
+                       type="hidden" />
+
+                <div class="form-check form-switch mb-4">
+
+                    <input asp-for="AutoAssignmentEnabled"
+                           class="form-check-input"
+                           type="checkbox" />
+
+                    <label asp-for="AutoAssignmentEnabled"
+                           class="form-check-label">
+                    </label>
+
+                </div>
+
+                <div class="alert alert-info">
+
+                    <strong>Information</strong>
+
+                    <br />
+
+                    When Auto Assignment is enabled,
+                    newly captured leads will be assigned
+                    automatically by the system.
+
+                </div>
+
+                <button type="submit"
+                        class="btn btn-primary">
+
+                    <i class="bi bi-save me-1"></i>
+
+                    Save Settings
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>

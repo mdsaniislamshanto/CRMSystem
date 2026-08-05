@@ -3,19 +3,24 @@ using CRMSystem.Models.ViewModels;
 using CRMSystem.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
+
+
 namespace CRMSystem.Controllers
 {
     public class SalesManagerController : Controller
     {
         private readonly ISalesManagerDashboardService _dashboardService;
         private readonly ILeadService _leadService;
+        private readonly ISettingsService _settingsService;
 
         public SalesManagerController(
             ISalesManagerDashboardService dashboardService,
-            ILeadService leadService)
+            ILeadService leadService,
+            ISettingsService settingsService)
         {
             _dashboardService = dashboardService;
             _leadService = leadService;
+            _settingsService = settingsService;
         }
 
         // ==========================
@@ -242,9 +247,40 @@ namespace CRMSystem.Controllers
         // ==========================
         // Settings
         // ==========================
-        public IActionResult Settings()
+        [HttpGet]
+        public async Task<IActionResult> Settings()
         {
-            return View();
+            var settings = await _settingsService.GetSettingsAsync();
+
+            var model = new AutoAssignmentSettingsViewModel
+            {
+                SettingId = settings.SettingId,
+                AutoAssignmentEnabled = settings.AutoAssignmentEnabled
+            };
+
+            return View(model);
+        }
+
+        // ==========================
+        // Save Settings
+        // ==========================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Settings(
+            AutoAssignmentSettingsViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            await _settingsService.UpdateAutoAssignmentAsync(
+                model.AutoAssignmentEnabled);
+
+            TempData["Success"] =
+                "Settings updated successfully.";
+
+            return RedirectToAction(nameof(Settings));
         }
     }
 }
