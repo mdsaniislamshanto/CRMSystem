@@ -6,6 +6,7 @@ using CRMSystem.Models.ViewModels;
 using CRMSystem.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
 
 namespace CRMSystem.Services
 {
@@ -13,13 +14,19 @@ namespace CRMSystem.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IEmailService _emailService;
+        private readonly IAutoAssignmentService _autoAssignmentService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public LeadService(
             ApplicationDbContext context,
-            IEmailService emailService)
+            IEmailService emailService,
+            IAutoAssignmentService autoAssignmentService,
+            IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _emailService = emailService;
+            _autoAssignmentService = autoAssignmentService;
+            _httpContextAccessor = httpContextAccessor;
         }
 
 
@@ -59,6 +66,16 @@ namespace CRMSystem.Services
 
             // Save Again
             await _context.SaveChangesAsync();
+
+            // Auto Assign Lead if enabled
+            var userId = long.Parse(
+     _httpContextAccessor.HttpContext!
+     .Session
+     .GetString(SessionKeys.UserId)!);
+
+            await _autoAssignmentService.AutoAssignLeadAsync(
+                lead.LeadId,
+                userId);
         }
 
 
@@ -74,6 +91,8 @@ namespace CRMSystem.Services
             lead.LeadCode = $"L{lead.LeadId:D6}";
 
             await _context.SaveChangesAsync();
+
+            await _autoAssignmentService.AutoAssignLeadAsync(lead.LeadId);
 
             return lead.LeadId;
         }

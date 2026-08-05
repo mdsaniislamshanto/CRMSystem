@@ -63,6 +63,9 @@ builder.Services.AddScoped<IAssignmentService, AssignmentService>();
 // Register LeadCaptureService
 builder.Services.AddScoped<ILeadCaptureService, LeadCaptureService>();
 
+// Register AutoAssignmentService
+builder.Services.AddScoped<IAutoAssignmentService, AutoAssignmentService>();
+
 
 var app = builder.Build();
 
