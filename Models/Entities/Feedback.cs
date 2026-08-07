@@ -13,6 +13,7 @@ namespace CRMSystem.Models.Entities
         public long AssignmentId { get; set; }
 
         [Required]
+        [StringLength(1000)]
         public string Summary { get; set; } = string.Empty;
 
         public FeedbackStatus Status { get; set; }
@@ -21,6 +22,7 @@ namespace CRMSystem.Models.Entities
 
         public string? VoiceRecording { get; set; }
 
+        [StringLength(2000)]
         public string? Notes { get; set; }
 
         public DateTime SubmittedAt { get; set; }

@@ -1,0 +1,204 @@
+﻿@model CRMSystem.Models.ViewModels.SubmitFeedbackViewModel
+
+@{
+    ViewData["Title"] = "Submit Feedback";
+}
+
+<div class="card shadow">
+
+    <div class="card-header bg-primary text-white">
+
+        <h4 class="mb-0">
+
+            Submit Feedback
+
+        </h4>
+
+    </div>
+
+    <div class="card-body">
+
+        <form asp-action="SubmitFeedback"
+              method="post"
+              enctype="multipart/form-data">
+
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly"
+                 class="text-danger mb-3">
+            </div>
+
+            <input asp-for="AssignmentId"
+                   type="hidden" />
+
+            <div class="mb-3">
+
+                <label asp-for="Summary"
+                       class="form-label">
+                </label>
+
+                <textarea asp-for="Summary"
+                          class="form-control"
+                          rows="4">
+                </textarea>
+
+                <span asp-validation-for="Summary"
+                      class="text-danger">
+                </span>
+
+            </div>
+
+            <div class="mb-3">
+
+                <label asp-for="Status"
+                       class="form-label">
+                </label>
+
+                <select asp-for="Status"
+                        class="form-select"
+                        asp-items="Html.GetEnumSelectList<CRMSystem.Enums.FeedbackStatus>()">
+
+                    <option value="">
+
+                        -- Select Status --
+
+                    </option>
+
+                </select>
+
+                <span asp-validation-for="Status"
+                      class="text-danger">
+                </span>
+
+            </div>
+
+            <div class="mb-3"
+                 id="followUpContainer">
+
+                <label asp-for="NextFollowUpDate"
+                       class="form-label">
+                </label>
+
+                <input asp-for="NextFollowUpDate"
+                       type="date"
+                       class="form-control"
+                       id="nextFollowUpDate" />
+
+            </div>
+
+            <div class="mb-3">
+
+                <label asp-for="ProofImage"
+                       class="form-label">
+
+                    Proof Image
+
+                </label>
+
+                <input asp-for="ProofImage"
+                       type="file"
+                       accept=".jpg,.jpeg,.png,.webp"
+                       class="form-control" />
+
+            </div>
+
+            <div class="mb-3">
+
+                <label asp-for="VoiceRecording"
+                       class="form-label">
+
+                    Voice Recording
+
+                </label>
+
+                <input asp-for="VoiceRecording"
+                       type="file"
+                       accept=".mp3,.wav,.m4a"
+                       class="form-control" />
+
+            </div>
+
+            <div class="mb-3">
+
+                <label asp-for="Notes"
+                       class="form-label">
+                </label>
+
+                <textarea asp-for="Notes"
+                          class="form-control"
+                          rows="3">
+                </textarea>
+
+            </div>
+
+            <div class="d-flex gap-2">
+
+                <button type="submit"
+                        class="btn btn-primary">
+
+                    <i class="bi bi-check-circle"></i>
+
+                    Submit Feedback
+
+                </button>
+
+                <a asp-action="MyAssignedLeads"
+                   class="btn btn-secondary">
+
+                    Cancel
+
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const status = document.getElementById("Status");
+
+            const followUpContainer =
+                document.getElementById("followUpContainer");
+
+            const nextFollowUp =
+                document.getElementById("nextFollowUpDate");
+
+            function toggleFollowUp()
+            {
+                if (
+                    status.value === "7" ||
+                    status.value === "8")
+                {
+                    followUpContainer.style.display = "none";
+
+                    nextFollowUp.required = false;
+
+                    nextFollowUp.value = "";
+                }
+                else
+                {
+                    followUpContainer.style.display = "block";
+
+                    nextFollowUp.required = true;
+                }
+            }
+
+            toggleFollowUp();
+
+            status.addEventListener("change", toggleFollowUp);
+
+        });
+
+    </script>
+
+}

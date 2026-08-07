@@ -7,31 +7,31 @@
     ViewData["Breadcrumb"] = "My Assigned Leads";
 }
 
-<div class="container mt-4">
+<div class="card shadow">
 
-    <div class="card shadow">
+    <div class="card-header bg-primary text-white">
 
-        <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">
+            My Assigned Leads
+        </h4>
 
-            <h4 class="mb-0">
-                My Assigned Leads
-            </h4>
+    </div>
 
-        </div>
+    <div class="card-body">
 
-        <div class="card-body">
+        @if (!Model.Any())
+        {
+            <div class="alert alert-info">
 
-            @if (!Model.Any())
-            {
-                <div class="alert alert-info">
+                No assigned leads found.
 
-                    No assigned leads found.
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
 
-                </div>
-            }
-            else
-            {
-                <table class="table table-bordered table-hover">
+                <table class="table table-bordered table-hover align-middle">
 
                     <thead class="table-light">
 
@@ -51,7 +51,7 @@
 
                             <th>Status</th>
 
-                            <th>Action</th>
+                            <th style="width:170px;">Action</th>
 
                         </tr>
 
@@ -79,7 +79,7 @@
 
                                     @if (lead.AssignmentStatus == CRMSystem.Enums.AssignmentStatus.Pending)
                                     {
-                                        <span class="badge bg-warning">
+                                        <span class="badge bg-warning text-dark">
                                             Pending
                                         </span>
                                     }
@@ -89,9 +89,15 @@
                                             Accepted
                                         </span>
                                     }
-                                    else
+                                    else if (lead.AssignmentStatus == CRMSystem.Enums.AssignmentStatus.Reassigned)
                                     {
                                         <span class="badge bg-secondary">
+                                            Reassigned
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-dark">
                                             @lead.AssignmentStatus
                                         </span>
                                     }
@@ -114,18 +120,30 @@
                                             <button type="submit"
                                                     class="btn btn-success btn-sm">
 
+                                                <i class="bi bi-check-circle"></i>
+
                                                 Accept
 
                                             </button>
 
                                         </form>
                                     }
+                                    else if (lead.AssignmentStatus == CRMSystem.Enums.AssignmentStatus.Accepted)
+                                    {
+                                        <a asp-action="SubmitFeedback"
+                                           asp-route-assignmentId="@lead.AssignmentId"
+                                           class="btn btn-primary btn-sm">
+
+                                            <i class="bi bi-chat-left-text"></i>
+
+                                            Submit Feedback
+
+                                        </a>
+                                    }
                                     else
                                     {
-                                        <span class="text-success">
-
-                                            ✔ Accepted
-
+                                        <span class="text-muted">
+                                            No Action
                                         </span>
                                     }
 
@@ -137,9 +155,9 @@
                     </tbody>
 
                 </table>
-            }
 
-        </div>
+            </div>
+        }
 
     </div>
 

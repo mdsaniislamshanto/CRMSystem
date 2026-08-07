@@ -69,6 +69,8 @@ builder.Services.AddScoped<IAutoAssignmentService, AutoAssignmentService>();
 // Register SalesOfficerDashboardService
 builder.Services.AddScoped<ISalesOfficerDashboardService, SalesOfficerDashboardService>();
 
+// Register LeadFeedbackService
+builder.Services.AddScoped<ILeadFeedbackService, LeadFeedbackService>();
 
 
 var app = builder.Build();

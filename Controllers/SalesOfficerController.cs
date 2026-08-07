@@ -1,4 +1,5 @@
 ﻿using CRMSystem.Constants;
+using CRMSystem.Models.ViewModels;
 using CRMSystem.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,11 +9,13 @@ namespace CRMSystem.Controllers
     {
         private readonly ILeadService _leadService;
         private readonly ISalesOfficerDashboardService _dashboardService;
+        private readonly ILeadFeedbackService _leadFeedbackService; 
 
-        public SalesOfficerController(ILeadService leadService, ISalesOfficerDashboardService dashboardService)
+        public SalesOfficerController(ILeadService leadService, ISalesOfficerDashboardService dashboardService, ILeadFeedbackService leadFeedbackService)
         {
             _leadService = leadService;
             _dashboardService = dashboardService;
+            _leadFeedbackService = leadFeedbackService;
         }
 
 
@@ -54,6 +57,8 @@ namespace CRMSystem.Controllers
             return View(leads);
         }
 
+
+
         // ==========================
         // Accept Lead
         // ==========================
@@ -76,6 +81,63 @@ namespace CRMSystem.Controllers
             TempData["Success"] = "Lead accepted successfully.";
 
             return RedirectToAction(nameof(MyAssignedLeads));
+        }
+
+
+        // ==========================
+        // GET: Submit Feedback
+        // ==========================
+
+        [HttpGet]
+        public IActionResult SubmitFeedback(long assignmentId)
+        {
+            ViewData["Title"] = "Submit Feedback";
+            ViewData["Breadcrumb"] = "Submit Feedback";
+
+            var model = new SubmitFeedbackViewModel
+            {
+                AssignmentId = assignmentId
+            };
+
+            return View(model);
+        }
+
+        // ==========================
+        // POST: Submit Feedback
+        // ==========================
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SubmitFeedback(SubmitFeedbackViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var userId = HttpContext.Session.GetString(SessionKeys.UserId);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            try
+            {
+                await _leadFeedbackService.SubmitFeedbackAsync(
+                    model,
+                    long.Parse(userId));
+
+                TempData["Success"] = "Feedback submitted successfully.";
+
+                return RedirectToAction(nameof(MyAssignedLeads));
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+
+                return View(model);
+            }
         }
     }
 }

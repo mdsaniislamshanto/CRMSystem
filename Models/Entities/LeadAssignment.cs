@@ -31,5 +31,7 @@ namespace CRMSystem.Models.Entities
 
         [ForeignKey(nameof(AssignedBy))]
         public User? AssignedByUser { get; set; }
+
+        public ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();
     }
 }
