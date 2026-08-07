@@ -308,23 +308,7 @@ namespace CRMSystem.Services
             var admin = await _context.Users
                 .FirstOrDefaultAsync(u => u.UserId == adminId);
 
-            // Send Email prev
-            //if (salesOfficer != null && admin != null)
-            //{
-            //    //temp
-            //    throw new Exception("Email section reached.");
-
-
-            //    await _emailService.SendLeadAssignmentEmailAsync(
-            //        salesOfficer.Email,
-            //        $"{salesOfficer.FirstName} {salesOfficer.LastName}",
-            //        lead.LeadCode,
-            //        lead.LeadName,
-            //        $"{admin.FirstName} {admin.LastName}",
-            //        assignment.AssignedAt
-            //        
-
-            //test
+        
             if (salesOfficer == null)
             {
                 throw new Exception("Sales Officer not found.");
@@ -511,6 +495,27 @@ namespace CRMSystem.Services
             }
 
             await _context.SaveChangesAsync();
+
+            // Get New Sales Officer
+            var salesOfficer = await _context.Users
+                .FirstOrDefaultAsync(u => u.UserId == model.NewSalesOfficerId);
+
+            // Get Sales Manager
+            var salesManager = await _context.Users
+                .FirstOrDefaultAsync(u => u.UserId == salesManagerId);
+
+            if (salesOfficer != null &&
+                salesManager != null &&
+                lead != null)
+            {
+                await _emailService.SendLeadAssignmentEmailAsync(
+                    salesOfficer.Email,
+                    salesOfficer.FullName,
+                    lead.LeadCode,
+                    lead.LeadName,
+                    salesManager.FullName,
+                    newAssignment.AssignedAt);
+            }
         }
     }
 

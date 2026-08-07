@@ -1,4 +1,5 @@
 ﻿using CRMSystem.Constants;
+using CRMSystem.Enums;
 using CRMSystem.Models.ViewModels;
 using CRMSystem.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -12,15 +13,18 @@ namespace CRMSystem.Controllers
         private readonly ISalesManagerDashboardService _dashboardService;
         private readonly ILeadService _leadService;
         private readonly ISettingsService _settingsService;
+        private readonly ILeadCaptureService _leadCaptureService;
 
         public SalesManagerController(
             ISalesManagerDashboardService dashboardService,
             ILeadService leadService,
-            ISettingsService settingsService)
+            ISettingsService settingsService,
+            ILeadCaptureService leadCaptureService)
         {
             _dashboardService = dashboardService;
             _leadService = leadService;
             _settingsService = settingsService;
+            _leadCaptureService = leadCaptureService;
         }
 
         // ==========================
@@ -212,12 +216,118 @@ namespace CRMSystem.Controllers
         }
 
 
+
+        // ==========================
+        // GET: Create Manual  Lead
+        // ==========================
+
+        [HttpGet]
+        public IActionResult CreateLead()
+        {
+            ViewData["Title"] = "Create Lead";
+            ViewData["Breadcrumb"] = "Create Lead";
+
+            return View();
+        }
+        // ==========================
+        // POST:  Manual Lead Create 
+        // ==========================
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateLead(CreateLeadViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            await _leadService.CreateLeadAsync(model);
+
+            TempData["Success"] = "Lead created successfully.";
+
+            return RedirectToAction(nameof(LeadQueue));
+        }
+
+
+        // ==========================
+        // Generate Demo Lead
+        // ==========================
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> GenerateDemoLead()
+        {
+            var model = new AutoLeadCreateViewModel
+            {
+                LeadName = "Demo Customer",
+                CompanyName = "Facebook Demo Ltd.",
+                Email = "demo@example.com",
+                Phone = "01712345678",
+                Profession = "Business Owner",
+                Address = "Dhaka",
+                Source = LeadSource.Facebook,
+                Priority = LeadPriority.Medium,
+                Description = "This is a simulated Facebook Lead."
+            };
+
+            await _leadCaptureService.CaptureLeadAsync(
+                model,
+                LeadCaptureSource.FacebookLeadAds,
+                "FB-DEMO-001",
+                null);
+
+            TempData["Success"] = "Demo Lead generated successfully.";
+
+            return RedirectToAction(nameof(LeadQueue));
+        }
+
+
+
+
+        // ==========================
+        // Archive Lead
+        // ==========================
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ArchiveLead(long id)
+        {
+            await _leadService.ArchiveLeadAsync(id);
+
+            TempData["Success"] = "Lead archived successfully.";
+
+            return RedirectToAction(nameof(LeadQueue));
+        }
+
         // ==========================
         // Archived Leads
         // ==========================
-        public IActionResult ArchivedLeads()
+
+        [HttpGet]
+        public async Task<IActionResult> ArchivedLeads()
         {
-            return View();
+            ViewData["Title"] = "Archived Leads";
+            ViewData["Breadcrumb"] = "Archived Leads";
+
+            var leads = await _leadService.GetArchivedLeadsAsync();
+
+            return View(leads);
+        }
+
+        // ==========================
+        // Restore Lead
+        // ==========================
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RestoreLead(long id)
+        {
+            await _leadService.RestoreLeadAsync(id);
+
+            TempData["Success"] = "Lead restored successfully.";
+
+            return RedirectToAction(nameof(ArchivedLeads));
         }
 
         // ==========================
