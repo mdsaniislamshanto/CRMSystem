@@ -1,4 +1,7 @@
-﻿@{
+﻿@model CRMSystem.Models.ViewModels.SalesOfficerDashboardViewModel
+
+@{
+    Layout = "~/Views/Shared/_SalesOfficerLayout.cshtml";
     ViewData["Title"] = "Sales Officer Dashboard";
 }
 
@@ -14,7 +17,7 @@
             <div class="card shadow-sm border-0">
                 <div class="card-body text-center">
                     <h5>Total Assigned</h5>
-                    <h2>0</h2>
+                    <h2>@Model.TotalAssigned</h2>
                 </div>
             </div>
         </div>
@@ -23,7 +26,7 @@
             <div class="card shadow-sm border-0">
                 <div class="card-body text-center">
                     <h5>Pending</h5>
-                    <h2>0</h2>
+                    <h2>@Model.PendingLeads</h2>
                 </div>
             </div>
         </div>
@@ -32,7 +35,7 @@
             <div class="card shadow-sm border-0">
                 <div class="card-body text-center">
                     <h5>Accepted</h5>
-                    <h2>0</h2>
+                    <h2>@Model.AcceptedLeads</h2>
                 </div>
             </div>
         </div>
@@ -41,7 +44,7 @@
             <div class="card shadow-sm border-0">
                 <div class="card-body text-center">
                     <h5>Completed</h5>
-                    <h2>0</h2>
+                    <h2>@Model.CompletedLeads</h2>
                 </div>
             </div>
         </div>

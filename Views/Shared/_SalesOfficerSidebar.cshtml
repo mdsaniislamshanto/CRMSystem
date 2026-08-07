@@ -1,0 +1,134 @@
+﻿@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+}
+
+<div class="sidebar">
+
+    <!-- Logo -->
+    <div class="sidebar-header">
+
+        <h4 class="m-0">
+            <i class="bi bi-person-workspace"></i>
+            CRM System
+        </h4>
+
+    </div>
+
+    <!-- Navigation -->
+    <ul class="sidebar-menu">
+
+        <!-- Dashboard -->
+        <li>
+
+            <a asp-controller="SalesOfficer"
+               asp-action="Dashboard"
+               class="@(currentController == "SalesOfficer" && currentAction == "Dashboard" ? "active" : "")">
+
+                <i class="bi bi-speedometer2"></i>
+
+                Dashboard
+
+            </a>
+
+        </li>
+
+        <!-- My Work -->
+        <li class="menu-title">
+
+            My Work
+
+        </li>
+
+        <li>
+
+            <a asp-controller="SalesOfficer"
+               asp-action="MyAssignedLeads"
+               class="@(currentAction == "MyAssignedLeads" ? "active" : "")">
+
+                <i class="bi bi-list-task"></i>
+
+                My Assigned Leads
+
+            </a>
+
+        </li>
+
+        <li>
+
+            <a asp-controller="SalesOfficer"
+               asp-action="FollowUps">
+
+                <i class="bi bi-telephone-forward-fill"></i>
+
+                Follow-ups
+
+            </a>
+
+        </li>
+
+        <li>
+
+            <a asp-controller="SalesOfficer"
+               asp-action="Feedback">
+
+                <i class="bi bi-chat-left-text-fill"></i>
+
+                Feedback
+
+            </a>
+
+        </li>
+
+        <!-- Performance -->
+        <li class="menu-title">
+
+            Performance
+
+        </li>
+
+        <li>
+
+            <a asp-controller="SalesOfficer"
+               asp-action="MyPerformance">
+
+                <i class="bi bi-bar-chart-fill"></i>
+
+                My Performance
+
+            </a>
+
+        </li>
+
+        <!-- Notifications -->
+        <li>
+
+            <a asp-controller="SalesOfficer"
+               asp-action="Notifications">
+
+                <i class="bi bi-bell-fill"></i>
+
+                Notifications
+
+            </a>
+
+        </li>
+
+        <!-- Logout -->
+        <li class="mt-auto">
+
+            <a asp-controller="Auth"
+               asp-action="Logout"
+               class="text-danger">
+
+                <i class="bi bi-box-arrow-right"></i>
+
+                Logout
+
+            </a>
+
+        </li>
+
+    </ul>
+
+</div>

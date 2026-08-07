@@ -333,7 +333,7 @@ namespace CRMSystem.Services
         {
             return await _context.LeadAssignments
                 .Include(a => a.Lead)
-                .Where(a => a.SalesOfficerId == salesOfficerId && !a.IsDeleted)
+              .Where(a => a.SalesOfficerId == salesOfficerId && a.IsActive && !a.IsDeleted)
                 .OrderByDescending(a => a.AssignedAt)
                 .Select(a => new MyAssignedLeadViewModel
                 {
@@ -351,9 +351,36 @@ namespace CRMSystem.Services
         }
 
 
+        // For sales officer Accept leads
         public async Task AcceptLeadAsync(long assignmentId, long salesOfficerId)
         {
-            await Task.CompletedTask;
+            var assignment = await _context.LeadAssignments
+                .Include(a => a.Lead)
+                .FirstOrDefaultAsync(a =>
+                    a.AssignmentId == assignmentId &&
+                    a.SalesOfficerId == salesOfficerId &&
+                    a.IsActive &&
+                    !a.IsDeleted);
+
+            if (assignment == null)
+            {
+                return;
+            }
+
+            if (assignment.AssignmentStatus != AssignmentStatus.Pending)
+            {
+                return;
+            }
+
+            assignment.AssignmentStatus = AssignmentStatus.Accepted;
+            assignment.AcceptedAt = DateTime.UtcNow;
+
+            if (assignment.Lead != null)
+            {
+                assignment.Lead.Status = LeadStatus.InProgress;
+            }
+
+            await _context.SaveChangesAsync();
         }
 
 

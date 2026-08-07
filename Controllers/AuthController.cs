@@ -64,7 +64,7 @@ namespace CRMSystem.Controllers
                     return RedirectToAction("Index", "Admin");
 
                 case RoleKeys.SalesOfficer:
-                    return RedirectToAction("Index", "Sales");
+                    return RedirectToAction("Dashboard", "SalesOfficer");
 
                 case RoleKeys.Account:
                     return RedirectToAction("Index", "Account");
