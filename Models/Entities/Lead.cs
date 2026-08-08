@@ -38,6 +38,12 @@ namespace CRMSystem.Models.Entities
 
         public LeadSource Source { get; set; }
 
+        [StringLength(200)]
+        public string? SourceReferenceId { get; set; }
+
+        [StringLength(200)]
+        public string? SourceCampaign { get; set; }
+
         public LeadPriority Priority { get; set; }
 
         public LeadStatus Status { get; set; }
