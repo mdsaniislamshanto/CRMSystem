@@ -26,6 +26,7 @@ namespace CRMSystem.Models.Entities
         public string? Notes { get; set; }
 
         public DateTime SubmittedAt { get; set; }
+        public DateTime? NextFollowUpDate { get; set; }
 
         [ForeignKey(nameof(AssignmentId))]
         public LeadAssignment? LeadAssignment { get; set; }

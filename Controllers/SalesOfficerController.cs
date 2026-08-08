@@ -139,5 +139,51 @@ namespace CRMSystem.Controllers
                 return View(model);
             }
         }
+
+        // GET: SalesOfficer/FeedbackHistory
+        public async Task<IActionResult> FeedbackHistory()
+        {
+            var userId = HttpContext.Session.GetString(SessionKeys.UserId);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            ViewData["Title"] = "Feedback History";
+            ViewData["Breadcrumb"] = "Feedback History";
+
+            var feedbacks =
+                await _leadFeedbackService.GetFeedbackHistoryAsync(
+                    long.Parse(userId));
+
+            return View(feedbacks);
+        }
+
+
+            // GET: SalesOfficer/FeedbackDetails
+        public async Task<IActionResult> FeedbackDetails(long feedbackId)
+        {
+            var userId = HttpContext.Session.GetString(SessionKeys.UserId);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            ViewData["Title"] = "Feedback Details";
+            ViewData["Breadcrumb"] = "Feedback Details";
+
+            var feedback = await _leadFeedbackService.GetFeedbackDetailsAsync(
+                feedbackId,
+                long.Parse(userId));
+
+            if (feedback == null)
+            {
+                return NotFound();
+            }
+
+            return View(feedback);
+        }
     }
 }

@@ -1,0 +1,522 @@
+﻿@model CRMSystem.Models.ViewModels.FeedbackDetailsViewModel
+
+@{
+    Layout = "~/Views/Shared/_SalesOfficerLayout.cshtml";
+
+    ViewData["Title"] = "Feedback Details";
+    ViewData["Breadcrumb"] = "Feedback Details";
+}
+
+<div class="card shadow">
+
+    <!-- Page Header -->
+
+    <div class="card-header bg-primary text-white d-flex align-items-center">
+
+        <i class="bi bi-file-earmark-text-fill fs-4 me-3"></i>
+
+        <div>
+
+            <h4 class="mb-0">
+
+                Feedback Details
+
+            </h4>
+
+            <small>
+
+                View complete information about the submitted feedback.
+
+            </small>
+
+        </div>
+
+    </div>
+
+
+    <div class="card-body p-4">
+
+
+        <!-- Lead Information -->
+
+        <div class="d-flex align-items-center mb-3">
+
+            <i class="bi bi-person-vcard text-primary fs-4 me-2"></i>
+
+            <h5 class="mb-0">
+
+                Lead Information
+
+            </h5>
+
+        </div>
+
+        <hr />
+
+
+        <div class="row g-3 mb-4">
+
+            <div class="col-md-6">
+
+                <label class="form-label fw-semibold">
+
+                    Lead ID
+
+                </label>
+
+                <div class="form-control bg-light">
+
+                    @Model.LeadId
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <label class="form-label fw-semibold">
+
+                    Company
+
+                </label>
+
+                <div class="form-control bg-light">
+
+                    @Model.CompanyName
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <label class="form-label fw-semibold">
+
+                    Lead Name
+
+                </label>
+
+                <div class="form-control bg-light">
+
+                    @Model.LeadName
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <label class="form-label fw-semibold">
+
+                    Email
+
+                </label>
+
+                <div class="form-control bg-light">
+
+                    @if (!string.IsNullOrWhiteSpace(Model.Email))
+                    {
+                        @Model.Email
+                    }
+                    else
+                    {
+                        <span class="text-muted">
+
+                            Not provided
+
+                        </span>
+                    }
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <label class="form-label fw-semibold">
+
+                    Phone
+
+                </label>
+
+                <div class="form-control bg-light">
+
+                    @if (!string.IsNullOrWhiteSpace(Model.Phone))
+                    {
+                        @Model.Phone
+                    }
+                    else
+                    {
+                        <span class="text-muted">
+
+                            Not provided
+
+                        </span>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Feedback Information -->
+
+        <div class="d-flex align-items-center mb-3">
+
+            <i class="bi bi-chat-left-text text-primary fs-4 me-2"></i>
+
+            <h5 class="mb-0">
+
+                Feedback Information
+
+            </h5>
+
+        </div>
+
+        <hr />
+
+
+        <div class="row g-3 mb-4">
+
+            <div class="col-md-6">
+
+                <label class="form-label fw-semibold">
+
+                    Feedback Status
+
+                </label>
+
+                <div>
+
+                    @switch (Model.Status)
+                    {
+                        case CRMSystem.Enums.FeedbackStatus.Interested:
+
+                            <span class="badge rounded-pill bg-primary px-3 py-2">
+
+                                Interested
+
+                            </span>
+
+                            break;
+
+                        case CRMSystem.Enums.FeedbackStatus.FollowUpRequired:
+
+                            <span class="badge rounded-pill bg-warning text-dark px-3 py-2">
+
+                                Follow-up Required
+
+                            </span>
+
+                            break;
+
+                        case CRMSystem.Enums.FeedbackStatus.MeetingScheduled:
+
+                            <span class="badge rounded-pill bg-info text-dark px-3 py-2">
+
+                                Meeting Scheduled
+
+                            </span>
+
+                            break;
+
+                        case CRMSystem.Enums.FeedbackStatus.Visited:
+
+                            <span class="badge rounded-pill bg-secondary px-3 py-2">
+
+                                Visited
+
+                            </span>
+
+                            break;
+
+                        case CRMSystem.Enums.FeedbackStatus.QuotationSent:
+
+                            <span class="badge rounded-pill bg-dark px-3 py-2">
+
+                                Quotation Sent
+
+                            </span>
+
+                            break;
+
+                        case CRMSystem.Enums.FeedbackStatus.Negotiation:
+
+                            <span class="badge rounded-pill bg-warning text-dark px-3 py-2">
+
+                                Negotiation
+
+                            </span>
+
+                            break;
+
+                        case CRMSystem.Enums.FeedbackStatus.Completed:
+
+                            <span class="badge rounded-pill bg-success px-3 py-2">
+
+                                Completed
+
+                            </span>
+
+                            break;
+
+                        case CRMSystem.Enums.FeedbackStatus.Closed:
+
+                            <span class="badge rounded-pill bg-danger px-3 py-2">
+
+                                Closed
+
+                            </span>
+
+                            break;
+
+                        default:
+
+                            <span class="badge rounded-pill bg-secondary px-3 py-2">
+
+                                @Model.Status
+
+                            </span>
+
+                            break;
+                    }
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <label class="form-label fw-semibold">
+
+                    Submitted At
+
+                </label>
+
+                <div class="form-control bg-light">
+
+                    @Model.SubmittedAt.ToString("dd MMM yyyy hh:mm tt")
+
+                </div>
+
+            </div>
+
+
+            <div class="col-12">
+
+                <label class="form-label fw-semibold">
+
+                    Summary
+
+                </label>
+
+                <div class="form-control bg-light"
+                     style="min-height: 120px; white-space: pre-wrap;">
+
+                    @Model.Summary
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <label class="form-label fw-semibold">
+
+                    Next Follow-up Date
+
+                </label>
+
+                <div class="form-control bg-light">
+
+                    @if (Model.NextFollowUpDate.HasValue)
+                    {
+                        @Model.NextFollowUpDate.Value.ToString("dd MMM yyyy")
+                    }
+                    else
+                    {
+                        <span class="text-muted">
+
+                            No follow-up scheduled
+
+                        </span>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Supporting Evidence -->
+
+        <div class="d-flex align-items-center mb-3">
+
+            <i class="bi bi-paperclip text-primary fs-4 me-2"></i>
+
+            <h5 class="mb-0">
+
+                Supporting Evidence
+
+            </h5>
+
+        </div>
+
+        <hr />
+
+
+        <div class="row g-4 mb-4">
+
+            <!-- Proof Image -->
+
+            <div class="col-md-6">
+
+                <label class="form-label fw-semibold">
+
+                    Proof Image
+
+                </label>
+
+                @if (!string.IsNullOrWhiteSpace(Model.ProofImage))
+                {
+                    <div class="border rounded p-3 bg-light text-center">
+
+                        <img src="@Url.Content(Model.ProofImage)"
+                             alt="Proof Image"
+                             class="img-fluid rounded"
+                             style="max-height: 350px;" />
+
+                    </div>
+                }
+                else
+                {
+                    <div class="border rounded p-3 bg-light">
+
+                        <span class="text-muted">
+
+                            No proof image uploaded.
+
+                        </span>
+
+                    </div>
+                }
+
+            </div>
+
+
+            <!-- Voice Recording -->
+
+            <div class="col-md-6">
+
+                <label class="form-label fw-semibold">
+
+                    Voice Recording
+
+                </label>
+
+                @if (!string.IsNullOrWhiteSpace(Model.VoiceRecording))
+                {
+                    <div class="border rounded p-3 bg-light">
+
+                        <audio controls
+                               class="w-100">
+
+                            <source src="@Url.Content(Model.VoiceRecording)" />
+
+                            Your browser does not support the audio element.
+
+                        </audio>
+
+                    </div>
+                }
+                else
+                {
+                    <div class="border rounded p-3 bg-light">
+
+                        <span class="text-muted">
+
+                            No voice recording uploaded.
+
+                        </span>
+
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
+
+        <!-- Additional Notes -->
+
+        <div class="d-flex align-items-center mb-3">
+
+            <i class="bi bi-journal-text text-primary fs-4 me-2"></i>
+
+            <h5 class="mb-0">
+
+                Additional Notes
+
+            </h5>
+
+        </div>
+
+        <hr />
+
+
+        <div class="mb-4">
+
+            @if (!string.IsNullOrWhiteSpace(Model.Notes))
+            {
+                <div class="form-control bg-light"
+                     style="min-height: 100px; white-space: pre-wrap;">
+
+                    @Model.Notes
+
+                </div>
+            }
+            else
+            {
+                <div class="form-control bg-light">
+
+                    <span class="text-muted">
+
+                        No additional notes provided.
+
+                    </span>
+
+                </div>
+            }
+
+        </div>
+
+
+        <!-- Action Buttons -->
+
+        <hr />
+
+        <div class="d-flex justify-content-end gap-2">
+
+            <a asp-action="FeedbackHistory"
+               class="btn btn-outline-secondary px-4">
+
+                <i class="bi bi-arrow-left-circle me-1"></i>
+
+                Back to Feedback History
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>

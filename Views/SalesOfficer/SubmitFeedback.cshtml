@@ -1,22 +1,37 @@
 ﻿@model CRMSystem.Models.ViewModels.SubmitFeedbackViewModel
 
 @{
+    Layout = "~/Views/Shared/_SalesOfficerLayout.cshtml";
+
     ViewData["Title"] = "Submit Feedback";
+    ViewData["Breadcrumb"] = "Submit Feedback";
 }
 
 <div class="card shadow">
 
-    <div class="card-header bg-primary text-white">
+    <div class="card-header bg-primary text-white d-flex align-items-center">
 
-        <h4 class="mb-0">
+        <i class="bi bi-chat-square-text-fill fs-4 me-3"></i>
 
-            Submit Feedback
+        <div>
 
-        </h4>
+            <h4 class="mb-0">
+
+                Submit Feedback
+
+            </h4>
+
+            <small>
+
+                Provide feedback for your assigned lead.
+
+            </small>
+
+        </div>
 
     </div>
 
-    <div class="card-body">
+    <div class="card-body p-4">
 
         <form asp-action="SubmitFeedback"
               method="post"
@@ -25,21 +40,35 @@
             @Html.AntiForgeryToken()
 
             <div asp-validation-summary="ModelOnly"
-                 class="text-danger mb-3">
+                 class="alert alert-danger">
             </div>
 
             <input asp-for="AssignmentId"
                    type="hidden" />
 
-            <div class="mb-3">
+            <h5 class="border-bottom pb-2 mb-4">
+
+                <i class="bi bi-pencil-square text-primary me-2"></i>
+
+                Feedback Information
+
+            </h5>
+
+            <!-- Summary -->
+
+            <div class="mb-4">
 
                 <label asp-for="Summary"
-                       class="form-label">
+                       class="form-label fw-semibold">
+
+                    Summary <span class="text-danger">*</span>
+
                 </label>
 
                 <textarea asp-for="Summary"
                           class="form-control"
-                          rows="4">
+                          rows="5"
+                          placeholder="Write a short summary of your discussion with the customer...">
                 </textarea>
 
                 <span asp-validation-for="Summary"
@@ -48,106 +77,167 @@
 
             </div>
 
-            <div class="mb-3">
+            <!-- Status + Follow Up -->
 
-                <label asp-for="Status"
-                       class="form-label">
-                </label>
+            <div class="row">
 
-                <select asp-for="Status"
-                        class="form-select"
-                        asp-items="Html.GetEnumSelectList<CRMSystem.Enums.FeedbackStatus>()">
+                <div class="col-md-6 mb-4">
 
-                    <option value="">
+                    <label asp-for="Status"
+                           class="form-label fw-semibold">
 
-                        -- Select Status --
+                        Status <span class="text-danger">*</span>
 
-                    </option>
+                    </label>
 
-                </select>
+                    <select asp-for="Status"
+                            class="form-select"
+                            asp-items="Html.GetEnumSelectList<CRMSystem.Enums.FeedbackStatus>()">
 
-                <span asp-validation-for="Status"
-                      class="text-danger">
-                </span>
+                        <option value="">
 
-            </div>
+                            -- Select Status --
 
-            <div class="mb-3"
-                 id="followUpContainer">
+                        </option>
 
-                <label asp-for="NextFollowUpDate"
-                       class="form-label">
-                </label>
+                    </select>
 
-                <input asp-for="NextFollowUpDate"
-                       type="date"
-                       class="form-control"
-                       id="nextFollowUpDate" />
+                    <span asp-validation-for="Status"
+                          class="text-danger">
+                    </span>
 
-            </div>
+                </div>
 
-            <div class="mb-3">
+                <div class="col-md-6 mb-4"
+                     id="followUpContainer">
 
-                <label asp-for="ProofImage"
-                       class="form-label">
+                    <label asp-for="NextFollowUpDate"
+                           class="form-label fw-semibold">
 
-                    Proof Image
+                        Next Follow-up Date
 
-                </label>
+                    </label>
 
-                <input asp-for="ProofImage"
-                       type="file"
-                       accept=".jpg,.jpeg,.png,.webp"
-                       class="form-control" />
+                    <input asp-for="NextFollowUpDate"
+                           type="date"
+                           class="form-control"
+                           id="nextFollowUpDate" />
 
-            </div>
+                    <span asp-validation-for="NextFollowUpDate"
+                          class="text-danger">
+                    </span>
 
-            <div class="mb-3">
-
-                <label asp-for="VoiceRecording"
-                       class="form-label">
-
-                    Voice Recording
-
-                </label>
-
-                <input asp-for="VoiceRecording"
-                       type="file"
-                       accept=".mp3,.wav,.m4a"
-                       class="form-control" />
+                </div>
 
             </div>
 
-            <div class="mb-3">
+            <!-- Upload Section -->
+
+            <h5 class="border-bottom pb-2 mb-4">
+
+                <i class="bi bi-paperclip text-primary me-2"></i>
+
+                Supporting Evidence
+
+            </h5>
+
+            <div class="row">
+
+                <div class="col-md-6 mb-4">
+
+                    <label asp-for="ProofImage"
+                           class="form-label fw-semibold">
+
+                        Proof Image
+
+                    </label>
+
+                    <input asp-for="ProofImage"
+                           type="file"
+                           accept=".jpg,.jpeg,.png,.webp"
+                           class="form-control" />
+
+                    <small class="text-muted">
+
+                        JPG, PNG or WEBP
+
+                    </small>
+
+                </div>
+
+                <div class="col-md-6 mb-4">
+
+                    <label asp-for="VoiceRecording"
+                           class="form-label fw-semibold">
+
+                        Voice Recording
+
+                    </label>
+
+                    <input asp-for="VoiceRecording"
+                           type="file"
+                           accept=".mp3,.wav,.m4a"
+                           class="form-control" />
+
+                    <small class="text-muted">
+
+                        MP3, WAV or M4A
+
+                    </small>
+
+                </div>
+
+            </div>
+
+            <div class="alert alert-info">
+
+                <i class="bi bi-info-circle me-2"></i>
+
+                Upload either a <strong>Proof Image</strong> or a
+                <strong>Voice Recording</strong>. Uploading both is optional.
+
+            </div>
+
+            <!-- Notes -->
+
+            <div class="mb-4">
 
                 <label asp-for="Notes"
-                       class="form-label">
+                       class="form-label fw-semibold">
+
+                    Additional Notes
+
                 </label>
 
                 <textarea asp-for="Notes"
                           class="form-control"
-                          rows="3">
+                          rows="4"
+                          placeholder="Additional notes (optional)...">
                 </textarea>
 
             </div>
 
-            <div class="d-flex gap-2">
+            <hr />
 
-                <button type="submit"
-                        class="btn btn-primary">
-
-                    <i class="bi bi-check-circle"></i>
-
-                    Submit Feedback
-
-                </button>
+            <div class="d-flex justify-content-end gap-2">
 
                 <a asp-action="MyAssignedLeads"
-                   class="btn btn-secondary">
+                   class="btn btn-outline-secondary px-4">
+
+                    <i class="bi bi-arrow-left-circle me-1"></i>
 
                     Cancel
 
                 </a>
+
+                <button type="submit"
+                        class="btn btn-primary px-4">
+
+                    <i class="bi bi-check-circle-fill me-1"></i>
+
+                    Submit Feedback
+
+                </button>
 
             </div>
 
@@ -163,7 +253,7 @@
 
     <script>
 
-        document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", function() {
 
             const status = document.getElementById("Status");
 
@@ -173,20 +263,18 @@
             const nextFollowUp =
                 document.getElementById("nextFollowUpDate");
 
-            function toggleFollowUp()
-            {
-                if (
-                    status.value === "7" ||
-                    status.value === "8")
-                {
+            function toggleFollowUp() {
+
+                if (status.value === "7" || status.value === "8") {
+
                     followUpContainer.style.display = "none";
 
                     nextFollowUp.required = false;
 
                     nextFollowUp.value = "";
                 }
-                else
-                {
+                else {
+
                     followUpContainer.style.display = "block";
 
                     nextFollowUp.required = true;
@@ -200,5 +288,4 @@
         });
 
     </script>
-
 }

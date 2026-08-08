@@ -12,6 +12,7 @@ namespace CRMSystem.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _environment;
+ 
 
         // Allowed file extensions and size limits
         private static readonly string[] AllowedImageExtensions =
@@ -124,6 +125,69 @@ namespace CRMSystem.Services
             await _context.SaveChangesAsync();
         }
 
+        // Retrieves the feedback history for a specific sales officer
+        public async Task<List<FeedbackHistoryViewModel>> GetFeedbackHistoryAsync(long salesOfficerId)
+        {
+            var feedbacks = await _context.Feedbacks
+                .Include(f => f.LeadAssignment)
+                    .ThenInclude(a => a!.Lead)
+                .Where(f => f.LeadAssignment!.SalesOfficerId == salesOfficerId)
+                .OrderByDescending(f => f.SubmittedAt)
+                .Select(f => new FeedbackHistoryViewModel
+                {
+                    FeedbackId = f.FeedbackId,
+                    AssignmentId = f.AssignmentId,
+                    LeadId = f.LeadAssignment!.LeadId,
+                    CompanyName = f.LeadAssignment.Lead!.CompanyName,
+                    LeadName = f.LeadAssignment.Lead.LeadName,
+                    Status = f.Status,
+                    SubmittedAt = f.SubmittedAt,
+                    NextFollowUpDate = f.NextFollowUpDate
+                })
+                .ToListAsync();
+
+            return feedbacks;
+        }
+
+ 
+        //// Retrieves the feedback history for a specific sales officer
+        //public async Task<List<FeedbackHistoryViewModel>> GetFeedbackHistoryAsync(long salesOfficerId)
+        //{
+        //    var feedbacks = await _context.Feedbacks
+
+        //        .Include(f => f.LeadAssignment)
+        //            .ThenInclude(a => a!.Lead)
+
+        //        .Where(f => f.LeadAssignment!.SalesOfficerId == salesOfficerId)
+
+        //        .OrderByDescending(f => f.SubmittedAt)
+
+        //        .Select(f => new FeedbackHistoryViewModel
+        //        {
+        //            FeedbackId = f.FeedbackId,
+
+        //            AssignmentId = f.AssignmentId,
+
+        //            LeadId = f.LeadAssignment!.LeadId,
+
+        //            CompanyName = f.LeadAssignment.Lead!.CompanyName,
+
+        //            LeadName = f.LeadAssignment.Lead.LeadName,
+
+        //            Status = f.Status,
+
+        //            SubmittedAt = f.SubmittedAt,
+
+        //            //NextFollowUpDate = f.NextFollowUpDate
+        //        })
+
+        //        .ToListAsync();
+
+        //    return feedbacks;
+        //}
+
+
+
 
         // Helper method to save files
         private async Task<string> SaveFileAsync(IFormFile file,string folderName,string[] allowedExtensions,long maxSize)
@@ -161,6 +225,51 @@ namespace CRMSystem.Services
 
             return $"/uploads/feedback/{folderName}/{fileName}";
         }
+
+        // Retrieves detailed feedback information for a specific feedback entry
+        public async Task<FeedbackDetailsViewModel?> GetFeedbackDetailsAsync( long feedbackId,long salesOfficerId)
+        {
+            var feedback = await _context.Feedbacks
+                .Include(f => f.LeadAssignment)
+                    .ThenInclude(a => a!.Lead)
+                .Where(f =>
+                    f.FeedbackId == feedbackId &&
+                    f.LeadAssignment!.SalesOfficerId == salesOfficerId)
+                .Select(f => new FeedbackDetailsViewModel
+                {
+                    FeedbackId = f.FeedbackId,
+
+                    AssignmentId = f.AssignmentId,
+
+                    LeadId = f.LeadAssignment!.LeadId,
+
+                    CompanyName = f.LeadAssignment.Lead!.CompanyName,
+
+                    LeadName = f.LeadAssignment.Lead.LeadName,
+
+                    Email = f.LeadAssignment.Lead.Email,
+
+                    Phone = f.LeadAssignment.Lead.Phone,
+
+                    Summary = f.Summary,
+
+                    Status = f.Status,
+
+                    SubmittedAt = f.SubmittedAt,
+
+                    NextFollowUpDate = f.NextFollowUpDate,
+
+                    ProofImage = f.ProofImage,
+
+                    VoiceRecording = f.VoiceRecording,
+
+                    Notes = f.Notes
+                })
+                .FirstOrDefaultAsync();
+
+            return feedback;
+        }
+
 
     }
 }

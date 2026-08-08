@@ -12,7 +12,11 @@
     <div class="card-header bg-primary text-white">
 
         <h4 class="mb-0">
+
+            <i class="bi bi-list-task me-2"></i>
+
             My Assigned Leads
+
         </h4>
 
     </div>
@@ -31,9 +35,9 @@
         {
             <div class="table-responsive">
 
-                <table class="table table-bordered table-hover align-middle">
+                <table class="table table-hover align-middle mb-0">
 
-                    <thead class="table-light">
+                    <thead class="table-light text-center">
 
                         <tr>
 
@@ -63,7 +67,9 @@
                         {
                             <tr>
 
-                                <td>@lead.LeadId</td>
+                                <td class="text-center">
+                                    @lead.LeadId
+                                </td>
 
                                 <td>@lead.CompanyName</td>
 
@@ -71,27 +77,31 @@
 
                                 <td>@lead.Email</td>
 
-                                <td>@lead.Phone</td>
+                                <td class="text-center">
+                                    @lead.Phone
+                                </td>
 
-                                <td>@lead.AssignedAt.ToString("dd MMM yyyy hh:mm tt")</td>
+                                <td class="text-center">
+                                    @lead.AssignedAt.ToString("dd MMM yyyy hh:mm tt")
+                                </td>
 
-                                <td>
+                                <td class="text-center">
 
                                     @if (lead.AssignmentStatus == CRMSystem.Enums.AssignmentStatus.Pending)
                                     {
-                                        <span class="badge bg-warning text-dark">
+                                        <span class="badge rounded-pill bg-warning text-dark px-3 py-2">
                                             Pending
                                         </span>
                                     }
                                     else if (lead.AssignmentStatus == CRMSystem.Enums.AssignmentStatus.Accepted)
                                     {
-                                        <span class="badge bg-success">
+                                        <span class="badge rounded-pill bg-success px-3 py-2">
                                             Accepted
                                         </span>
                                     }
                                     else if (lead.AssignmentStatus == CRMSystem.Enums.AssignmentStatus.Reassigned)
                                     {
-                                        <span class="badge bg-secondary">
+                                        <span class="badge rounded-pill bg-secondary px-3 py-2">
                                             Reassigned
                                         </span>
                                     }
@@ -104,7 +114,7 @@
 
                                 </td>
 
-                                <td>
+                                <td class="text-center">
 
                                     @if (lead.AssignmentStatus == CRMSystem.Enums.AssignmentStatus.Pending)
                                     {
@@ -118,7 +128,7 @@
                                                    value="@lead.AssignmentId" />
 
                                             <button type="submit"
-                                                    class="btn btn-success btn-sm">
+                                                    class="btn btn-success btn-sm px-3">
 
                                                 <i class="bi bi-check-circle"></i>
 
@@ -132,9 +142,9 @@
                                     {
                                         <a asp-action="SubmitFeedback"
                                            asp-route-assignmentId="@lead.AssignmentId"
-                                           class="btn btn-primary btn-sm">
+                                           class="btn btn-primary btn-sm px-3">
 
-                                            <i class="bi bi-chat-left-text"></i>
+                                            <i class="bi bi-send-check-fill me-1"></i>
 
                                             Submit Feedback
 
@@ -143,7 +153,7 @@
                                     else
                                     {
                                         <span class="text-muted">
-                                            No Action
+                                            -
                                         </span>
                                     }
 
