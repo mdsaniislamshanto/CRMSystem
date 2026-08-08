@@ -1,6 +1,7 @@
 ﻿using CRMSystem.Enums;
 using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
+using CRMSystem.Validators;
 
 namespace CRMSystem.Models.ViewModels
 {
@@ -20,6 +21,7 @@ namespace CRMSystem.Models.ViewModels
 
         public IFormFile? VoiceRecording { get; set; }
 
+        [FutureDate]
         public DateTime? NextFollowUpDate { get; set; }
 
         [StringLength(2000)]
