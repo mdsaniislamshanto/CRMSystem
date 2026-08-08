@@ -185,5 +185,24 @@ namespace CRMSystem.Controllers
 
             return View(feedback);
         }
+
+        // GET: SalesOfficer/FollowUps
+        public async Task<IActionResult> FollowUps()
+        {
+            var userId = HttpContext.Session.GetString(SessionKeys.UserId);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            ViewData["Title"] = "Follow-ups";
+            ViewData["Breadcrumb"] = "Follow-ups";
+
+            var followUps = await _leadFeedbackService
+                .GetSalesOfficerFollowUpsAsync(long.Parse(userId));
+
+            return View(followUps);
+        }
     }
 }

@@ -44,7 +44,7 @@ namespace CRMSystem.Services
             _environment = environment;
         }
 
-        public async Task SubmitFeedbackAsync( SubmitFeedbackViewModel model, long salesOfficerId)
+        public async Task SubmitFeedbackAsync(SubmitFeedbackViewModel model,long salesOfficerId)
         {
             var assignment = await _context.LeadAssignments
                 .FirstOrDefaultAsync(a => a.AssignmentId == model.AssignmentId);
@@ -112,12 +112,20 @@ namespace CRMSystem.Services
             var feedback = new Feedback
             {
                 AssignmentId = model.AssignmentId,
+
                 Summary = model.Summary.Trim(),
+
                 Status = model.Status,
+
                 ProofImage = imagePath,
+
                 VoiceRecording = voicePath,
+
                 Notes = model.Notes?.Trim(),
-                SubmittedAt = DateTime.UtcNow
+
+                SubmittedAt = DateTime.UtcNow,
+
+                NextFollowUpDate = model.NextFollowUpDate
             };
 
             _context.Feedbacks.Add(feedback);
@@ -149,42 +157,6 @@ namespace CRMSystem.Services
             return feedbacks;
         }
 
- 
-        //// Retrieves the feedback history for a specific sales officer
-        //public async Task<List<FeedbackHistoryViewModel>> GetFeedbackHistoryAsync(long salesOfficerId)
-        //{
-        //    var feedbacks = await _context.Feedbacks
-
-        //        .Include(f => f.LeadAssignment)
-        //            .ThenInclude(a => a!.Lead)
-
-        //        .Where(f => f.LeadAssignment!.SalesOfficerId == salesOfficerId)
-
-        //        .OrderByDescending(f => f.SubmittedAt)
-
-        //        .Select(f => new FeedbackHistoryViewModel
-        //        {
-        //            FeedbackId = f.FeedbackId,
-
-        //            AssignmentId = f.AssignmentId,
-
-        //            LeadId = f.LeadAssignment!.LeadId,
-
-        //            CompanyName = f.LeadAssignment.Lead!.CompanyName,
-
-        //            LeadName = f.LeadAssignment.Lead.LeadName,
-
-        //            Status = f.Status,
-
-        //            SubmittedAt = f.SubmittedAt,
-
-        //            //NextFollowUpDate = f.NextFollowUpDate
-        //        })
-
-        //        .ToListAsync();
-
-        //    return feedbacks;
-        //}
 
 
 
@@ -271,5 +243,38 @@ namespace CRMSystem.Services
         }
 
 
+        // Retrieves upcoming follow-ups for a specific sales officer
+        public async Task<List<SalesOfficerFollowUpViewModel>> GetSalesOfficerFollowUpsAsync(long salesOfficerId)
+        {
+            var followUps = await _context.Feedbacks
+                .Include(f => f.LeadAssignment)
+                    .ThenInclude(a => a!.Lead)
+                .Where(f =>
+                    f.LeadAssignment!.SalesOfficerId == salesOfficerId &&
+                    f.NextFollowUpDate.HasValue &&
+                    f.NextFollowUpDate.Value.Date >= DateTime.Today)
+                .Select(f => new SalesOfficerFollowUpViewModel
+                {
+                    FeedbackId = f.FeedbackId,
+
+                    AssignmentId = f.AssignmentId,
+
+                    LeadId = f.LeadAssignment!.LeadId,
+
+                    CompanyName = f.LeadAssignment.Lead!.CompanyName,
+
+                    LeadName = f.LeadAssignment.Lead.LeadName,
+
+                    Status = f.Status,
+
+                    NextFollowUpDate = f.NextFollowUpDate!.Value,
+
+                    SubmittedAt = f.SubmittedAt
+                })
+                .OrderBy(f => f.NextFollowUpDate)
+                .ToListAsync();
+
+            return followUps;
+        }
     }
 }

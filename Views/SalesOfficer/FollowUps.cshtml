@@ -1,0 +1,245 @@
+﻿@model List<CRMSystem.Models.ViewModels.SalesOfficerFollowUpViewModel>
+
+@{
+    Layout = "~/Views/Shared/_SalesOfficerLayout.cshtml";
+
+    ViewData["Title"] = "Follow-ups";
+    ViewData["Breadcrumb"] = "Follow-ups";
+}
+
+<div class="card shadow">
+
+    <!-- Header -->
+
+    <div class="card-header bg-primary text-white d-flex align-items-center">
+
+        <i class="bi bi-calendar-check-fill fs-4 me-3"></i>
+
+        <div>
+
+            <h4 class="mb-0">
+                Follow-ups
+            </h4>
+
+            <small>
+                Manage your upcoming customer follow-ups and submit feedback.
+            </small>
+
+        </div>
+
+    </div>
+
+
+    <!-- Body -->
+
+    <div class="card-body p-4">
+
+        @if (!Model.Any())
+        {
+            <div class="alert alert-info d-flex align-items-center">
+
+                <i class="bi bi-info-circle-fill me-2"></i>
+
+                <div>
+                    No upcoming follow-ups found.
+                </div>
+
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+
+                <table class="table table-bordered table-hover align-middle">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th>
+                                Lead ID
+                            </th>
+
+                            <th>
+                                Company
+                            </th>
+
+                            <th>
+                                Lead Name
+                            </th>
+
+                            <th>
+                                Current Status
+                            </th>
+
+                            <th>
+                                Follow-up Date
+                            </th>
+
+                            <th>
+                                Last Feedback
+                            </th>
+
+                            <th class="text-center">
+                                Action
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        @foreach (var followUp in Model)
+                        {
+                            <tr>
+
+                                <td>
+                                    <span class="fw-semibold">
+                                        #@followUp.LeadId
+                                    </span>
+                                </td>
+
+
+                                <td>
+                                    @followUp.CompanyName
+                                </td>
+
+
+                                <td>
+                                    @followUp.LeadName
+                                </td>
+
+
+                                <td>
+
+                                    @switch (followUp.Status)
+                                    {
+                                        case CRMSystem.Enums.FeedbackStatus.Interested:
+
+                                            <span class="badge rounded-pill bg-primary">
+                                                Interested
+                                            </span>
+
+                                            break;
+
+                                        case CRMSystem.Enums.FeedbackStatus.FollowUpRequired:
+
+                                            <span class="badge rounded-pill bg-warning text-dark">
+                                                Follow-up Required
+                                            </span>
+
+                                            break;
+
+                                        case CRMSystem.Enums.FeedbackStatus.MeetingScheduled:
+
+                                            <span class="badge rounded-pill bg-info text-dark">
+                                                Meeting Scheduled
+                                            </span>
+
+                                            break;
+
+                                        case CRMSystem.Enums.FeedbackStatus.Visited:
+
+                                            <span class="badge rounded-pill bg-secondary">
+                                                Visited
+                                            </span>
+
+                                            break;
+
+                                        case CRMSystem.Enums.FeedbackStatus.QuotationSent:
+
+                                            <span class="badge rounded-pill bg-dark">
+                                                Quotation Sent
+                                            </span>
+
+                                            break;
+
+                                        case CRMSystem.Enums.FeedbackStatus.Negotiation:
+
+                                            <span class="badge rounded-pill bg-warning text-dark">
+                                                Negotiation
+                                            </span>
+
+                                            break;
+
+                                        case CRMSystem.Enums.FeedbackStatus.Completed:
+
+                                            <span class="badge rounded-pill bg-success">
+                                                Completed
+                                            </span>
+
+                                            break;
+
+                                        case CRMSystem.Enums.FeedbackStatus.Closed:
+
+                                            <span class="badge rounded-pill bg-danger">
+                                                Closed
+                                            </span>
+
+                                            break;
+
+                                        default:
+
+                                            <span class="badge rounded-pill bg-secondary">
+                                                @followUp.Status
+                                            </span>
+
+                                            break;
+                                    }
+
+                                </td>
+
+
+                                <td>
+
+                                    <div class="fw-semibold">
+
+                                        @followUp.NextFollowUpDate.ToString("dd MMM yyyy")
+
+                                    </div>
+
+                                </td>
+
+
+                                <td>
+
+                                    <div>
+                                        @followUp.SubmittedAt.ToString("dd MMM yyyy")
+                                    </div>
+
+                                    <small class="text-muted">
+                                        @followUp.SubmittedAt.ToString("hh:mm tt")
+                                    </small>
+
+                                </td>
+
+
+                                <td class="text-center">
+
+                                    <a asp-action="SubmitFeedback"
+                                       asp-route-assignmentId="@followUp.AssignmentId"
+                                       class="btn btn-primary btn-sm">
+
+                                        <i class="bi bi-chat-left-text-fill me-1"></i>
+
+                                        Submit Feedback
+
+                                    </a>
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+        }
+
+    </div>
+
+</div>
