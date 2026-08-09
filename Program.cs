@@ -4,6 +4,7 @@ using CRMSystem.Services;
 using CRMSystem.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using CRMSystem.Configurations;
+using CRMSystem.Services.GoogleForms;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +12,10 @@ var builder = WebApplication.CreateBuilder(args);
 //For email 
 builder.Services.Configure<EmailSettings>(
     builder.Configuration.GetSection("EmailSettings"));
+
+//For Google Forms API
+builder.Services.Configure<GoogleFormsSettings>(
+    builder.Configuration.GetSection("GoogleForms"));
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -72,6 +77,8 @@ builder.Services.AddScoped<ISalesOfficerDashboardService, SalesOfficerDashboardS
 // Register LeadFeedbackService
 builder.Services.AddScoped<ILeadFeedbackService, LeadFeedbackService>();
 
+// Register GoogleFormsService
+builder.Services.AddScoped<IGoogleFormsService, GoogleFormsService>();
 
 var app = builder.Build();
 
