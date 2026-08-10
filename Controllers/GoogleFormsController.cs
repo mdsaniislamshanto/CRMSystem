@@ -27,7 +27,8 @@ namespace CRMSystem.Controllers
         {
             if (string.IsNullOrWhiteSpace(code))
             {
-                return BadRequest("Google authorization code was not received.");
+                return BadRequest(
+                    "Google authorization code was not received.");
             }
 
             var success =
@@ -35,11 +36,81 @@ namespace CRMSystem.Controllers
 
             if (!success)
             {
-                return BadRequest("Google Forms authorization failed.");
+                return BadRequest(
+                    "Google Forms authorization failed.");
             }
 
             return Content(
                 "Google Forms connected successfully.");
         }
+
+        [HttpGet]
+        public async Task<IActionResult> TestResponses()
+        {
+            try
+            {
+                var responses =
+                    await _googleFormsService.GetResponsesAsync();
+
+                return Json(responses);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
     }
 }
+
+
+
+
+//using CRMSystem.Services.Interfaces;
+//using Microsoft.AspNetCore.Mvc;
+
+//namespace CRMSystem.Controllers
+//{
+//    public class GoogleFormsController : Controller
+//    {
+//        private readonly IGoogleFormsService _googleFormsService;
+
+//        public GoogleFormsController(
+//            IGoogleFormsService googleFormsService)
+//        {
+//            _googleFormsService = googleFormsService;
+//        }
+
+//        [HttpGet]
+//        public async Task<IActionResult> Connect()
+//        {
+//            var authorizationUrl =
+//                await _googleFormsService.GetAuthorizationUrlAsync();
+
+//            return Redirect(authorizationUrl);
+//        }
+
+//        [HttpGet]
+//        public async Task<IActionResult> Callback(string? code)
+//        {
+//            if (string.IsNullOrWhiteSpace(code))
+//            {
+//                return BadRequest("Google authorization code was not received.");
+//            }
+
+//            var success =
+//                await _googleFormsService.HandleCallbackAsync(code);
+
+//            if (!success)
+//            {
+//                return BadRequest("Google Forms authorization failed.");
+//            }
+
+//            return Content(
+//                "Google Forms connected successfully.");
+//        }
+//    }
+//}
