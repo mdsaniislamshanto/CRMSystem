@@ -9,8 +9,7 @@ namespace CRMSystem.Models.Entities
         [Key]
         public long CaptureLogId { get; set; }
 
-        [Required]
-        public long LeadId { get; set; }
+        public long? LeadId { get; set; }
 
         [Required]
         public LeadCaptureSource CaptureSource { get; set; }

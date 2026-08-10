@@ -31,6 +31,15 @@ namespace CRMSystem.Data
             modelBuilder.Entity<Lead>()
                 .HasIndex(l => l.LeadCode)
                 .IsUnique();
+
+            modelBuilder.Entity<Lead>()
+    .HasIndex(l => new
+    {
+        l.Source,
+        l.SourceReferenceId
+    })
+    .IsUnique();
+
             //modelBuilder.Entity<LeadAssignment>()
             //    .HasOne(la => la.Lead)
             //    .WithMany()

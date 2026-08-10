@@ -29,8 +29,14 @@ namespace CRMSystem.Models.ViewModels
 
         public LeadSource Source { get; set; }
 
+        [StringLength(200)]
+        public string? SourceReferenceId { get; set; }
+
         public LeadPriority Priority { get; set; }
 
         public string? Description { get; set; }
+
+      
+        public string? PayloadJson { get; set; }
     }
 }

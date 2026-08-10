@@ -1,14 +1,17 @@
 ﻿using CRMSystem.Configurations;
 using CRMSystem.Data;
+using CRMSystem.Enums;
 using CRMSystem.Models.Entities;
+using CRMSystem.Models.ViewModels;
 using CRMSystem.Services.Interfaces;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Auth.OAuth2.Flows;
 using Google.Apis.Auth.OAuth2.Responses;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Google.Apis.Forms.v1;
 using Google.Apis.Services;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using System.Text.Json;  
 
 namespace CRMSystem.Services.GoogleForms
 {
@@ -19,6 +22,8 @@ namespace CRMSystem.Services.GoogleForms
 
         private const string FormsResponsesReadonlyScope =
             "https://www.googleapis.com/auth/forms.responses.readonly";
+        private const string FormsBodyReadonlyScope =
+    "https://www.googleapis.com/auth/forms.body.readonly"; 
 
         private const string GoogleFormsProvider = "GoogleForms";
 
@@ -172,6 +177,65 @@ namespace CRMSystem.Services.GoogleForms
         }
 
 
+        // This method retrieves the questions/items from the Google Form.
+        public async Task<IList<Google.Apis.Forms.v1.Data.Item>> GetFormItemsAsync()
+        {
+            var credential = await _context.GoogleOAuthCredentials
+                .Where(x =>
+                    x.Provider == GoogleFormsProvider &&
+                    x.IsActive &&
+                    !x.IsDeleted)
+                .OrderByDescending(x => x.CreatedAt)
+                .FirstOrDefaultAsync();
+
+            if (credential == null)
+            {
+                throw new InvalidOperationException(
+                    "Google Forms is not connected.");
+            }
+
+            if (string.IsNullOrWhiteSpace(credential.RefreshToken))
+            {
+                throw new InvalidOperationException(
+                    "Google Forms refresh token is missing. Please reconnect Google Forms.");
+            }
+
+            var flow = CreateAuthorizationFlow();
+
+            var token = new TokenResponse
+            {
+                AccessToken = credential.AccessToken,
+                RefreshToken = credential.RefreshToken,
+                IssuedUtc = DateTime.UtcNow,
+                ExpiresInSeconds = credential.TokenExpiry.HasValue
+                    ? (long)Math.Max(
+                        0,
+                        (credential.TokenExpiry.Value - DateTime.UtcNow).TotalSeconds)
+                    : null
+            };
+
+            var userCredential = new UserCredential(
+                flow,
+                "crm-google-forms-user",
+                token);
+
+            var formsService = new Google.Apis.Forms.v1.FormsService(
+                new Google.Apis.Services.BaseClientService.Initializer
+                {
+                    HttpClientInitializer = userCredential,
+                    ApplicationName = "CRM System"
+                });
+
+            var request = formsService.Forms.Get(
+                _settings.FormId);
+
+            var form = await request.ExecuteAsync();
+
+            return form.Items
+                ?? new List<Google.Apis.Forms.v1.Data.Item>();
+        }
+
+
         // This method creates a GoogleAuthorizationCodeFlow instance using the client ID, client secret, and required scopes.
         private GoogleAuthorizationCodeFlow CreateAuthorizationFlow()
         {
@@ -186,9 +250,168 @@ namespace CRMSystem.Services.GoogleForms
 
                     Scopes = new[]
                     {
-                        FormsResponsesReadonlyScope
+                FormsResponsesReadonlyScope,
+                FormsBodyReadonlyScope
                     }
                 });
         }
+
+        // This method converts Google Form responses into CRM lead view models.
+
+        public async Task<List<AutoLeadCreateViewModel>> GetLeadCandidatesAsync()
+        {
+            var responses = await GetResponsesAsync();
+
+            var items = await GetFormItemsAsync();
+
+            var result = new List<AutoLeadCreateViewModel>();
+
+            foreach (var response in responses)
+            {
+                string? leadName = null;
+                string? phone = null;
+                string? email = null;
+                string? address = null;
+                string? companyName = null;
+
+                foreach (var answer in response.Answers)
+                {
+                    var questionId = answer.Key;
+
+                    var item = items.FirstOrDefault(x =>
+                        x.QuestionItem?.Question?.QuestionId == questionId);
+
+                    var title = item?.Title?.Trim();
+
+                    var textAnswer =
+                        answer.Value.TextAnswers?.Answers?
+                            .FirstOrDefault()?.Value;
+
+                    if (string.IsNullOrWhiteSpace(textAnswer))
+                    {
+                        continue;
+                    }
+
+                    if (string.Equals(title, "Name",
+                        StringComparison.OrdinalIgnoreCase))
+                    {
+                        leadName = textAnswer;
+                    }
+                    else if (string.Equals(title, "Phone number",
+                        StringComparison.OrdinalIgnoreCase))
+                    {
+                        phone = textAnswer;
+                    }
+                    else if (string.Equals(title, "Email",
+                        StringComparison.OrdinalIgnoreCase))
+                    {
+                        email = textAnswer;
+                    }
+                    else if (string.Equals(title, "Address",
+                        StringComparison.OrdinalIgnoreCase))
+                    {
+                        address = textAnswer;
+                    }
+                    else if (string.Equals(title, "Company Name",
+                        StringComparison.OrdinalIgnoreCase))
+                    {
+                        companyName = textAnswer;
+                    }
+                }
+
+                // Skip invalid response
+                if (string.IsNullOrWhiteSpace(leadName) ||
+                    string.IsNullOrWhiteSpace(phone))
+                {
+                    continue;
+                }
+
+                result.Add(new AutoLeadCreateViewModel
+                {
+                    LeadName = leadName,
+                    Phone = phone,
+                    Email = email,
+                    Address = address,
+                    CompanyName = companyName,
+
+                    Source = LeadSource.Other,
+
+                    Priority = LeadPriority.Medium,
+
+                    SourceReferenceId = response.ResponseId,
+
+                    PayloadJson = JsonSerializer.Serialize(response)
+                });
+            }
+
+            return result;
+        }
+
+        //public async Task<IList<AutoLeadCreateViewModel>> GetLeadCandidatesAsync()
+        //{
+        //    var responses = await GetResponsesAsync();
+
+        //    var leadCandidates = new List<AutoLeadCreateViewModel>();
+
+        //    foreach (var response in responses)
+        //    {
+        //        var lead = new AutoLeadCreateViewModel
+        //        {
+        //            Source = LeadSource.GoogleForm,
+        //            SourceReferenceId = response.ResponseId,
+        //            Priority = LeadPriority.Medium,
+        //            PayloadJson = JsonSerializer.Serialize(response)
+        //        };
+
+        //        foreach (var answerEntry in response.Answers)
+        //        {
+        //            var questionId = answerEntry.Key;
+        //            var answer = answerEntry.Value;
+
+        //            var value = answer.TextAnswers?
+        //                .Answers?
+        //                .FirstOrDefault()?
+        //                .Value;
+
+        //            if (string.IsNullOrWhiteSpace(value))
+        //            {
+        //                continue;
+        //            }
+
+        //            switch (questionId)
+        //            {
+        //                case "778b574a":
+        //                    lead.LeadName = value;
+        //                    break;
+
+        //                case "458e9ec2":
+        //                    lead.Phone = value;
+        //                    break;
+
+        //                case "2f17adc9":
+        //                    lead.Email = value;
+        //                    break;
+
+        //                case "3f7b522a":
+        //                    lead.Address = value;
+        //                    break;
+
+        //                case "320744c8":
+        //                    lead.CompanyName = value;
+        //                    break;
+        //            }
+        //        }
+
+        //        if (!string.IsNullOrWhiteSpace(lead.LeadName) &&
+        //            !string.IsNullOrWhiteSpace(lead.Phone))
+        //        {
+        //            leadCandidates.Add(lead);
+        //        }
+        //    }
+
+        //    return leadCandidates;
+        //}
+
     }
+    
 }

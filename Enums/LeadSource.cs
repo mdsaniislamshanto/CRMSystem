@@ -9,6 +9,7 @@
         Referral,
         WalkIn,
         ManualEntry,
-        Other
+        Other,
+        GoogleForm
     }
 }

@@ -6,6 +6,8 @@
 
         Success,
 
-        Failed
+        Failed,
+
+        Duplicate
     }
 }

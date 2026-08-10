@@ -80,23 +80,131 @@ namespace CRMSystem.Services
 
 
         // For Auto Lead Capture
-        public async Task<long> CreateLeadFromCaptureAsync(AutoLeadCreateViewModel model)
+        public async Task<long> CreateLeadFromCaptureAsync(
+            AutoLeadCreateViewModel model)
         {
-            var lead = CreateLeadEntity(model);
+            var receivedAt = DateTime.UtcNow;
 
-            _context.Leads.Add(lead);
+            // Source reference is required for automatic capture
+            if (string.IsNullOrWhiteSpace(model.SourceReferenceId))
+            {
+                throw new InvalidOperationException(
+                    "SourceReferenceId is required for automatic lead capture.");
+            }
 
-            await _context.SaveChangesAsync();
+            // Check whether this external lead has already been captured
+            var existingLead = await _context.Leads
+                .FirstOrDefaultAsync(l =>
+                    l.Source == model.Source &&
+                    l.SourceReferenceId == model.SourceReferenceId &&
+                    !l.IsDeleted);
 
-            lead.LeadCode = $"L{lead.LeadId:D6}";
+            // Duplicate found
+            if (existingLead != null)
+            {
+                var duplicateLog = new LeadCaptureLog
+                {
+                    LeadId = existingLead.LeadId,
 
-            await _context.SaveChangesAsync();
+                    CaptureSource = LeadCaptureSource.GoogleForm,
 
-            await _autoAssignmentService.AutoAssignLeadAsync(lead.LeadId);
+                    CaptureStatus = CaptureStatus.Duplicate,
 
-            return lead.LeadId;
+                    ExternalLeadId = model.SourceReferenceId,
+
+                    PayloadJson = model.PayloadJson,
+
+                    ReceivedAt = receivedAt,
+
+                    ProcessedAt = DateTime.UtcNow,
+
+                    IsActive = true
+                };
+
+                await _context.LeadCaptureLogs.AddAsync(duplicateLog);
+
+                await _context.SaveChangesAsync();
+
+                return existingLead.LeadId;
+            }
+
+            try
+            {
+                // Create new Lead entity
+                var lead = CreateLeadEntity(model);
+
+                _context.Leads.Add(lead);
+
+                // First save generates LeadId
+                await _context.SaveChangesAsync();
+
+                // Generate LeadCode
+                lead.LeadCode = $"L{lead.LeadId:D6}";
+
+                await _context.SaveChangesAsync();
+
+                // Create successful capture log
+                var captureLog = new LeadCaptureLog
+                {
+                    LeadId = lead.LeadId,
+
+                    CaptureSource = LeadCaptureSource.GoogleForm,
+
+                    CaptureStatus = CaptureStatus.Success,
+
+                    ExternalLeadId = model.SourceReferenceId,
+
+                    PayloadJson = model.PayloadJson,
+
+                    ReceivedAt = receivedAt,
+
+                    ProcessedAt = DateTime.UtcNow,
+
+                    IsActive = true
+                };
+
+                await _context.LeadCaptureLogs.AddAsync(captureLog);
+
+                await _context.SaveChangesAsync();
+
+                // Automatically assign the new Lead
+                await _autoAssignmentService
+                    .AutoAssignLeadAsync(lead.LeadId);
+
+                return lead.LeadId;
+            }
+            catch (Exception ex)
+            {
+                var captureLog = new LeadCaptureLog
+                {
+                    // Lead creation failed,
+                    // therefore there is no LeadId.
+                    LeadId = null,
+
+                    CaptureSource = LeadCaptureSource.GoogleForm,
+
+                    CaptureStatus = CaptureStatus.Failed,
+
+                    ExternalLeadId = model.SourceReferenceId,
+
+                    PayloadJson = model.PayloadJson,
+
+                    ErrorMessage = ex.Message,
+
+                    ReceivedAt = receivedAt,
+
+                    ProcessedAt = DateTime.UtcNow,
+
+                    IsActive = true
+                };
+
+                await _context.LeadCaptureLogs.AddAsync(captureLog);
+
+                await _context.SaveChangesAsync();
+
+                throw;
+            }
         }
-
 
         //for viewing the lead details in the view lead page
         public async Task<LeadViewModel?> GetLeadByIdAsync(long id)
@@ -396,6 +504,7 @@ namespace CRMSystem.Services
                 Phone = model.Phone,
                 Address = model.Address,
                 Source = model.Source,
+               
                 Priority = model.Priority,
                 Status = LeadStatus.New,
                 Description = model.Description,
@@ -404,24 +513,39 @@ namespace CRMSystem.Services
             };
         }
 
-
         // Create Lead Entity from Auto Lead Capture
-        private Lead CreateLeadEntity(AutoLeadCreateViewModel model)
+        private Lead CreateLeadEntity(
+            AutoLeadCreateViewModel model)
         {
             return new Lead
             {
+                LeadCode = string.Empty,
+
                 CompanyName = model.CompanyName,
+
                 LeadName = model.LeadName,
+
                 Profession = model.Profession,
+
                 Email = model.Email,
+
                 Phone = model.Phone,
+
                 Address = model.Address,
+
                 Source = model.Source,
+
+                // Google Form Response ID
+                SourceReferenceId = model.SourceReferenceId,
+
                 Priority = model.Priority,
+
                 Status = LeadStatus.New,
+
                 Description = model.Description,
 
-                // Temporary (পরে System User ব্যবহার করব)
+                // Temporary
+                // Later replace with actual system user
                 CreatedBy = 1
             };
         }
