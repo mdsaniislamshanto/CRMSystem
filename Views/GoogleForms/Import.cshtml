@@ -1,11 +1,26 @@
-﻿@model CRMSystem.Models.ViewModels.GoogleFormImportViewModel
+﻿@using CRMSystem.Constants
+@using Microsoft.AspNetCore.Http
 
 @{
     ViewData["Title"] = "Google Form Lead Import";
 
+    var currentRole =
+        Context.Session.GetString(SessionKeys.RoleKey);
+
+    // Users who are allowed to import Google Form leads
     var canImport =
-        User.IsInRole("ADMIN") ||
-        User.IsInRole("SALES_MANAGER");
+        currentRole == "ADMIN" ||
+        currentRole == "SALES_MANAGER";
+
+    // Select dashboard layout based on current role
+    if (currentRole == "SALES_MANAGER")
+    {
+        Layout = "_SalesManagerLayout";
+    }
+    else
+    {
+        Layout = "_AdminLayout";
+    }
 }
 
 <div class="container-fluid py-4">
@@ -215,7 +230,7 @@
 
                     <tbody>
 
-                        @if (Model.Candidates.Any())
+                        @if (Model.Candidates.Count > 0)
                         {
                             var index = 1;
 
