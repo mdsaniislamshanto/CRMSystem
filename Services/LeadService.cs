@@ -7,6 +7,7 @@ using CRMSystem.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 
 namespace CRMSystem.Services
 {
@@ -142,11 +143,31 @@ namespace CRMSystem.Services
             // Save Again
             await _context.SaveChangesAsync();
 
+            // =====================================================
+            // Get Current Logged-in User ID from Authentication Claim
+            // =====================================================
+
+            var httpContext = _httpContextAccessor.HttpContext;
+
+            if (httpContext == null)
+            {
+                throw new InvalidOperationException(
+                    "HTTP context is not available.");
+            }
+
+            var userIdClaim =
+                httpContext.User.FindFirstValue(
+                    ClaimTypes.NameIdentifier);
+
+            if (!long.TryParse(userIdClaim, out long userId))
+            {
+                throw new InvalidOperationException(
+                    "Current logged-in user could not be identified.");
+            }
+
+            // =====================================================
             // Auto Assign Lead if enabled
-            var userId = long.Parse(
-     _httpContextAccessor.HttpContext!
-     .Session
-     .GetString(SessionKeys.UserId)!);
+            // =====================================================
 
             await _autoAssignmentService.AutoAssignLeadAsync(
                 lead.LeadId,

@@ -10,15 +10,19 @@ namespace CRMSystem.Services
     public class AutoAssignmentService : IAutoAssignmentService
     {
         private readonly ApplicationDbContext _context;
-        private readonly IEmailService _emailService; 
+        private readonly IEmailService _emailService;
 
-        public AutoAssignmentService(ApplicationDbContext context, IEmailService emailService)
+        public AutoAssignmentService(
+            ApplicationDbContext context,
+            IEmailService emailService)
         {
             _context = context;
             _emailService = emailService;
         }
 
-        public async Task AutoAssignLeadAsync(long leadId, long? assignedBy = null)
+        public async Task AutoAssignLeadAsync(
+            long leadId,
+            long? assignedBy = null)
         {
             // Check System Settings
             var settings = await _context.SystemSettings.FirstAsync();
@@ -30,9 +34,8 @@ namespace CRMSystem.Services
             }
 
             /////////////////////////////////
-            ///Round Robin Assignment Logic//
-            ///////////////////////////////// 
-
+            /// Round Robin Assignment Logic
+            /////////////////////////////////
 
             // Get Active Sales Officers
             var salesOfficers = await _context.Users
@@ -83,12 +86,16 @@ namespace CRMSystem.Services
                 }
             }
 
+            // Resolve Assigned By User ID
+            long assignedByUserId =
+                assignedBy ?? SystemUsers.SystemAdminUserId;
+
             // Create Assignment
             var assignment = new LeadAssignment
             {
                 LeadId = leadId,
                 SalesOfficerId = nextSalesOfficer.UserId,
-                AssignedBy = assignedBy ?? SystemUsers.SystemAdminUserId,
+                AssignedBy = assignedByUserId,
                 AssignedAt = DateTime.UtcNow,
                 AssignmentStatus = AssignmentStatus.Pending,
                 IsActive = true
@@ -107,25 +114,21 @@ namespace CRMSystem.Services
 
             await _context.SaveChangesAsync();
 
-
             // Get Assigned By User
             var assignedByUser = await _context.Users
                 .FirstOrDefaultAsync(u =>
-                    u.UserId == (assignedBy ?? SystemUsers.SystemAdminUserId));
+                    u.UserId == assignedByUserId);
 
-            if (assignedByUser != null)
+            if (assignedByUser != null && lead != null)
             {
                 await _emailService.SendLeadAssignmentEmailAsync(
                     nextSalesOfficer.Email,
                     nextSalesOfficer.FullName,
-                    lead!.LeadCode,
+                    lead.LeadCode,
                     lead.LeadName,
                     assignedByUser.FullName,
                     assignment.AssignedAt);
             }
         }
-
-
     }
-    
 }
