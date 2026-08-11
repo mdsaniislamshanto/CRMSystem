@@ -1,4 +1,5 @@
-﻿using CRMSystem.Models.ViewModels;
+﻿using CRMSystem.Enums;
+using CRMSystem.Models.ViewModels;
 
 namespace CRMSystem.Services.Interfaces
 {
@@ -10,6 +11,14 @@ namespace CRMSystem.Services.Interfaces
 
         //For Auto Lead Capture
         Task<long> CreateLeadFromCaptureAsync(AutoLeadCreateViewModel model);
+
+
+        // For API Leads
+        Task<List<ApiLeadViewModel>> GetApiLeadsAsync(
+     string? search = null,
+     LeadSource? source = null,
+     LeadStatus? status = null);
+
 
 
         Task<LeadViewModel?> GetLeadByIdAsync(long id);
@@ -31,6 +40,8 @@ namespace CRMSystem.Services.Interfaces
         Task<ReassignLeadViewModel?> GetReassignLeadViewModelAsync(long leadId);
 
         Task ReassignLeadAsync(ReassignLeadViewModel model, long salesManagerId);
+    
+
 
 
 

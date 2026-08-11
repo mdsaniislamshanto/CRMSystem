@@ -218,5 +218,29 @@ namespace CRMSystem.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+        // API Leads
+        [HttpGet]
+        public async Task<IActionResult> ApiLeads(
+     string? search,
+     LeadSource? source,
+     LeadStatus? status)
+        {
+            var leads = await _leadService.GetApiLeadsAsync(
+                search,
+                source,
+                status);
+
+            var model = new ApiLeadFilterViewModel
+            {
+                Search = search,
+                Source = source,
+                Status = status,
+                Leads = leads
+            };
+
+            return View(model);
+        }
+
     }
 }

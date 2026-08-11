@@ -257,7 +257,6 @@ namespace CRMSystem.Services.GoogleForms
         }
 
         // This method converts Google Form responses into CRM lead view models.
-
         public async Task<List<AutoLeadCreateViewModel>> GetLeadCandidatesAsync()
         {
             var responses = await GetResponsesAsync();
@@ -292,39 +291,59 @@ namespace CRMSystem.Services.GoogleForms
                         continue;
                     }
 
-                    if (string.Equals(title, "Name",
+                    if (string.Equals(
+                        title,
+                        "Name",
                         StringComparison.OrdinalIgnoreCase))
                     {
                         leadName = textAnswer;
                     }
-                    else if (string.Equals(title, "Phone number",
+                    else if (string.Equals(
+                        title,
+                        "Phone number",
                         StringComparison.OrdinalIgnoreCase))
                     {
                         phone = textAnswer;
                     }
-                    else if (string.Equals(title, "Email",
+                    else if (string.Equals(
+                        title,
+                        "Email",
                         StringComparison.OrdinalIgnoreCase))
                     {
                         email = textAnswer;
                     }
-                    else if (string.Equals(title, "Address",
+                    else if (string.Equals(
+                        title,
+                        "Address",
                         StringComparison.OrdinalIgnoreCase))
                     {
                         address = textAnswer;
                     }
-                    else if (string.Equals(title, "Company Name",
+                    else if (string.Equals(
+                        title,
+                        "Company Name",
                         StringComparison.OrdinalIgnoreCase))
                     {
                         companyName = textAnswer;
                     }
                 }
 
-                // Skip invalid response
+                // Ignore invalid responses
                 if (string.IsNullOrWhiteSpace(leadName) ||
                     string.IsNullOrWhiteSpace(phone))
                 {
                     continue;
                 }
+
+                // Google Form ResponseId is the unique external reference
+                var sourceReferenceId = response.ResponseId;
+
+                // Check whether this Google Form response was already imported
+                var alreadyImported = await _context.Leads
+                    .AnyAsync(l =>
+                        l.Source == LeadSource.GoogleForm &&
+                        l.SourceReferenceId == sourceReferenceId &&
+                        !l.IsDeleted);
 
                 result.Add(new AutoLeadCreateViewModel
                 {
@@ -334,83 +353,21 @@ namespace CRMSystem.Services.GoogleForms
                     Address = address,
                     CompanyName = companyName,
 
-                    Source = LeadSource.Other,
+                    // Google Form leads must have GoogleForm as their source
+                    Source = LeadSource.GoogleForm,
 
                     Priority = LeadPriority.Medium,
 
-                    SourceReferenceId = response.ResponseId,
+                    SourceReferenceId = sourceReferenceId,
 
-                    PayloadJson = JsonSerializer.Serialize(response)
+                    PayloadJson = JsonSerializer.Serialize(response),
+
+                    IsAlreadyImported = alreadyImported
                 });
             }
 
             return result;
         }
-
-        //public async Task<IList<AutoLeadCreateViewModel>> GetLeadCandidatesAsync()
-        //{
-        //    var responses = await GetResponsesAsync();
-
-        //    var leadCandidates = new List<AutoLeadCreateViewModel>();
-
-        //    foreach (var response in responses)
-        //    {
-        //        var lead = new AutoLeadCreateViewModel
-        //        {
-        //            Source = LeadSource.GoogleForm,
-        //            SourceReferenceId = response.ResponseId,
-        //            Priority = LeadPriority.Medium,
-        //            PayloadJson = JsonSerializer.Serialize(response)
-        //        };
-
-        //        foreach (var answerEntry in response.Answers)
-        //        {
-        //            var questionId = answerEntry.Key;
-        //            var answer = answerEntry.Value;
-
-        //            var value = answer.TextAnswers?
-        //                .Answers?
-        //                .FirstOrDefault()?
-        //                .Value;
-
-        //            if (string.IsNullOrWhiteSpace(value))
-        //            {
-        //                continue;
-        //            }
-
-        //            switch (questionId)
-        //            {
-        //                case "778b574a":
-        //                    lead.LeadName = value;
-        //                    break;
-
-        //                case "458e9ec2":
-        //                    lead.Phone = value;
-        //                    break;
-
-        //                case "2f17adc9":
-        //                    lead.Email = value;
-        //                    break;
-
-        //                case "3f7b522a":
-        //                    lead.Address = value;
-        //                    break;
-
-        //                case "320744c8":
-        //                    lead.CompanyName = value;
-        //                    break;
-        //            }
-        //        }
-
-        //        if (!string.IsNullOrWhiteSpace(lead.LeadName) &&
-        //            !string.IsNullOrWhiteSpace(lead.Phone))
-        //        {
-        //            leadCandidates.Add(lead);
-        //        }
-        //    }
-
-        //    return leadCandidates;
-        //}
 
     }
     

@@ -5,6 +5,7 @@ using CRMSystem.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using CRMSystem.Configurations;
 using CRMSystem.Services.GoogleForms;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,6 +32,22 @@ builder.Services.AddScoped<IUserService, UserService>();
 
 //Register EmailServices for dependency injection
 builder.Services.AddScoped<IEmailService, EmailService>();
+
+
+// Add Cookie Authentication
+builder.Services.AddAuthentication(
+    CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Auth/Login";
+        options.AccessDeniedPath = "/Auth/AccessDenied";
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+        options.SlidingExpiration = true;
+    });
+
+// Add Authorization
+builder.Services.AddAuthorization();
+
 
 // Add session services
 builder.Services.AddSession(options =>
@@ -101,6 +118,8 @@ app.UseHttpsRedirection();
 app.UseRouting();
 
 app.UseSession();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

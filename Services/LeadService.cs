@@ -30,6 +30,81 @@ namespace CRMSystem.Services
         }
 
 
+        // For getting automatically captured API leads
+        public async Task<List<ApiLeadViewModel>> GetApiLeadsAsync(
+            string? search = null,
+            LeadSource? source = null,
+            LeadStatus? status = null)
+        {
+            var query = _context.Leads
+                .Where(l =>
+                    !l.IsDeleted &&
+                    _context.LeadCaptureLogs.Any(c =>
+                        c.LeadId == l.LeadId &&
+                        c.CaptureStatus == CaptureStatus.Success &&
+                        !c.IsDeleted))
+                .AsQueryable();
+
+            // Search filter
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.Trim();
+
+                query = query.Where(l =>
+                    l.LeadName.Contains(search) ||
+                    (l.CompanyName != null &&
+                     l.CompanyName.Contains(search)) ||
+                    (l.Email != null &&
+                     l.Email.Contains(search)) ||
+                    l.Phone.Contains(search) ||
+                    l.LeadCode.Contains(search));
+            }
+
+            // Source filter
+            if (source.HasValue)
+            {
+                query = query.Where(l =>
+                    l.Source == source.Value);
+            }
+
+            // Status filter
+            if (status.HasValue)
+            {
+                query = query.Where(l =>
+                    l.Status == status.Value);
+            }
+
+            return await query
+                .Select(l => new ApiLeadViewModel
+                {
+                    LeadId = l.LeadId,
+                    LeadCode = l.LeadCode,
+                    LeadName = l.LeadName,
+                    CompanyName = l.CompanyName,
+                    Email = l.Email,
+                    Phone = l.Phone,
+                    Address = l.Address,
+                    Profession = l.Profession,
+                    Source = l.Source,
+                    Priority = l.Priority,
+                    Status = l.Status,
+
+                    AssignedTo = _context.LeadAssignments
+                        .Where(a =>
+                            a.LeadId == l.LeadId &&
+                            a.IsActive &&
+                            !a.IsDeleted)
+                        .Select(a => a.SalesOfficer!.FullName)
+                        .FirstOrDefault(),
+
+                    CreatedAt = l.CreatedAt,
+                    LastContactDate = l.LastContactDate
+                })
+                .OrderByDescending(l => l.CreatedAt)
+                .ToListAsync();
+        }
+
+
         //for getting all the leads from the database
         public async Task<List<LeadViewModel>> GetAllLeadsAsync()
         {

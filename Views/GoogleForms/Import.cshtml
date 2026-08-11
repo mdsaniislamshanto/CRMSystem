@@ -1,0 +1,325 @@
+﻿@model CRMSystem.Models.ViewModels.GoogleFormImportViewModel
+
+@{
+    ViewData["Title"] = "Google Form Lead Import";
+
+    var canImport =
+        User.IsInRole("ADMIN") ||
+        User.IsInRole("SALES_MANAGER");
+}
+
+<div class="container-fluid py-4">
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold mb-1">
+                Google Form Lead Import
+            </h2>
+
+            <p class="text-muted mb-0">
+                Review and import leads captured from Google Forms.
+            </p>
+        </div>
+
+        @if (canImport)
+        {
+            <form asp-action="ImportLeads"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <button type="submit"
+                        class="btn btn-primary px-4"
+                    @(Model.NewLeads == 0 ? "disabled" : "")>
+
+                    <i class="bi bi-cloud-arrow-down me-2"></i>
+
+                    Import New Leads
+
+                </button>
+
+            </form>
+        }
+
+    </div>
+
+
+    <!-- Success Message -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Success"]
+        </div>
+    }
+
+
+    <!-- Error Message -->
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["Error"]
+        </div>
+    }
+
+
+    <!-- Summary Cards -->
+    <div class="row g-4 mb-4">
+
+        <!-- Total Responses -->
+        <div class="col-md-3">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="text-muted small">
+                        Total Responses
+                    </div>
+
+                    <h3 class="fw-bold mt-2">
+                        @Model.TotalCandidates
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- New Leads -->
+        <div class="col-md-3">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="text-muted small">
+                        New Leads
+                    </div>
+
+                    <h3 class="fw-bold mt-2 text-success">
+                        @Model.NewLeads
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Already Imported -->
+        <div class="col-md-3">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="text-muted small">
+                        Already Imported
+                    </div>
+
+                    <h3 class="fw-bold mt-2 text-secondary">
+                        @Model.DuplicateLeads
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Source -->
+        <div class="col-md-3">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="text-muted small">
+                        Source
+                    </div>
+
+                    <h3 class="fw-bold mt-2">
+                        Google Forms
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Permission Information -->
+    @if (!canImport)
+    {
+        <div class="alert alert-warning">
+
+            <i class="bi bi-shield-lock me-2"></i>
+
+            Only Admin and Sales Manager users can import Google Form leads.
+
+        </div>
+    }
+
+
+    <!-- Google Form Responses -->
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-white py-3">
+
+            <h5 class="mb-0 fw-semibold">
+                Google Form Responses
+            </h5>
+
+        </div>
+
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th>#</th>
+
+                            <th>Lead Name</th>
+
+                            <th>Company</th>
+
+                            <th>Email</th>
+
+                            <th>Phone</th>
+
+                            <th>Address</th>
+
+                            <th>Source</th>
+
+                            <th>Status</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        @if (Model.Candidates.Any())
+                        {
+                            var index = 1;
+
+                            foreach (var candidate in Model.Candidates)
+                            {
+                                <tr>
+
+                                    <td>
+                                        @index
+                                    </td>
+
+
+                                    <td class="fw-semibold">
+                                        @candidate.LeadName
+                                    </td>
+
+
+                                    <td>
+                                        @(candidate.CompanyName ?? "-")
+                                    </td>
+
+
+                                    <td>
+                                        @(candidate.Email ?? "-")
+                                    </td>
+
+
+                                    <td>
+                                        @candidate.Phone
+                                    </td>
+
+
+                                    <td>
+                                        @(candidate.Address ?? "-")
+                                    </td>
+
+
+                                    <td>
+
+                                        <span class="badge bg-primary">
+                                            Google Form
+                                        </span>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        @if (candidate.IsAlreadyImported)
+                                        {
+                                            <span class="badge bg-secondary">
+
+                                                <i class="bi bi-check-circle me-1"></i>
+
+                                                Already Imported
+
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">
+
+                                                <i class="bi bi-plus-circle me-1"></i>
+
+                                                New
+
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                </tr>
+
+                                index++;
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+
+                                <td colspan="8"
+                                    class="text-center py-5">
+
+                                    <div class="text-muted">
+
+                                        <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+
+                                        No Google Form responses found.
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

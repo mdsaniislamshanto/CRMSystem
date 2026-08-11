@@ -35,8 +35,9 @@ namespace CRMSystem.Models.ViewModels
         public LeadPriority Priority { get; set; }
 
         public string? Description { get; set; }
-
-      
+              
         public string? PayloadJson { get; set; }
+
+        public bool IsAlreadyImported { get; set; }
     }
 }

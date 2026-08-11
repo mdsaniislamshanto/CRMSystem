@@ -1,12 +1,14 @@
-﻿using CRMSystem.Services.Interfaces;
+﻿using CRMSystem.Models.ViewModels;
+using CRMSystem.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CRMSystem.Controllers
 {
     public class GoogleFormsController : Controller
     {
         private readonly IGoogleFormsService _googleFormsService;
-        private readonly ILeadService _leadService; 
+        private readonly ILeadService _leadService;
 
         public GoogleFormsController(
             IGoogleFormsService googleFormsService,
@@ -94,7 +96,55 @@ namespace CRMSystem.Controllers
             return Json(leads);
         }
 
+
+
         [HttpGet]
+        [Authorize(Roles = "ADMIN,SALES_MANAGER")]    
+        public async Task<IActionResult> Import()
+        {
+            try
+            {
+                var candidates =
+                    await _googleFormsService.GetLeadCandidatesAsync();
+
+                var newLeads = candidates
+                    .Count(x => !x.IsAlreadyImported);
+
+                var duplicateLeads = candidates
+                    .Count(x => x.IsAlreadyImported);
+
+                var model = new GoogleFormImportViewModel
+                {
+                    Candidates = candidates,
+
+                    TotalCandidates = candidates.Count,
+
+                    NewLeads = newLeads,
+
+                    DuplicateLeads = duplicateLeads,
+
+                    FailedLeads = 0,
+
+                    ImportCompleted = false
+                };
+
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+
+                return View(
+                    new GoogleFormImportViewModel());
+            }
+        }
+
+
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "ADMIN,SALES_MANAGER")]
         public async Task<IActionResult> ImportLeads()
         {
             try
@@ -102,33 +152,45 @@ namespace CRMSystem.Controllers
                 var candidates =
                     await _googleFormsService.GetLeadCandidatesAsync();
 
-                var createdLeadIds = new List<long>();
+                var newCandidates = candidates
+                    .Where(x => !x.IsAlreadyImported)
+                    .ToList();
 
-                foreach (var candidate in candidates)
+                var duplicateCount = candidates
+                    .Count(x => x.IsAlreadyImported);
+
+                var newLeadCount = 0;
+                var failedCount = 0;
+
+                foreach (var candidate in newCandidates)
                 {
-                    var leadId =
+                    try
+                    {
                         await _leadService
                             .CreateLeadFromCaptureAsync(candidate);
 
-                    createdLeadIds.Add(leadId);
+                        newLeadCount++;
+                    }
+                    catch
+                    {
+                        failedCount++;
+                    }
                 }
 
-                return Json(new
-                {
-                    success = true,
-                    message = "Google Form leads imported successfully.",
-                    totalCandidates = candidates.Count,
-                    createdLeads = createdLeadIds.Count,
-                    leadIds = createdLeadIds
-                });
+                TempData["Success"] =
+                    $"Google Form import completed successfully. " +
+                    $"New Leads: {newLeadCount}, " +
+                    $"Already Imported: {duplicateCount}, " +
+                    $"Failed: {failedCount}.";
+
+                return RedirectToAction(nameof(Import));
             }
             catch (Exception ex)
             {
-                return BadRequest(new
-                {
-                    success = false,
-                    message = ex.Message
-                });
+                TempData["Error"] =
+                    $"Google Form import failed: {ex.Message}";
+
+                return RedirectToAction(nameof(Import));
             }
         }
 
