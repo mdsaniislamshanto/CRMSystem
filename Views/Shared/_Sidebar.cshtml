@@ -80,6 +80,22 @@
 
         </li>
 
+        <!-- API Leads -->
+
+        <li>
+
+            <a asp-controller="Lead"
+               asp-action="ApiLeads"
+               class="@(currentController == "Lead" && currentAction == "ApiLeads" ? "active" : "")">
+
+                <i class="bi bi-cloud-arrow-down-fill"></i>
+
+                API Leads
+
+            </a>
+
+        </li>
+
         <!-- Archived Leads -->
 
         <li>
