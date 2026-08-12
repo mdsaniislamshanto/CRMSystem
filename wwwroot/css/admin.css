@@ -262,3 +262,289 @@ footer {
         margin-left: 0;
     }
 }
+
+
+
+
+
+
+
+/* ============================================================
+   Notification Dropdown
+============================================================ */
+
+.notification-dropdown {
+    width: 380px;
+    min-width: 380px;
+    max-width: calc(100vw - 30px);
+    padding: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+
+/* ============================================================
+   Notification List
+============================================================ */
+
+.notification-list {
+    max-height: 420px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+
+/* ============================================================
+   Individual Notification
+============================================================ */
+
+.notification-dropdown-item {
+    width: 100%;
+    padding: 14px 16px;
+    border-bottom: 1px solid #E2E8F0;
+    transition: background-color 0.2s ease;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+
+    .notification-dropdown-item:hover {
+        background-color: #F8FAFC;
+    }
+
+
+/* ============================================================
+   Unread Notification
+============================================================ */
+
+.notification-unread {
+    background-color: #F5F8FF;
+}
+
+
+/* ============================================================
+   Notification Main Layout
+============================================================ */
+
+/*
+   JavaScript creates:
+
+   <div class="d-flex gap-3">
+
+       <div class="notification-dropdown-icon">
+           ...
+       </div>
+
+       <div class="flex-grow-1">
+           ...
+       </div>
+
+   </div>
+
+   We control that layout here.
+*/
+
+.notification-dropdown-item > .d-flex {
+    display: grid !important;
+    grid-template-columns: 36px minmax(0, 1fr);
+    column-gap: 12px;
+    width: 100%;
+    min-width: 0;
+    align-items: flex-start;
+    box-sizing: border-box;
+}
+
+
+/* ============================================================
+   Notification Icon
+============================================================ */
+
+.notification-dropdown-icon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    max-width: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #F1F3F5;
+    box-sizing: border-box;
+}
+
+
+    .notification-dropdown-icon i {
+        font-size: 16px;
+    }
+
+
+/* ============================================================
+   Notification Text Area
+============================================================ */
+
+.notification-dropdown-item .flex-grow-1 {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    flex: none !important;
+    box-sizing: border-box;
+}
+
+
+    /* ============================================================
+   Notification Title Row
+============================================================ */
+
+    .notification-dropdown-item .flex-grow-1 > .d-flex {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        width: 100%;
+        min-width: 0;
+        gap: 8px;
+        box-sizing: border-box;
+    }
+
+
+/* ============================================================
+   Notification Title
+============================================================ */
+
+.notification-dropdown-item strong {
+    display: block;
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 100%;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    font-weight: 600;
+    color: #1E293B;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: normal;
+}
+
+
+/* ============================================================
+   New Badge
+============================================================ */
+
+.notification-dropdown-item .badge {
+    flex: 0 0 auto;
+    flex-shrink: 0;
+    white-space: nowrap;
+    font-size: 0.7rem;
+    padding: 4px 7px;
+}
+
+
+/* ============================================================
+   Notification Message
+============================================================ */
+
+.notification-dropdown-item .text-muted {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    margin-top: 5px;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: #64748B !important;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    box-sizing: border-box;
+}
+
+
+/* ============================================================
+   Notification Date
+============================================================ */
+
+.notification-dropdown-item .text-secondary {
+    display: block;
+    width: 100%;
+    margin-top: 5px;
+    font-size: 0.72rem;
+    line-height: 1.4;
+    color: #94A3B8 !important;
+}
+
+
+/* ============================================================
+   Mark as Read Button
+============================================================ */
+
+.notification-dropdown-item .mark-notification-read {
+    display: inline-block;
+    margin-top: 4px;
+    padding: 0;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+
+    .notification-dropdown-item .mark-notification-read:hover {
+        text-decoration: underline;
+    }
+
+
+/* ============================================================
+   Notification Footer
+============================================================ */
+
+.notification-dropdown > .border-top {
+    background-color: #FFFFFF;
+    width: 100%;
+}
+
+
+    .notification-dropdown > .border-top .dropdown-item {
+        width: 100%;
+        white-space: nowrap;
+        text-align: center;
+        box-sizing: border-box;
+    }
+
+
+/* ============================================================
+   Notification Scrollbar
+============================================================ */
+
+.notification-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+
+.notification-list::-webkit-scrollbar-track {
+    background: #F8FAFC;
+}
+
+
+.notification-list::-webkit-scrollbar-thumb {
+    background: #CBD5E1;
+    border-radius: 10px;
+}
+
+
+    .notification-list::-webkit-scrollbar-thumb:hover {
+        background: #94A3B8;
+    }
+
+
+/* ============================================================
+   Responsive Notification Dropdown
+============================================================ */
+
+@media (max-width: 576px) {
+
+    .notification-dropdown {
+        width: 340px;
+        min-width: 340px;
+        max-width: calc(100vw - 20px);
+    }
+}

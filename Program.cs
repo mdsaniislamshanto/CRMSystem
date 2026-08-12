@@ -33,6 +33,8 @@ builder.Services.AddScoped<IUserService, UserService>();
 //Register EmailServices for dependency injection
 builder.Services.AddScoped<IEmailService, EmailService>();
 
+// Register NotificationService for dependency injection
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 // Add Cookie Authentication
 builder.Services.AddAuthentication(

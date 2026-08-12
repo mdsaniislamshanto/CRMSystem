@@ -1,0 +1,362 @@
+﻿@using CRMSystem.Constants
+@using CRMSystem.Enums
+
+@model List<CRMSystem.Models.ViewModels.NotificationViewModel>
+
+@{
+    ViewData["Title"] = "Notifications";
+
+    // =====================================================
+    // Select Layout According to Logged-in User Role
+    // =====================================================
+
+    var roleKey =
+        Context.Session.GetString(SessionKeys.RoleKey);
+
+    switch (roleKey)
+    {
+        case RoleKeys.Admin:
+
+            Layout = "_AdminLayout";
+
+            break;
+
+        case RoleKeys.SalesManager:
+
+            Layout = "_SalesManagerLayout";
+
+            break;
+
+        case RoleKeys.SalesOfficer:
+
+            Layout = "_SalesOfficerLayout";
+
+            break;
+
+        // HR layout will be added later
+        case RoleKeys.HR:
+
+            Layout = "_Layout";
+
+            break;
+
+        // Account layout will be added later
+        case RoleKeys.Account:
+
+            Layout = "_Layout";
+
+            break;
+
+        default:
+
+            Layout = "_Layout";
+
+            break;
+    }
+}
+
+
+<div class="container-fluid py-4">
+
+    <!-- Page Header -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+                Notifications
+            </h2>
+
+            <p class="text-muted mb-0">
+                View your latest CRM notifications and alerts.
+            </p>
+
+        </div>
+
+
+        @if (Model.Any(n => !n.IsRead))
+        {
+            <button type="button"
+                    class="btn btn-outline-primary"
+                    id="markAllReadBtn">
+
+                <i class="bi bi-check2-all me-1"></i>
+
+                Mark All as Read
+
+            </button>
+        }
+
+    </div>
+
+
+    <!-- Notification Card -->
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-body p-0">
+
+            @if (!Model.Any())
+            {
+                <div class="text-center py-5">
+
+                    <i class="bi bi-bell-slash fs-1 text-muted d-block mb-3"></i>
+
+                    <h5 class="fw-semibold">
+                        No Notifications
+                    </h5>
+
+                    <p class="text-muted mb-0">
+                        You don't have any notifications yet.
+                    </p>
+
+                </div>
+            }
+            else
+            {
+                <div class="list-group list-group-flush">
+
+                    @foreach (var notification in Model)
+                    {
+                        <div class="list-group-item
+                            notification-item
+                            @(notification.IsRead ? "" : "bg-light")"
+                             data-notification-id="@notification.NotificationId">
+
+                            <div class="d-flex align-items-start gap-3">
+
+                                <!-- Icon -->
+
+                                <div class="notification-icon">
+
+                                    @switch (notification.NotificationType)
+                                    {
+                                        case NotificationType.LeadAssigned:
+
+                                            <i class="bi bi-person-plus-fill text-primary"></i>
+
+                                            break;
+
+                                        case NotificationType.AcceptanceSLAMissed:
+
+                                            <i class="bi bi-clock-history text-danger"></i>
+
+                                            break;
+
+                                        case NotificationType.FirstFeedbackSLAMissed:
+
+                                            <i class="bi bi-chat-left-text-fill text-danger"></i>
+
+                                            break;
+
+                                        case NotificationType.NextFeedbackOverdue:
+
+                                            <i class="bi bi-calendar-x-fill text-warning"></i>
+
+                                            break;
+
+                                        default:
+
+                                            <i class="bi bi-bell-fill text-secondary"></i>
+
+                                            break;
+                                    }
+
+                                </div>
+
+
+                                <!-- Content -->
+
+                                <div class="flex-grow-1">
+
+                                    <div class="d-flex justify-content-between">
+
+                                        <h6 class="mb-1 fw-semibold">
+
+                                            @notification.Title
+
+                                            @if (!notification.IsRead)
+                                            {
+                                                <span class="badge bg-primary ms-2">
+                                                    New
+                                                </span>
+                                            }
+
+                                        </h6>
+
+
+                                        <small class="text-muted">
+
+                                            @notification.CreatedAt
+                                            .ToLocalTime()
+                                            .ToString("dd MMM yyyy hh:mm tt")
+
+                                        </small>
+
+                                    </div>
+
+
+                                    <p class="mb-2 text-muted">
+
+                                        @notification.Message
+
+                                    </p>
+
+
+                                    @if (!notification.IsRead)
+                                    {
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-secondary mark-read-btn"
+                                                data-id="@notification.NotificationId">
+
+                                            <i class="bi bi-check2 me-1"></i>
+
+                                            Mark as Read
+
+                                        </button>
+                                    }
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    }
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Anti-Forgery Token -->
+
+<form id="notificationAntiForgeryForm"
+      class="d-none">
+
+    @Html.AntiForgeryToken()
+
+</form>
+
+
+@section Scripts
+{
+    <script>
+
+        // ============================================================
+        // Mark Individual Notification as Read
+        // ============================================================
+
+        document.querySelectorAll(".mark-read-btn")
+            .forEach(button => {
+
+                button.addEventListener("click", async function () {
+
+                    const notificationId =
+                        this.dataset.id;
+
+
+                    const token =
+                        document.querySelector(
+                            '#notificationAntiForgeryForm input[name="__RequestVerificationToken"]'
+                        )?.value;
+
+
+                    if (!token) {
+
+                        console.error(
+                            "Anti-forgery token not found.");
+
+                        return;
+                    }
+
+
+                    const response =
+                        await fetch(
+                            '@Url.Action("MarkAsRead", "Notification")',
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/x-www-form-urlencoded"
+                                },
+
+                                body:
+                                    `notificationId=${encodeURIComponent(notificationId)}` +
+                                    `&__RequestVerificationToken=${encodeURIComponent(token)}`
+                            });
+
+
+                    if (response.ok) {
+
+                        location.reload();
+
+                    }
+
+                });
+
+            });
+
+
+        // ============================================================
+        // Mark All Notifications as Read
+        // ============================================================
+
+        const markAllButton =
+            document.getElementById("markAllReadBtn");
+
+
+        if (markAllButton) {
+
+            markAllButton.addEventListener(
+                "click",
+                async function () {
+
+                    const token =
+                        document.querySelector(
+                            '#notificationAntiForgeryForm input[name="__RequestVerificationToken"]'
+                        )?.value;
+
+
+                    if (!token) {
+
+                        console.error(
+                            "Anti-forgery token not found.");
+
+                        return;
+                    }
+
+
+                    const response =
+                        await fetch(
+                            '@Url.Action("MarkAllAsRead", "Notification")',
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/x-www-form-urlencoded"
+                                },
+
+                                body:
+                                    `__RequestVerificationToken=${encodeURIComponent(token)}`
+                            });
+
+
+                    if (response.ok) {
+
+                        location.reload();
+
+                    }
+
+                });
+        }
+
+    </script>
+}
