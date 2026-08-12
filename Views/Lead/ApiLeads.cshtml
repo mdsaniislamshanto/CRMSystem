@@ -1,19 +1,42 @@
-﻿@model CRMSystem.Models.ViewModels.ApiLeadFilterViewModel
+﻿@using CRMSystem.Constants
+@using CRMSystem.Enums
+@using Microsoft.AspNetCore.Http
+@model CRMSystem.Models.ViewModels.ApiLeadFilterViewModel
 
 @{
     ViewData["Title"] = "API Leads";
+
+    var currentRole =
+        Context.Session.GetString(SessionKeys.RoleKey);
+
+    if (currentRole == "SALES_MANAGER")
+    {
+        Layout = "_SalesManagerLayout";
+    }
+    else
+    {
+        Layout = "_AdminLayout";
+    }
 }
 
-<div class="container-fluid">
 
-    <!-- Page Header -->
+<div class="container-fluid py-4">
+
+    <!-- =====================================================
+         PAGE HEADER
+    ====================================================== -->
+
     <div class="d-flex justify-content-between align-items-center mb-4">
 
         <div>
 
-            <h2 class="fw-bold mb-1">
-                API Leads
-            </h2>
+            <div class="d-flex align-items-center gap-2 mb-1">
+
+                <h2 class="fw-bold mb-0">
+                    API Leads
+                </h2>
+
+            </div>
 
             <p class="text-muted mb-0">
                 Manage leads captured automatically from external API sources.
@@ -21,11 +44,12 @@
 
         </div>
 
+
         <div>
 
             <a asp-controller="GoogleForms"
                asp-action="Import"
-               class="btn btn-primary">
+               class="btn btn-primary px-4">
 
                 <i class="bi bi-cloud-arrow-down me-2"></i>
 
@@ -38,13 +62,13 @@
     </div>
 
 
-    <!-- =========================================
-         Search and Filters
-    ========================================== -->
+    <!-- =====================================================
+         SEARCH & FILTERS
+    ====================================================== -->
 
-    <div class="card shadow-sm border-0 mb-4">
+    <div class="card border-0 shadow-sm mb-4">
 
-        <div class="card-body">
+        <div class="card-body p-4">
 
             <form asp-controller="Lead"
                   asp-action="ApiLeads"
@@ -53,15 +77,16 @@
                 <div class="row g-3 align-items-end">
 
                     <!-- Search -->
-                    <div class="col-lg-5">
+
+                    <div class="col-xl-5 col-lg-5">
 
                         <label class="form-label fw-semibold">
-                            Search
+                            Search Leads
                         </label>
 
                         <div class="input-group">
 
-                            <span class="input-group-text">
+                            <span class="input-group-text bg-white">
                                 <i class="bi bi-search"></i>
                             </span>
 
@@ -77,7 +102,8 @@
 
 
                     <!-- Source -->
-                    <div class="col-lg-2">
+
+                    <div class="col-xl-2 col-lg-2">
 
                         <label class="form-label fw-semibold">
                             Source
@@ -90,12 +116,20 @@
                                 All Sources
                             </option>
 
-                            @foreach (var item in Enum.GetValues<CRMSystem.Enums.LeadSource>())
+                            @foreach (var item in Enum.GetValues<LeadSource>())
                             {
-                                <option value="@item"
-                                        selected="@(Model.Source == item ? "selected" : null)">
-                                    @item
-                                </option>
+                                if (Model.Source == item)
+                                {
+                                    <option value="@item" selected>
+                                        @item
+                                    </option>
+                                }
+                                else
+                                {
+                                    <option value="@item">
+                                        @item
+                                    </option>
+                                }
                             }
 
                         </select>
@@ -104,7 +138,8 @@
 
 
                     <!-- Status -->
-                    <div class="col-lg-2">
+
+                    <div class="col-xl-2 col-lg-2">
 
                         <label class="form-label fw-semibold">
                             Status
@@ -117,12 +152,20 @@
                                 All Status
                             </option>
 
-                            @foreach (var item in Enum.GetValues<CRMSystem.Enums.LeadStatus>())
+                            @foreach (var item in Enum.GetValues<LeadStatus>())
                             {
-                                <option value="@item"
-                                        selected="@(Model.Status == item ? "selected" : null)">
-                                    @item
-                                </option>
+                                if (Model.Status == item)
+                                {
+                                    <option value="@item" selected>
+                                        @item
+                                    </option>
+                                }
+                                else
+                                {
+                                    <option value="@item">
+                                        @item
+                                    </option>
+                                }
                             }
 
                         </select>
@@ -130,11 +173,13 @@
                     </div>
 
 
-                    <!-- Search Button -->
-                    <div class="col-lg-1">
+                    <!-- Search -->
+
+                    <div class="col-xl-1 col-lg-1">
 
                         <button type="submit"
-                                class="btn btn-primary w-100">
+                                class="btn btn-primary w-100"
+                                title="Search">
 
                             <i class="bi bi-search"></i>
 
@@ -144,7 +189,8 @@
 
 
                     <!-- Clear -->
-                    <div class="col-lg-2">
+
+                    <div class="col-xl-2 col-lg-2">
 
                         <a asp-controller="Lead"
                            asp-action="ApiLeads"
@@ -167,23 +213,28 @@
     </div>
 
 
-    <!-- Summary Cards -->
+    <!-- =====================================================
+         SUMMARY CARDS
+    ====================================================== -->
+
     <div class="row g-4 mb-4">
 
+
         <!-- Total API Leads -->
+
         <div class="col-xl-3 col-md-6">
 
-            <div class="card shadow-sm border-0 h-100">
+            <div class="card border-0 shadow-sm h-100">
 
-                <div class="card-body">
+                <div class="card-body p-4">
 
                     <div class="d-flex justify-content-between align-items-center">
 
                         <div>
 
-                            <h6 class="text-muted mb-1">
+                            <div class="text-muted small mb-1">
                                 Total API Leads
-                            </h6>
+                            </div>
 
                             <h2 class="fw-bold mb-0">
                                 @Model.Leads.Count
@@ -207,23 +258,24 @@
 
 
         <!-- New Leads -->
+
         <div class="col-xl-3 col-md-6">
 
-            <div class="card shadow-sm border-0 h-100">
+            <div class="card border-0 shadow-sm h-100">
 
-                <div class="card-body">
+                <div class="card-body p-4">
 
                     <div class="d-flex justify-content-between align-items-center">
 
                         <div>
 
-                            <h6 class="text-muted mb-1">
+                            <div class="text-muted small mb-1">
                                 New Leads
-                            </h6>
+                            </div>
 
-                            <h2 class="fw-bold mb-0">
+                            <h2 class="fw-bold mb-0 text-success">
                                 @Model.Leads.Count(x =>
-                                    x.Status == CRMSystem.Enums.LeadStatus.New)
+                                    x.Status == LeadStatus.New)
                             </h2>
 
                         </div>
@@ -244,25 +296,26 @@
 
 
         <!-- Assigned Leads -->
+
         <div class="col-xl-3 col-md-6">
 
-            <div class="card shadow-sm border-0 h-100">
+            <div class="card border-0 shadow-sm h-100">
 
-                <div class="card-body">
+                <div class="card-body p-4">
 
                     <div class="d-flex justify-content-between align-items-center">
 
                         <div>
 
-                            <h6 class="text-muted mb-1">
+                            <div class="text-muted small mb-1">
                                 Assigned Leads
-                            </h6>
+                            </div>
 
                             <h2 class="fw-bold mb-0">
                                 @Model.Leads.Count(x =>
-                                    x.Status == CRMSystem.Enums.LeadStatus.Assigned ||
-                                    x.Status == CRMSystem.Enums.LeadStatus.Accepted ||
-                                    x.Status == CRMSystem.Enums.LeadStatus.InProgress)
+                                    x.Status == LeadStatus.Assigned ||
+                                    x.Status == LeadStatus.Accepted ||
+                                    x.Status == LeadStatus.InProgress)
                             </h2>
 
                         </div>
@@ -282,24 +335,25 @@
         </div>
 
 
-        <!-- Completed Leads -->
+        <!-- Completed -->
+
         <div class="col-xl-3 col-md-6">
 
-            <div class="card shadow-sm border-0 h-100">
+            <div class="card border-0 shadow-sm h-100">
 
-                <div class="card-body">
+                <div class="card-body p-4">
 
                     <div class="d-flex justify-content-between align-items-center">
 
                         <div>
 
-                            <h6 class="text-muted mb-1">
+                            <div class="text-muted small mb-1">
                                 Completed
-                            </h6>
+                            </div>
 
                             <h2 class="fw-bold mb-0">
                                 @Model.Leads.Count(x =>
-                                    x.Status == CRMSystem.Enums.LeadStatus.Completed)
+                                    x.Status == LeadStatus.Completed)
                             </h2>
 
                         </div>
@@ -321,10 +375,15 @@
     </div>
 
 
-    <!-- API Leads Table -->
-    <div class="card shadow-sm border-0">
+    <!-- =====================================================
+         API LEADS TABLE
+    ====================================================== -->
 
-        <div class="card-header bg-white py-3">
+    <div class="card border-0 shadow-sm">
+
+        <!-- Card Header -->
+
+        <div class="card-header bg-white border-bottom py-3">
 
             <div class="d-flex justify-content-between align-items-center">
 
@@ -340,14 +399,21 @@
 
                 </div>
 
-                <span class="badge bg-primary">
+
+                <span class="badge bg-primary rounded-pill px-3 py-2">
+
                     @Model.Leads.Count
+
+                    Leads
+
                 </span>
 
             </div>
 
         </div>
 
+
+        <!-- Table -->
 
         <div class="card-body p-0">
 
@@ -405,7 +471,8 @@
 
 
                     <tbody>
-                        @if (Model.Leads.Any())
+
+                        @if (Model.Leads.Count > 0)
                         {
                             var index = 1;
 
@@ -414,12 +481,14 @@
                                 <tr>
 
                                     <!-- Serial -->
+
                                     <td class="ps-4">
                                         @index
                                     </td>
 
 
                                     <!-- Lead -->
+
                                     <td>
 
                                         <div class="fw-semibold">
@@ -434,6 +503,7 @@
 
 
                                     <!-- Company -->
+
                                     <td>
 
                                         @(string.IsNullOrWhiteSpace(lead.CompanyName)
@@ -444,11 +514,15 @@
 
 
                                     <!-- Contact -->
+
                                     <td>
 
                                         <div>
+
                                             <i class="bi bi-telephone me-1"></i>
+
                                             @lead.Phone
+
                                         </div>
 
                                         <div class="small text-muted">
@@ -465,6 +539,7 @@
 
 
                                     <!-- Source -->
+
                                     <td>
 
                                         <span class="badge bg-primary">
@@ -477,17 +552,16 @@
 
 
                                     <!-- Priority -->
+
                                     <td>
 
-                                        @if (lead.Priority ==
-                                            CRMSystem.Enums.LeadPriority.High)
+                                        @if (lead.Priority == LeadPriority.High)
                                         {
                                             <span class="badge bg-danger">
                                                 High
                                             </span>
                                         }
-                                        else if (lead.Priority ==
-                                            CRMSystem.Enums.LeadPriority.Medium)
+                                        else if (lead.Priority == LeadPriority.Medium)
                                         {
                                             <span class="badge bg-warning text-dark">
                                                 Medium
@@ -504,38 +578,34 @@
 
 
                                     <!-- Status -->
+
                                     <td>
 
-                                        @if (lead.Status ==
-                                            CRMSystem.Enums.LeadStatus.New)
+                                        @if (lead.Status == LeadStatus.New)
                                         {
                                             <span class="badge bg-primary">
                                                 New
                                             </span>
                                         }
-                                        else if (lead.Status ==
-                                            CRMSystem.Enums.LeadStatus.Assigned)
+                                        else if (lead.Status == LeadStatus.Assigned)
                                         {
                                             <span class="badge bg-warning text-dark">
                                                 Assigned
                                             </span>
                                         }
-                                        else if (lead.Status ==
-                                            CRMSystem.Enums.LeadStatus.Accepted)
+                                        else if (lead.Status == LeadStatus.Accepted)
                                         {
                                             <span class="badge bg-info">
                                                 Accepted
                                             </span>
                                         }
-                                        else if (lead.Status ==
-                                            CRMSystem.Enums.LeadStatus.InProgress)
+                                        else if (lead.Status == LeadStatus.InProgress)
                                         {
                                             <span class="badge bg-primary">
                                                 In Progress
                                             </span>
                                         }
-                                        else if (lead.Status ==
-                                            CRMSystem.Enums.LeadStatus.Completed)
+                                        else if (lead.Status == LeadStatus.Completed)
                                         {
                                             <span class="badge bg-success">
                                                 Completed
@@ -552,6 +622,7 @@
 
 
                                     <!-- Assigned To -->
+
                                     <td>
 
                                         @if (string.IsNullOrWhiteSpace(lead.AssignedTo))
@@ -571,6 +642,7 @@
 
 
                                     <!-- Created -->
+
                                     <td>
 
                                         <div>
@@ -585,9 +657,12 @@
 
 
                                     <!-- Actions -->
+
                                     <td class="text-center">
 
                                         <div class="btn-group">
+
+                                            <!-- Details -->
 
                                             <a asp-controller="Lead"
                                                asp-action="Details"
@@ -600,6 +675,8 @@
                                             </a>
 
 
+                                            <!-- Edit -->
+
                                             <a asp-controller="Lead"
                                                asp-action="Edit"
                                                asp-route-id="@lead.LeadId"
@@ -611,15 +688,32 @@
                                             </a>
 
 
-                                            <a asp-controller="Lead"
-                                               asp-action="Assign"
-                                               asp-route-id="@lead.LeadId"
-                                               class="btn btn-sm btn-outline-success"
-                                               title="Assign Lead">
+                                            <!-- Assign/Reassign -->
+                                            @if (lead.Status == LeadStatus.New ||
+                                                 lead.Status == LeadStatus.Rejected)
+                                            {
+                                                <a asp-controller="Lead"
+                                                   asp-action="Assign"
+                                                   asp-route-id="@lead.LeadId"
+                                                   class="btn btn-sm btn-outline-success"
+                                                   title="Assign Lead">
 
-                                                <i class="bi bi-person-check"></i>
+                                                    <i class="bi bi-person-check"></i>
 
-                                            </a>
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <a asp-controller="Lead"
+                                                   asp-action="Assign"
+                                                   asp-route-id="@lead.LeadId"
+                                                   class="btn btn-sm btn-outline-warning"
+                                                   title="Reassign Lead">
+
+                                                    <i class="bi bi-arrow-repeat"></i>
+
+                                                </a>
+                                            }
 
                                         </div>
 
@@ -632,6 +726,8 @@
                         }
                         else
                         {
+                            <!-- Empty State -->
+
                             <tr>
 
                                 <td colspan="10"
@@ -641,7 +737,7 @@
 
                                         <i class="bi bi-cloud-slash fs-1 d-block mb-3"></i>
 
-                                        <h5>
+                                        <h5 class="fw-semibold">
                                             No API Leads Found
                                         </h5>
 
