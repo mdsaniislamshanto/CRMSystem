@@ -7,6 +7,483 @@
     ViewData["Breadcrumb"] = "My Assigned Leads";
 }
 
+<div class="container-fluid py-4">
+
+    <!-- =====================================================
+         PAGE HEADER
+    ====================================================== -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+                My Assigned Leads
+            </h2>
+
+            <p class="text-muted mb-0">
+                View and manage leads assigned to you.
+            </p>
+
+        </div>
+
+        <div>
+
+            <span class="badge bg-primary rounded-pill px-3 py-2">
+
+                <i class="bi bi-list-task me-1"></i>
+
+                @Model.Count Leads
+
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         SUMMARY CARDS
+    ====================================================== -->
+
+    <div class="row g-4 mb-4">
+
+        <!-- Total -->
+
+        <div class="col-xl-4 col-md-6">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <div class="text-muted small mb-1">
+                                Total Assigned
+                            </div>
+
+                            <h2 class="fw-bold mb-0">
+                                @Model.Count
+                            </h2>
+
+                        </div>
+
+                        <div class="dashboard-icon bg-primary">
+
+                            <i class="bi bi-list-task"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Pending -->
+
+        <div class="col-xl-4 col-md-6">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <div class="text-muted small mb-1">
+                                Pending Acceptance
+                            </div>
+
+                            <h2 class="fw-bold mb-0 text-warning">
+
+                                @Model.Count(x =>
+                                    x.AssignmentStatus ==
+                                    CRMSystem.Enums.AssignmentStatus.Pending)
+
+                            </h2>
+
+                        </div>
+
+                        <div class="dashboard-icon bg-warning">
+
+                            <i class="bi bi-clock-history"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Accepted -->
+
+        <div class="col-xl-4 col-md-6">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <div class="text-muted small mb-1">
+                                Accepted
+                            </div>
+
+                            <h2 class="fw-bold mb-0 text-success">
+
+                                @Model.Count(x =>
+                                    x.AssignmentStatus ==
+                                    CRMSystem.Enums.AssignmentStatus.Accepted)
+
+                            </h2>
+
+                        </div>
+
+                        <div class="dashboard-icon bg-success">
+
+                            <i class="bi bi-check-circle-fill"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         LEADS TABLE
+    ====================================================== -->
+
+    <div class="card border-0 shadow-sm">
+
+        <!-- Header -->
+
+        <div class="card-header bg-white border-bottom py-3">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <h5 class="mb-1 fw-semibold">
+                        Assigned Leads
+                    </h5>
+
+                    <small class="text-muted">
+                        Leads currently assigned to you.
+                    </small>
+
+                </div>
+
+                <span class="text-muted small">
+                    @Model.Count total
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- Body -->
+
+        <div class="card-body p-0">
+
+            @if (Model == null || Model.Count == 0)
+            {
+                <!-- Empty State -->
+
+                <div class="text-center py-5">
+
+                    <i class="bi bi-inbox fs-1 text-muted d-block mb-3"></i>
+
+                    <h5 class="fw-semibold">
+                        No Assigned Leads
+                    </h5>
+
+                    <p class="text-muted mb-0">
+                        You currently have no active leads assigned to you.
+                    </p>
+
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead class="table-light">
+
+                            <tr>
+
+                                <th class="ps-4">
+                                    Lead
+                                </th>
+
+                                <th>
+                                    Company
+                                </th>
+
+                                <th>
+                                    Contact
+                                </th>
+
+                                <th>
+                                    Assigned At
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th class="text-center">
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            @foreach (var lead in Model)
+                            {
+                                <tr>
+
+                                    <!-- Lead -->
+
+                                    <td class="ps-4">
+
+                                        <div class="fw-semibold">
+                                            @lead.LeadName
+                                        </div>
+
+                                        <small class="text-muted">
+                                            Lead ID: @lead.LeadId
+                                        </small>
+
+                                    </td>
+
+
+                                    <!-- Company -->
+
+                                    <td>
+
+                                        @(string.IsNullOrWhiteSpace(
+                                            lead.CompanyName)
+                                            ? "-"
+                                            : lead.CompanyName)
+
+                                    </td>
+
+
+                                    <!-- Contact -->
+
+                                    <td>
+
+                                        <div>
+
+                                            <i class="bi bi-envelope me-1"></i>
+
+                                            @(string.IsNullOrWhiteSpace(
+                                                lead.Email)
+                                                ? "-"
+                                                : lead.Email)
+
+                                        </div>
+
+                                        <div class="small text-muted">
+
+                                            <i class="bi bi-telephone me-1"></i>
+
+                                            @lead.Phone
+
+                                        </div>
+
+                                    </td>
+
+
+                                    <!-- Assigned At -->
+
+                                    <td>
+
+                                        <div>
+                                            @lead.AssignedAt.ToLocalTime().ToString("dd MMM yyyy")
+                                        </div>
+
+                                        <small class="text-muted">
+
+                                            @lead.AssignedAt.ToLocalTime().ToString("hh:mm tt")
+
+                                        </small>
+
+                                    </td>
+
+
+                                    <!-- Status -->
+
+                                    <td>
+
+                                        @if (lead.AssignmentStatus ==
+                                            CRMSystem.Enums.AssignmentStatus.Pending)
+                                        {
+                                            <span class="badge bg-warning text-dark px-3 py-2">
+
+                                                <i class="bi bi-clock me-1"></i>
+
+                                                Pending
+
+                                            </span>
+                                        }
+                                        else if (lead.AssignmentStatus ==
+                                            CRMSystem.Enums.AssignmentStatus.Accepted)
+                                        {
+                                            <span class="badge bg-success px-3 py-2">
+
+                                                <i class="bi bi-check-circle me-1"></i>
+
+                                                Accepted
+
+                                            </span>
+                                        }
+                                        else if (lead.AssignmentStatus ==
+                                            CRMSystem.Enums.AssignmentStatus.Reassigned)
+                                        {
+                                            <span class="badge bg-secondary px-3 py-2">
+
+                                                <i class="bi bi-arrow-repeat me-1"></i>
+
+                                                Reassigned
+
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-dark px-3 py-2">
+
+                                                @lead.AssignmentStatus
+
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- Action -->
+
+                                    <td class="text-center">
+
+                                        @if (lead.AssignmentStatus ==
+                                            CRMSystem.Enums.AssignmentStatus.Pending)
+                                        {
+                                            <form asp-action="AcceptLead"
+                                                  method="post"
+                                                  class="d-inline">
+
+                                                @Html.AntiForgeryToken()
+
+                                                <input type="hidden"
+                                                       name="assignmentId"
+                                                       value="@lead.AssignmentId" />
+
+                                                <button type="submit"
+                                                        class="btn btn-success btn-sm px-3">
+
+                                                    <i class="bi bi-check-circle me-1"></i>
+
+                                                    Accept
+
+                                                </button>
+
+                                            </form>
+                                        }
+                                        else if (lead.AssignmentStatus ==
+                                            CRMSystem.Enums.AssignmentStatus.Accepted)
+                                        {
+                                            <a asp-action="SubmitFeedback"
+                                               asp-route-assignmentId="@lead.AssignmentId"
+                                               class="btn btn-primary btn-sm px-3">
+
+                                                <i class="bi bi-chat-left-text me-1"></i>
+
+                                                Feedback
+
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+                                                —
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@* @model List<CRMSystem.Models.ViewModels.MyAssignedLeadViewModel>
+
+@{
+    Layout = "~/Views/Shared/_SalesOfficerLayout.cshtml";
+
+    ViewData["Title"] = "My Assigned Leads";
+    ViewData["Breadcrumb"] = "My Assigned Leads";
+}
+
 <div class="card shadow">
 
     <div class="card-header bg-primary text-white">
@@ -171,4 +648,4 @@
 
     </div>
 
-</div>
+</div> *@
