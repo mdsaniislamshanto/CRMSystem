@@ -1,4 +1,6 @@
-﻿using CRMSystem.Enums;
+﻿//This is for sales manager leads queue
+
+using CRMSystem.Enums;
 
 namespace CRMSystem.Models.ViewModels
 {
@@ -29,5 +31,7 @@ namespace CRMSystem.Models.ViewModels
         public string? Description { get; set; }
 
         public DateTime? FollowUpDate { get; set; }
+
+        public string? SalesOfficerName { get; set; }
     }
 }

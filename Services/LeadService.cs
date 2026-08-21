@@ -110,21 +110,49 @@ namespace CRMSystem.Services
         public async Task<List<LeadViewModel>> GetAllLeadsAsync()
         {
             return await _context.Leads
-                .Where(l => !l.IsArchived)
+                .Where(l => !l.IsArchived && !l.IsDeleted)
+
                 .Select(l => new LeadViewModel
                 {
                     LeadId = l.LeadId,
+
                     LeadCode = l.LeadCode,
+
                     CompanyName = l.CompanyName,
+
                     LeadName = l.LeadName,
+
                     Profession = l.Profession,
+
                     Email = l.Email,
+
                     Phone = l.Phone,
+
+                    Address = l.Address,
+
                     Source = l.Source,
+
                     Priority = l.Priority,
+
                     Status = l.Status,
-                    FollowUpDate = l.FollowUpDate
+
+                    Description = l.Description,
+
+                    FollowUpDate = l.FollowUpDate,
+
+                    // Get currently assigned Sales Officer
+                    SalesOfficerName = _context.LeadAssignments
+                        .Where(a =>
+                            a.LeadId == l.LeadId &&
+                            a.IsActive &&
+                            !a.IsDeleted)
+                        .Select(a => a.SalesOfficer!.FullName)
+                        .FirstOrDefault()
                 })
+
+                // Latest created lead first
+                .OrderByDescending(l => l.LeadId)
+
                 .ToListAsync();
         }
 

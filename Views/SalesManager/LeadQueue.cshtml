@@ -92,6 +92,8 @@
 
                             <th>Status</th>
 
+                            <th>Sales Officer</th>
+
                             <th class="text-center">
                                 Actions
                             </th>
@@ -106,7 +108,7 @@
                         {
                             <tr>
 
-                                <td colspan="7"
+                                <td colspan="8"
                                     class="text-center py-4">
 
                                     No active leads found.
@@ -151,10 +153,25 @@
                                     <td>
 
                                         <span class="badge bg-primary">
-
                                             @lead.Status
-
                                         </span>
+
+                                    </td>
+
+                                    <td>
+
+                                        @if (!string.IsNullOrWhiteSpace(lead.SalesOfficerName))
+                                        {
+                                            <span class="fw-semibold">
+                                                @lead.SalesOfficerName
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+                                                —
+                                            </span>
+                                        }
 
                                     </td>
 
