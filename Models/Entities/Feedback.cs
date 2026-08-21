@@ -26,7 +26,15 @@ namespace CRMSystem.Models.Entities
         public string? Notes { get; set; }
 
         public DateTime SubmittedAt { get; set; }
+
         public DateTime? NextFollowUpDate { get; set; }
+
+        // ==============================
+        // SLA Tracking
+        // ==============================
+
+        public bool NextFeedbackSLAMissed { get; set; } = false;
+
 
         [ForeignKey(nameof(AssignmentId))]
         public LeadAssignment? LeadAssignment { get; set; }

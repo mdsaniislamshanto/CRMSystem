@@ -1,11 +1,13 @@
+using CRMSystem.BackgroundServices;
+using CRMSystem.Configurations;
 using CRMSystem.Data;
 using CRMSystem.Data.Seeders;
 using CRMSystem.Services;
-using CRMSystem.Services.Interfaces;
-using Microsoft.EntityFrameworkCore;
-using CRMSystem.Configurations;
 using CRMSystem.Services.GoogleForms;
+using CRMSystem.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,6 +37,12 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 
 // Register NotificationService for dependency injection
 builder.Services.AddScoped<INotificationService, NotificationService>();
+
+// Register SLAService for dependency injection
+builder.Services.AddScoped<ISLAService, SLAService>();
+
+//Registrer Backgraound SLAService for dependency injection
+builder.Services.AddHostedService<SLABackgroundService>();
 
 // Add Cookie Authentication
 builder.Services.AddAuthentication(

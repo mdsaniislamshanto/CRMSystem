@@ -22,7 +22,19 @@ namespace CRMSystem.Models.Entities
 
         public DateTime? AcceptedAt { get; set; }
 
-        public AssignmentStatus AssignmentStatus { get; set; } = AssignmentStatus.Pending;
+        // ==============================
+        // SLA Tracking
+        // ==============================
+
+        public bool AcceptanceSLAMissed { get; set; } = false;
+
+        public bool FirstFeedbackSLAMissed { get; set; } = false;
+
+
+        public AssignmentStatus AssignmentStatus { get; set; } =
+            AssignmentStatus.Pending;
+
+
         [ForeignKey(nameof(LeadId))]
         public Lead? Lead { get; set; }
 
@@ -32,6 +44,7 @@ namespace CRMSystem.Models.Entities
         [ForeignKey(nameof(AssignedBy))]
         public User? AssignedByUser { get; set; }
 
-        public ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();
+        public ICollection<Feedback> Feedbacks { get; set; } =
+            new List<Feedback>();
     }
 }
