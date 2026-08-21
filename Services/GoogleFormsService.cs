@@ -263,7 +263,41 @@ namespace CRMSystem.Services.GoogleForms
 
             var items = await GetFormItemsAsync();
 
+            // =====================================================
+            // Load successful Google Form import logs
+            // =====================================================
+
+            var importedLogs = await _context.LeadCaptureLogs
+                .Where(log =>
+                    log.CaptureSource == LeadCaptureSource.GoogleForm &&
+                    log.CaptureStatus == CaptureStatus.Success &&
+                    log.ExternalLeadId != null &&
+                    log.IsActive)
+                .Select(log => new
+                {
+                    log.ExternalLeadId,
+                    log.ProcessedAt
+                })
+                .ToListAsync();
+
+
+            // =====================================================
+            // Create lookup for imported leads
+            // =====================================================
+
+            var importedTimes = importedLogs
+                .GroupBy(log => log.ExternalLeadId!)
+                .ToDictionary(
+                    group => group.Key,
+                    group => group.Min(x => x.ProcessedAt));
+
+
             var result = new List<AutoLeadCreateViewModel>();
+
+
+            // =====================================================
+            // Process Google Form responses
+            // =====================================================
 
             foreach (var response in responses)
             {
@@ -272,6 +306,11 @@ namespace CRMSystem.Services.GoogleForms
                 string? email = null;
                 string? address = null;
                 string? companyName = null;
+
+
+                // =================================================
+                // Read Form Answers
+                // =================================================
 
                 foreach (var answer in response.Answers)
                 {
@@ -290,6 +329,7 @@ namespace CRMSystem.Services.GoogleForms
                     {
                         continue;
                     }
+
 
                     if (string.Equals(
                         title,
@@ -328,45 +368,89 @@ namespace CRMSystem.Services.GoogleForms
                     }
                 }
 
+
+                // =================================================
                 // Ignore invalid responses
+                // =================================================
+
                 if (string.IsNullOrWhiteSpace(leadName) ||
                     string.IsNullOrWhiteSpace(phone))
                 {
                     continue;
                 }
 
-                // Google Form ResponseId is the unique external reference
+
+                // =================================================
+                // Google Form Response ID
+                // =================================================
+
                 var sourceReferenceId = response.ResponseId;
 
-                // Check whether this Google Form response was already imported
-                var alreadyImported = await _context.Leads
-                    .AnyAsync(l =>
-                        l.Source == LeadSource.GoogleForm &&
-                        l.SourceReferenceId == sourceReferenceId &&
-                        !l.IsDeleted);
+
+                // =================================================
+                // Check Import Status
+                // =================================================
+
+                var isAlreadyImported =
+                    importedTimes.ContainsKey(sourceReferenceId);
+
+
+                DateTime? importedAt = null;
+
+                if (isAlreadyImported)
+                {
+                    importedAt =
+                        importedTimes[sourceReferenceId];
+                }
+
+
+                // =================================================
+                // Create ViewModel
+                // =================================================
 
                 result.Add(new AutoLeadCreateViewModel
                 {
                     LeadName = leadName,
+
                     Phone = phone,
+
                     Email = email,
+
                     Address = address,
+
                     CompanyName = companyName,
 
-                    // Google Form leads must have GoogleForm as their source
                     Source = LeadSource.GoogleForm,
 
                     Priority = LeadPriority.Medium,
 
                     SourceReferenceId = sourceReferenceId,
 
-                    PayloadJson = JsonSerializer.Serialize(response),
+                    PayloadJson =
+                        JsonSerializer.Serialize(response),
 
-                    IsAlreadyImported = alreadyImported
+                    IsAlreadyImported =
+                        isAlreadyImported,
+
+                    // Google Form submission time
+                    GoogleFormSubmittedAt =
+                        response.LastSubmittedTimeDateTimeOffset,
+
+                    // CRM successful import time
+                    ImportedAt =
+                        importedAt
                 });
             }
 
-            return result;
+
+            // =====================================================
+            // Latest Google Form submission first
+            // =====================================================
+
+            return result
+                .OrderByDescending(x =>
+                    x.GoogleFormSubmittedAt ?? DateTimeOffset.MinValue)
+                .ToList();
         }
 
     }

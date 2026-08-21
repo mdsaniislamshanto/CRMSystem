@@ -1,5 +1,7 @@
-﻿@using CRMSystem.Constants
+﻿@model CRMSystem.Models.ViewModels.GoogleFormImportViewModel
+@using CRMSystem.Constants
 @using Microsoft.AspNetCore.Http
+
 
 @{
     ViewData["Title"] = "Google Form Lead Import";
@@ -219,6 +221,10 @@
 
                             <th>Address</th>
 
+                            <th>Google Form Submitted</th>
+
+                            <th>CRM Imported</th>
+
                             <th>Source</th>
 
                             <th>Status</th>
@@ -238,44 +244,109 @@
                             {
                                 <tr>
 
+                                    <!-- Number -->
+
                                     <td>
                                         @index
                                     </td>
 
+
+                                    <!-- Lead Name -->
 
                                     <td class="fw-semibold">
                                         @candidate.LeadName
                                     </td>
 
 
+                                    <!-- Company -->
+
                                     <td>
                                         @(candidate.CompanyName ?? "-")
                                     </td>
 
+
+                                    <!-- Email -->
 
                                     <td>
                                         @(candidate.Email ?? "-")
                                     </td>
 
 
+                                    <!-- Phone -->
+
                                     <td>
                                         @candidate.Phone
                                     </td>
 
+
+                                    <!-- Address -->
 
                                     <td>
                                         @(candidate.Address ?? "-")
                                     </td>
 
 
+                                    <!-- Google Form Submitted -->
+
+                                    <td>
+
+                                        @if (candidate.GoogleFormSubmittedAt.HasValue)
+                                        {
+                                            <div class="fw-semibold">
+                                                @candidate.GoogleFormSubmittedAt.Value.ToLocalTime().ToString("dd MMM yyyy")
+                                            </div>
+
+                                            <small class="text-muted">
+                                                @candidate.GoogleFormSubmittedAt.Value.ToLocalTime().ToString("hh:mm tt")
+                                            </small>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+                                                N/A
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- CRM Imported -->
+
+                                    <td>
+
+                                        @if (candidate.ImportedAt.HasValue)
+                                        {
+                                            <div class="fw-semibold">
+                                                @candidate.ImportedAt.Value.ToLocalTime().ToString("dd MMM yyyy")
+                                            </div>
+
+                                            <small class="text-muted">
+                                                @candidate.ImportedAt.Value.ToLocalTime().ToString("hh:mm tt")
+                                            </small>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+                                                Not Imported
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- Source -->
+
                                     <td>
 
                                         <span class="badge bg-primary">
+                                            <i class="bi bi-google me-1"></i>
                                             Google Form
                                         </span>
 
                                     </td>
 
+
+                                    <!-- Status -->
 
                                     <td>
 
@@ -311,7 +382,7 @@
                         {
                             <tr>
 
-                                <td colspan="8"
+                                <td colspan="10"
                                     class="text-center py-5">
 
                                     <div class="text-muted">
