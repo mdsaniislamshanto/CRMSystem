@@ -1,0 +1,399 @@
+﻿@model CRMSystem.Models.ViewModels.SalesManagerFollowUpDetailsViewModel
+
+@{
+    ViewData["Title"] = "Follow-up Details";
+    ViewData["Breadcrumb"] = "Follow-up Details";
+    Layout = "_SalesManagerLayout";
+}
+
+<div class="container-fluid py-4">
+
+    <!-- =========================================
+         Page Header
+         ========================================= -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+                Follow-up Details
+            </h2>
+
+            <p class="text-muted mb-0">
+                Complete feedback history for this lead.
+            </p>
+
+        </div>
+
+        <div>
+
+            <a asp-controller="SalesManager"
+               asp-action="FollowUps"
+               class="btn btn-outline-secondary">
+
+                <i class="bi bi-arrow-left me-1"></i>
+
+                Back to Follow-ups
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================
+         Lead Information
+         ========================================= -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <div class="row align-items-center">
+
+                <div class="col-md-6">
+
+                    <div class="text-muted small mb-1">
+                        Lead
+                    </div>
+
+                    <h4 class="fw-bold mb-1">
+                        @Model.LeadName
+                    </h4>
+
+                    <span class="text-muted">
+                        Lead ID: @Model.LeadId
+                    </span>
+
+                </div>
+
+
+                <div class="col-md-6 text-md-end mt-3 mt-md-0">
+
+                    <div class="text-muted small mb-1">
+                        Sales Officer
+                    </div>
+
+                    <div class="fw-semibold">
+                        <i class="bi bi-person me-1"></i>
+                        @Model.SalesOfficerName
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================
+         Feedback History
+         ========================================= -->
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-white border-0 py-3">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <h5 class="fw-bold mb-0">
+
+                    <i class="bi bi-clock-history me-2"></i>
+
+                    Feedback History
+
+                </h5>
+
+                <span class="badge bg-primary">
+                    @Model.FeedbackHistory.Count Feedback(s)
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="card-body">
+
+            @if (!Model.FeedbackHistory.Any())
+            {
+                <div class="text-center py-5">
+
+                    <i class="bi bi-chat-square-text fs-1 text-muted d-block mb-3"></i>
+
+                    <h5 class="fw-semibold">
+                        No Feedback Found
+                    </h5>
+
+                    <p class="text-muted mb-0">
+                        No feedback has been submitted for this lead yet.
+                    </p>
+
+                </div>
+            }
+            else
+            {
+                <div class="row">
+
+                    @foreach (var feedback in Model.FeedbackHistory)
+                    {
+                        <div class="col-12 mb-4">
+
+                            <div class="card border shadow-sm">
+
+                                <!-- =================================
+                                     Feedback Header
+                                     ================================= -->
+
+                                <div class="card-header bg-light">
+
+                                    <div class="d-flex justify-content-between align-items-center">
+
+                                        <div>
+
+                                            <span class="fw-bold">
+
+                                                <i class="bi bi-chat-left-text me-1"></i>
+
+                                                Feedback #@feedback.FeedbackId
+
+                                            </span>
+
+                                        </div>
+
+
+                                        <span class="badge bg-secondary">
+
+                                            @feedback.FeedbackStatus
+
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- =================================
+                                     Feedback Body
+                                     ================================= -->
+
+                                <div class="card-body">
+
+                                    <div class="row g-4">
+
+                                        <!-- Submitted At -->
+
+                                        <div class="col-md-4">
+
+                                            <div class="text-muted small mb-1">
+                                                Submitted At
+                                            </div>
+
+                                            <div class="fw-semibold">
+
+                                                @feedback.SubmittedAt.ToLocalTime().ToString("dd MMM yyyy")
+
+                                            </div>
+
+                                            <small class="text-muted">
+
+                                                @feedback.SubmittedAt.ToLocalTime().ToString("hh:mm tt")
+
+                                            </small>
+
+                                        </div>
+
+
+                                        <!-- Next Follow-up -->
+
+                                        <div class="col-md-4">
+
+                                            <div class="text-muted small mb-1">
+                                                Next Follow-up
+                                            </div>
+
+                                            @if (feedback.NextFollowUpDate.HasValue)
+                                            {
+                                                <div class="fw-semibold">
+
+                                                    @feedback.NextFollowUpDate.Value.ToLocalTime().ToString("dd MMM yyyy")
+
+                                                </div>
+
+                                                <small class="text-muted">
+
+                                                    @feedback.NextFollowUpDate.Value.ToLocalTime().ToString("hh:mm tt")
+
+                                                </small>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">
+                                                    Not scheduled
+                                                </span>
+                                            }
+
+                                        </div>
+
+
+                                        <!-- Follow-up Status -->
+
+                                        <div class="col-md-4">
+
+                                            <div class="text-muted small mb-1">
+                                                Follow-up Status
+                                            </div>
+
+                                            @if (feedback.NextFollowUpDate.HasValue)
+                                            {
+                                                @if (feedback.IsNextFollowUpOverdue)
+                                                {
+                                                    <span class="badge bg-danger">
+
+                                                        <i class="bi bi-exclamation-circle me-1"></i>
+
+                                                        Overdue
+
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-success">
+
+                                                        <i class="bi bi-calendar-check me-1"></i>
+
+                                                        Upcoming
+
+                                                    </span>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">
+                                                    No Follow-up
+                                                </span>
+                                            }
+
+                                        </div>
+
+
+                                        <!-- Summary -->
+
+                                        <div class="col-12">
+
+                                            <div class="text-muted small mb-1">
+                                                Summary
+                                            </div>
+
+                                            <div class="p-3 bg-light rounded">
+
+                                                @if (!string.IsNullOrWhiteSpace(feedback.Summary))
+                                                {
+                                                    @feedback.Summary
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">
+                                                        No summary provided.
+                                                    </span>
+                                                }
+
+                                            </div>
+
+                                        </div>
+
+
+                                        <!-- Notes -->
+                                        @if (!string.IsNullOrWhiteSpace(feedback.Notes))
+                                        {
+                                            <div class="col-12">
+
+                                                <div class="text-muted small mb-1">
+                                                    Additional Notes
+                                                </div>
+
+                                                <div class="p-3 bg-light rounded">
+
+                                                    @feedback.Notes
+
+                                                </div>
+
+                                            </div>
+                                        }
+
+
+                                        <!-- =================================
+                                             Proof Section
+                                             ================================= -->
+
+                                        <div class="col-12">
+
+                                            <div class="text-muted small mb-2">
+                                                Proof / Attachments
+                                            </div>
+
+                                            <div class="d-flex flex-wrap gap-2">
+
+                                                <!-- Proof Image -->
+                                                @if (!string.IsNullOrWhiteSpace(feedback.ProofImage))
+                                                {
+                                                    <a href="@feedback.ProofImage"
+                                                       target="_blank"
+                                                       class="btn btn-sm btn-outline-primary">
+
+                                                        <i class="bi bi-image me-1"></i>
+
+                                                        View Proof Image
+
+                                                    </a>
+                                                }
+
+
+                                                <!-- Voice Recording -->
+                                                @if (!string.IsNullOrWhiteSpace(feedback.VoiceRecording))
+                                                {
+                                                    <a href="@feedback.VoiceRecording"
+                                                       target="_blank"
+                                                       class="btn btn-sm btn-outline-success">
+
+                                                        <i class="bi bi-mic me-1"></i>
+
+                                                        Open Voice Recording
+
+                                                    </a>
+                                                }
+
+
+                                                @if (string.IsNullOrWhiteSpace(feedback.ProofImage)
+                                                  && string.IsNullOrWhiteSpace(feedback.VoiceRecording))
+                                                {
+                                                    <span class="text-muted">
+                                                        No proof attached.
+                                                    </span>
+                                                }
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    }
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>

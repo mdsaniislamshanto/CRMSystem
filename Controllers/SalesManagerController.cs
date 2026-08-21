@@ -392,5 +392,44 @@ namespace CRMSystem.Controllers
 
             return RedirectToAction(nameof(Settings));
         }
+
+
+        // ==========================
+        // Follow-ups
+        // ==========================
+        [HttpGet]
+        public async Task<IActionResult> FollowUps()
+        {
+            ViewData["Title"] = "Follow-ups";
+            ViewData["Breadcrumb"] = "Follow-ups";
+
+            var followUps =
+                await _dashboardService.GetFollowUpsAsync();
+
+            return View(followUps);
+        }
+
+
+
+        // ==========================
+        // Follow-up Details
+        // ==========================
+
+        [HttpGet]
+        public async Task<IActionResult> FollowUpDetails(long id)
+        {
+            var model =
+                await _dashboardService.GetFollowUpDetailsAsync(id);
+
+            if (model == null)
+            {
+                return NotFound();
+            }
+
+            ViewData["Title"] = "Follow-up Details";
+            ViewData["Breadcrumb"] = "Follow-up Details";
+
+            return View(model);
+        }
     }
 }
