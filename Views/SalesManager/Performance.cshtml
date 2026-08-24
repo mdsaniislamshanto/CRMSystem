@@ -1,6 +1,522 @@
-﻿@{
-    ViewData["Title"] = "Performance";
+﻿@model List<CRMSystem.Models.ViewModels.SalesOfficerPerformanceViewModel>
+
+@{
+    ViewData["Title"] = "Sales Officer Performance";
+    ViewData["Breadcrumb"] = "Performance";
     Layout = "_SalesManagerLayout";
+
+    var totalOfficers = Model.Count;
+
+    var totalAssigned = Model.Sum(x => x.TotalAssignedLeads);
+
+    var totalAccepted = Model.Sum(x => x.AcceptedLeads);
+
+    var totalFeedbacks = Model.Sum(x => x.TotalFeedbacks);
+
+    var totalOverdue = Model.Sum(x => x.OverdueFollowUps);
 }
 
-<h2>Performance</h2>
+<div class="container-fluid py-4">
+
+    <!-- ==========================================
+         Page Header
+         ========================================== -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+                Sales Officer Performance
+            </h2>
+
+            <p class="text-muted mb-0">
+                Monitor Sales Officer productivity, feedback activity,
+                SLA performance and follow-up status.
+            </p>
+
+        </div>
+
+        <div>
+
+            <span class="badge bg-primary fs-6 px-3 py-2">
+
+                <i class="bi bi-graph-up-arrow me-1"></i>
+
+                Performance
+
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==========================================
+         Summary Cards
+         ========================================== -->
+
+    <div class="row g-4 mb-4">
+
+        <!-- Total Officers -->
+
+        <div class="col-md-6 col-xl-3">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-start">
+
+                        <div>
+
+                            <div class="text-muted small">
+                                Sales Officers
+                            </div>
+
+                            <h3 class="fw-bold mt-2 mb-0">
+                                @totalOfficers
+                            </h3>
+
+                        </div>
+
+                        <div class="text-primary fs-3">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Total Assigned -->
+
+        <div class="col-md-6 col-xl-3">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-start">
+
+                        <div>
+
+                            <div class="text-muted small">
+                                Assigned Leads
+                            </div>
+
+                            <h3 class="fw-bold mt-2 mb-0">
+                                @totalAssigned
+                            </h3>
+
+                        </div>
+
+                        <div class="text-info fs-3">
+                            <i class="bi bi-person-lines-fill"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Total Feedback -->
+
+        <div class="col-md-6 col-xl-3">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-start">
+
+                        <div>
+
+                            <div class="text-muted small">
+                                Total Feedbacks
+                            </div>
+
+                            <h3 class="fw-bold mt-2 mb-0">
+                                @totalFeedbacks
+                            </h3>
+
+                        </div>
+
+                        <div class="text-success fs-3">
+                            <i class="bi bi-chat-left-text-fill"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Overdue Follow-ups -->
+
+        <div class="col-md-6 col-xl-3">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-start">
+
+                        <div>
+
+                            <div class="text-muted small">
+                                Overdue Follow-ups
+                            </div>
+
+                            <h3 class="fw-bold mt-2 mb-0
+                                @(totalOverdue > 0 ? "text-danger" : "text-success")">
+
+                                @totalOverdue
+
+                            </h3>
+
+                        </div>
+
+                        <div class="@(totalOverdue > 0 ? "text-danger" : "text-success") fs-3">
+
+                            <i class="bi bi-clock-history"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==========================================
+         Performance Table
+         ========================================== -->
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-white py-3">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <h5 class="fw-semibold mb-1">
+                        Sales Officer Performance
+                    </h5>
+
+                    <small class="text-muted">
+                        Current performance overview of active Sales Officers.
+                    </small>
+
+                </div>
+
+                <span class="badge bg-light text-dark border">
+
+                    @Model.Count Officer(s)
+
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="card-body p-0">
+
+            @if (!Model.Any())
+            {
+                <div class="text-center py-5">
+
+                    <i class="bi bi-bar-chart-line fs-1 text-muted d-block mb-3"></i>
+
+                    <h5 class="fw-semibold">
+                        No Performance Data
+                    </h5>
+
+                    <p class="text-muted mb-0">
+                        No active Sales Officers are available.
+                    </p>
+
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead class="table-light">
+
+                            <tr>
+
+                                <th>
+                                    Sales Officer
+                                </th>
+
+                                <th class="text-center">
+                                    Assigned
+                                </th>
+
+                                <th class="text-center">
+                                    Accepted
+                                </th>
+
+                                <th class="text-center">
+                                    Pending
+                                </th>
+
+                                <th class="text-center">
+                                    Completed
+                                </th>
+
+                                <th class="text-center">
+                                    Feedback
+                                </th>
+
+                                <th class="text-center">
+                                    Acceptance SLA
+                                </th>
+
+                                <th class="text-center">
+                                    First Feedback SLA
+                                </th>
+
+                                <th class="text-center">
+                                    Overdue
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            @foreach (var officer in Model)
+                            {
+                                <tr>
+
+                                    <!-- Sales Officer -->
+
+                                    <td>
+
+                                        <div class="d-flex align-items-center">
+
+                                            <div class="rounded-circle bg-primary-subtle
+                                                        text-primary d-flex
+                                                        align-items-center
+                                                        justify-content-center me-3"
+                                                 style="width:42px;height:42px;">
+
+                                                <i class="bi bi-person-fill"></i>
+
+                                            </div>
+
+                                            <div>
+
+                                                <div class="fw-semibold">
+                                                    @officer.SalesOfficerName
+                                                </div>
+
+                                                <small class="text-muted">
+                                                    ID: @officer.SalesOfficerId
+                                                </small>
+
+                                            </div>
+
+                                        </div>
+
+                                    </td>
+
+
+                                    <!-- Assigned -->
+
+                                    <td class="text-center">
+
+                                        <span class="badge bg-primary-subtle text-primary fs-6">
+
+                                            @officer.TotalAssignedLeads
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- Accepted -->
+
+                                    <td class="text-center">
+
+                                        <span class="badge bg-success-subtle text-success fs-6">
+
+                                            @officer.AcceptedLeads
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- Pending -->
+
+                                    <td class="text-center">
+
+                                        @if (officer.PendingAcceptance > 0)
+                                        {
+                                            <span class="badge bg-warning-subtle text-warning-emphasis fs-6">
+
+                                                @officer.PendingAcceptance
+
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-light text-muted border fs-6">
+
+                                                0
+
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- Completed -->
+
+                                    <td class="text-center">
+
+                                        <span class="badge bg-info-subtle text-info-emphasis fs-6">
+
+                                            @officer.CompletedLeads
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- Feedback -->
+
+                                    <td class="text-center">
+
+                                        <span class="badge bg-secondary-subtle text-secondary fs-6">
+
+                                            @officer.TotalFeedbacks
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- Acceptance SLA -->
+
+                                    <td class="text-center">
+
+                                        @if (officer.AcceptanceSLAMissed > 0)
+                                        {
+                                            <span class="badge bg-danger fs-6">
+
+                                                <i class="bi bi-exclamation-circle me-1"></i>
+
+                                                @officer.AcceptanceSLAMissed
+
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success fs-6">
+
+                                                <i class="bi bi-check-circle me-1"></i>
+
+                                                0
+
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- First Feedback SLA -->
+
+                                    <td class="text-center">
+
+                                        @if (officer.FirstFeedbackSLAMissed > 0)
+                                        {
+                                            <span class="badge bg-danger fs-6">
+
+                                                <i class="bi bi-exclamation-circle me-1"></i>
+
+                                                @officer.FirstFeedbackSLAMissed
+
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success fs-6">
+
+                                                <i class="bi bi-check-circle me-1"></i>
+
+                                                0
+
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- Overdue -->
+
+                                    <td class="text-center">
+
+                                        @if (officer.OverdueFollowUps > 0)
+                                        {
+                                            <span class="badge bg-danger fs-6">
+
+                                                <i class="bi bi-clock-history me-1"></i>
+
+                                                @officer.OverdueFollowUps
+
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success fs-6">
+
+                                                <i class="bi bi-check-circle me-1"></i>
+
+                                                0
+
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>

@@ -296,8 +296,142 @@ namespace CRMSystem.Services
                     })
                     .ToList();
 
-
             return model;
         }
+
+        // =====================================================
+        // Sales Officer Performance
+        // =====================================================
+
+        public async Task<List<SalesOfficerPerformanceViewModel>>
+            GetPerformanceAsync()
+        {
+            var now = DateTime.UtcNow;
+
+            var performance = await _context.Users
+
+                // Only Sales Officers
+                .Where(u =>
+                    u.Role != null &&
+                    u.Role.RoleKey == "SALES_OFFICER" &&
+                    u.IsActive &&
+                    !u.IsDeleted)
+
+                .Select(u => new SalesOfficerPerformanceViewModel
+                {
+                    // -----------------------------------------
+                    // Sales Officer Information
+                    // -----------------------------------------
+
+                    SalesOfficerId = u.UserId,
+
+                    SalesOfficerName = u.FullName,
+
+
+                    // -----------------------------------------
+                    // Total Assigned Leads
+                    // -----------------------------------------
+
+                    TotalAssignedLeads = _context.LeadAssignments
+                        .Count(a =>
+                            a.SalesOfficerId == u.UserId &&
+                            a.IsActive &&
+                            !a.IsDeleted),
+
+
+                    // -----------------------------------------
+                    // Accepted Leads
+                    // -----------------------------------------
+
+                    AcceptedLeads = _context.LeadAssignments
+                        .Count(a =>
+                            a.SalesOfficerId == u.UserId &&
+                            a.IsActive &&
+                            !a.IsDeleted &&
+                            a.AcceptedAt.HasValue),
+
+
+                    // -----------------------------------------
+                    // Pending Acceptance
+                    // -----------------------------------------
+
+                    PendingAcceptance = _context.LeadAssignments
+                        .Count(a =>
+                            a.SalesOfficerId == u.UserId &&
+                            a.IsActive &&
+                            !a.IsDeleted &&
+                            a.AssignmentStatus == AssignmentStatus.Pending),
+
+
+                    // -----------------------------------------
+                    // Completed Leads
+                    // -----------------------------------------
+
+                    CompletedLeads = _context.LeadAssignments
+                        .Count(a =>
+                            a.SalesOfficerId == u.UserId &&
+                            a.IsActive &&
+                            !a.IsDeleted &&
+                            a.Lead != null &&
+                            a.Lead.Status == LeadStatus.Completed),
+
+
+                    // -----------------------------------------
+                    // Total Feedbacks
+                    // -----------------------------------------
+
+                    TotalFeedbacks = _context.Feedbacks
+                        .Count(f =>
+                            f.LeadAssignment != null &&
+                            f.LeadAssignment.SalesOfficerId == u.UserId &&
+                            f.IsActive &&
+                            !f.IsDeleted),
+
+
+                    // -----------------------------------------
+                    // Acceptance SLA Missed
+                    // -----------------------------------------
+
+                    AcceptanceSLAMissed = _context.LeadAssignments
+                        .Count(a =>
+                            a.SalesOfficerId == u.UserId &&
+                            a.IsActive &&
+                            !a.IsDeleted &&
+                            a.AcceptanceSLAMissed),
+
+
+                    // -----------------------------------------
+                    // First Feedback SLA Missed
+                    // -----------------------------------------
+
+                    FirstFeedbackSLAMissed = _context.LeadAssignments
+                        .Count(a =>
+                            a.SalesOfficerId == u.UserId &&
+                            a.IsActive &&
+                            !a.IsDeleted &&
+                            a.FirstFeedbackSLAMissed),
+
+
+                    // -----------------------------------------
+                    // Overdue Follow-ups
+                    // -----------------------------------------
+
+                    OverdueFollowUps = _context.Feedbacks
+                        .Count(f =>
+                            f.LeadAssignment != null &&
+                            f.LeadAssignment.SalesOfficerId == u.UserId &&
+                            f.IsActive &&
+                            !f.IsDeleted &&
+                            f.NextFollowUpDate.HasValue &&
+                            f.NextFollowUpDate.Value < now)
+                })
+
+                .AsNoTracking()
+
+                .ToListAsync();
+
+            return performance;
+        }
+
     }
 }

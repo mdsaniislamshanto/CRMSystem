@@ -3,6 +3,7 @@ using CRMSystem.Enums;
 using CRMSystem.Models.ViewModels;
 using CRMSystem.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 
 
@@ -338,13 +339,20 @@ namespace CRMSystem.Controllers
             return View();
         }
 
-        // ==========================
-        // Performance
-        // ==========================
-        public IActionResult Performance()
+        // =====================================================
+        // Sales Officer Performance
+        // =====================================================
+
+        [HttpGet]
+        [Authorize(Roles = "ADMIN,SALES_MANAGER")]
+        public async Task<IActionResult> Performance()
         {
-            return View();
+            var performance =
+                await _dashboardService.GetPerformanceAsync();
+
+            return View(performance);
         }
+
 
         // ==========================
         // Reports
@@ -431,5 +439,7 @@ namespace CRMSystem.Controllers
 
             return View(model);
         }
+
+    
     }
 }
