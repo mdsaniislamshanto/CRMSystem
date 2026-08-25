@@ -17,6 +17,7 @@
         public bool IsEmailVerified { get; set; }
 
         public DateTime? LastLoginAt { get; set; }
+
         public bool IsActive { get; set; }
     }
 }

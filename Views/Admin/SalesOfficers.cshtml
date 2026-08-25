@@ -1,0 +1,517 @@
+﻿@model IEnumerable<CRMSystem.Models.ViewModels.UserViewModel>
+
+@{
+    ViewData["Title"] = "Sales Officers";
+    Layout = "_AdminLayout";
+}
+
+<div class="container mt-4">
+
+    <!-- Page Header -->
+    <div class="mb-4">
+
+        <h2 class="fw-bold mb-1">
+            Sales Officers
+        </h2>
+
+        <p class="text-muted mb-0">
+            Manage and monitor all Sales Officers.
+        </p>
+
+    </div>
+
+
+    <!-- Success Message -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show"
+             role="alert">
+
+            <i class="bi bi-check-circle-fill me-2"></i>
+
+            @TempData["Success"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+
+        </div>
+    }
+
+
+    <!-- Search & Filter -->
+    <div class="card shadow-sm border-0 mb-4">
+
+        <div class="card-body">
+
+            <div class="row g-3 align-items-center">
+
+                <!-- Search -->
+                <div class="col-lg-6">
+
+                    <input id="salesOfficerSearch"
+                           type="text"
+                           class="form-control"
+                           placeholder="Search by employee code, name or email..." />
+
+                </div>
+
+
+                <!-- Status Filter -->
+                <div class="col-lg-3">
+
+                    <select id="salesOfficerStatus"
+                            class="form-select">
+
+                        <option value="">
+                            All Status
+                        </option>
+
+                        <option value="Active">
+                            Active
+                        </option>
+
+                        <option value="Inactive">
+                            Inactive
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- Add Sales Officer -->
+                <div class="col-lg-3 text-lg-end">
+
+                    <a asp-controller="User"
+                       asp-action="Create"
+                       class="btn btn-primary">
+
+                        <i class="bi bi-person-plus-fill me-1"></i>
+
+                        Add Sales Officer
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Sales Officers Table -->
+    <div class="card shadow-sm border-0">
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0"
+                       id="salesOfficerTable">
+
+                    <thead class="table-dark">
+
+                        <tr>
+
+                            <th>
+                                Employee Code
+                            </th>
+
+                            <th>
+                                Name
+                            </th>
+
+                            <th>
+                                Email
+                            </th>
+
+                            <th>
+                                Phone
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                            <th>
+                                Last Login
+                            </th>
+
+                            <th class="text-center">
+                                Actions
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        @if (!Model.Any())
+                        {
+                            <tr>
+
+                                <td colspan="7"
+                                    class="text-center py-4 text-muted">
+
+                                    <i class="bi bi-person-x fs-3 d-block mb-2"></i>
+
+                                    No Sales Officers found.
+
+                                </td>
+
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var officer in Model)
+                            {
+                                var statusText = officer.IsActive
+                                    ? "Active"
+                                    : "Inactive";
+
+                                var lastLoginText = officer.LastLoginAt.HasValue
+                                    ? officer.LastLoginAt.Value
+                                        .ToLocalTime()
+                                        .ToString("dd MMM yyyy, hh:mm tt")
+                                    : "Never";
+
+                                var searchData =
+                                    officer.EmployeeCode + " " +
+                                    officer.FullName + " " +
+                                    officer.Email;
+
+                                <tr class="sales-officer-row"
+                                    data-search="@searchData.ToLower()"
+                                    data-status="@statusText">
+
+                                    <!-- Employee Code -->
+                                    <td>
+
+                                        <strong>
+                                            @officer.EmployeeCode
+                                        </strong>
+
+                                    </td>
+
+
+                                    <!-- Name -->
+                                    <td>
+
+                                        @officer.FullName
+
+                                    </td>
+
+
+                                    <!-- Email -->
+                                    <td>
+
+                                        @officer.Email
+
+                                    </td>
+
+
+                                    <!-- Phone -->
+                                    <td>
+
+                                        @(officer.PhoneNumber ?? "-")
+
+                                    </td>
+
+
+                                    <!-- Status -->
+                                    <td>
+
+                                        @if (officer.IsActive)
+                                        {
+                                            <span class="badge bg-success">
+                                                Active
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">
+                                                Inactive
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- Last Login -->
+                                    <td>
+
+                                        @if (officer.LastLoginAt.HasValue)
+                                        {
+                                            @lastLoginText
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+                                                Never
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- Actions -->
+                                    <td class="text-center">
+
+                                        <!-- Details -->
+                                        <a asp-controller="User"
+                                           asp-action="Details"
+                                           asp-route-id="@officer.UserId"
+                                           class="btn btn-sm btn-info text-white"
+                                           title="View Details">
+
+                                            <i class="bi bi-eye"></i>
+
+                                        </a>
+
+
+                                        <!-- Edit -->
+                                        <a asp-controller="User"
+                                           asp-action="Edit"
+                                           asp-route-id="@officer.UserId"
+                                           class="btn btn-sm btn-warning"
+                                           title="Edit">
+
+                                            <i class="bi bi-pencil-square"></i>
+
+                                        </a>
+
+
+                                        <!-- Activate / Deactivate -->
+                                        <form asp-controller="User"
+                                              asp-action="ToggleStatus"
+                                              asp-route-id="@officer.UserId"
+                                              method="post"
+                                              class="d-inline">
+
+                                            @Html.AntiForgeryToken()
+
+                                            @if (officer.IsActive)
+                                            {
+                                                <button type="button"
+                                                        class="btn btn-sm btn-danger"
+                                                        title="Deactivate"
+                                                        onclick="confirmToggle(this)">
+
+                                                    <i class="bi bi-person-x"></i>
+
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button type="button"
+                                                        class="btn btn-sm btn-success"
+                                                        title="Activate"
+                                                        onclick="confirmToggle(this)">
+
+                                                    <i class="bi bi-person-check"></i>
+
+                                                </button>
+                                            }
+
+                                        </form>
+
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+@section Scripts
+{
+    <script>
+
+        // =====================================================
+        // Activate / Deactivate Confirmation
+        // =====================================================
+
+        function confirmToggle(button) {
+
+            const form = button.closest("form");
+
+            const isDeactivate =
+                button.classList.contains("btn-danger");
+
+            Swal.fire({
+
+                title: isDeactivate
+                    ? "Deactivate Sales Officer?"
+                    : "Activate Sales Officer?",
+
+                text: isDeactivate
+                    ? "This Sales Officer will no longer be able to log in."
+                    : "This Sales Officer will be able to log in again.",
+
+                icon: "warning",
+
+                showCancelButton: true,
+
+                confirmButtonColor:
+                    isDeactivate ? "#d33" : "#198754",
+
+                cancelButtonColor: "#6c757d",
+
+                confirmButtonText:
+                    isDeactivate
+                        ? "Yes, Deactivate"
+                        : "Yes, Activate",
+
+                cancelButtonText: "Cancel"
+
+            }).then(function(result) {
+
+                if (result.isConfirmed) {
+
+                    form.submit();
+
+                }
+
+            });
+
+        }
+
+
+        // =====================================================
+        // Search & Status Filter
+        // =====================================================
+
+        const searchInput =
+            document.getElementById("salesOfficerSearch");
+
+        const statusFilter =
+            document.getElementById("salesOfficerStatus");
+
+        const rows =
+            document.querySelectorAll(".sales-officer-row");
+
+
+        function filterSalesOfficers() {
+
+            const searchTerm =
+                searchInput.value.toLowerCase().trim();
+
+            const selectedStatus =
+                statusFilter.value;
+
+            let visibleCount = 0;
+
+
+            rows.forEach(function(row) {
+
+                const searchData =
+                    row.getAttribute("data-search") || "";
+
+                const rowStatus =
+                    row.getAttribute("data-status") || "";
+
+
+                const matchesSearch =
+                    searchData.includes(searchTerm);
+
+                const matchesStatus =
+                    selectedStatus === ""
+                    || rowStatus === selectedStatus;
+
+
+                if (matchesSearch && matchesStatus) {
+
+                    row.style.display = "";
+
+                    visibleCount++;
+
+                }
+                else {
+
+                    row.style.display = "none";
+
+                }
+
+            });
+
+
+            let noResultRow =
+                document.getElementById("noFilterResult");
+
+
+            if (visibleCount === 0) {
+
+                if (!noResultRow) {
+
+                    noResultRow =
+                        document.createElement("tr");
+
+                    noResultRow.id =
+                        "noFilterResult";
+
+                    const cell =
+                        document.createElement("td");
+
+                    cell.colSpan = 7;
+
+                    cell.className =
+                        "text-center py-4 text-muted";
+
+                    cell.innerHTML =
+                        '<i class="bi bi-search fs-3 d-block mb-2"></i>' +
+                        'No Sales Officers match your search.';
+
+                    noResultRow.appendChild(cell);
+
+                    document.querySelector(
+                        "#salesOfficerTable tbody"
+                    ).appendChild(noResultRow);
+
+                }
+
+                noResultRow.style.display = "";
+
+            }
+            else {
+
+                if (noResultRow) {
+
+                    noResultRow.style.display = "none";
+
+                }
+
+            }
+
+        }
+
+
+        searchInput.addEventListener(
+            "input",
+            filterSalesOfficers
+        );
+
+
+        statusFilter.addEventListener(
+            "change",
+            filterSalesOfficers
+        );
+
+    </script>
+}

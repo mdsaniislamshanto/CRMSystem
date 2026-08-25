@@ -132,9 +132,9 @@
 
         <li>
 
-            <a asp-controller="Sales"
-               asp-action="Index"
-               class="@(currentController == "Sales" ? "active" : "")">
+            <a asp-controller="Admin"
+               asp-action="SalesOfficers"
+               class="@(currentController == "Admin" && currentAction == "SalesOfficers" ? "active" : "")">
 
                 <i class="bi bi-person-workspace"></i>
 
