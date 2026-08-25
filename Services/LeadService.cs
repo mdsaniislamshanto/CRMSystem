@@ -764,6 +764,32 @@ namespace CRMSystem.Services
                     newAssignment.AssignedAt);
             }
         }
+
+        // For getting all unassigned leads
+        public async Task<List<UnassignedLeadViewModel>> GetUnassignedLeadsAsync()
+        {
+            return await _context.Leads
+                .Where(l =>
+                    l.Status == LeadStatus.New &&
+                    !l.IsDeleted &&
+                    l.IsActive)
+                .OrderByDescending(l => l.CreatedAt)
+                .Select(l => new UnassignedLeadViewModel
+                {
+                    LeadId = l.LeadId,
+                    LeadCode = l.LeadCode,
+                    LeadName = l.LeadName,
+                    CompanyName = l.CompanyName,
+                    Phone = l.Phone,
+                    Priority = l.Priority,
+                    Source = l.Source,
+                    CreatedAt = l.CreatedAt
+                })
+                .ToListAsync();
+        }
+
+      
+
     }
 
 

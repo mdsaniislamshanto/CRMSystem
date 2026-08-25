@@ -242,5 +242,18 @@ namespace CRMSystem.Controllers
             return View(model);
         }
 
+
+        // GET: Lead/Unassigned
+        [HttpGet]
+        public async Task<IActionResult> Unassigned()
+        {
+            ViewData["Title"] = "Assign Lead";
+            ViewData["Breadcrumb"] = "Assign Lead";
+
+            var leads = await _leadService.GetUnassignedLeadsAsync();
+
+            return View(leads);
+        }
+
     }
 }

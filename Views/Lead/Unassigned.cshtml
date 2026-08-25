@@ -1,0 +1,203 @@
+﻿@model IEnumerable<CRMSystem.Models.ViewModels.UnassignedLeadViewModel>
+
+@{
+    ViewData["Title"] = "Assign Lead";
+    Layout = "_AdminLayout";
+}
+
+<div class="container mt-4">
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show"
+             role="alert">
+
+            <i class="bi bi-check-circle-fill me-2"></i>
+
+            @TempData["Success"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+
+        </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold mb-1">
+                Assign Lead
+            </h2>
+
+            <p class="text-muted mb-0">
+                Leads waiting for Sales Officer assignment.
+            </p>
+        </div>
+
+        <a asp-action="Index"
+           class="btn btn-outline-secondary">
+
+            <i class="bi bi-list-task me-1"></i>
+
+            All Leads
+
+        </a>
+
+    </div>
+
+    <div class="card shadow-sm">
+
+        <div class="card-body">
+
+            @if (!Model.Any())
+            {
+                <div class="text-center py-5">
+
+                    <i class="bi bi-check-circle-fill text-success"
+                       style="font-size: 3rem;">
+                    </i>
+
+                    <h5 class="mt-3">
+                        No Unassigned Leads
+                    </h5>
+
+                    <p class="text-muted mb-0">
+                        All available leads have already been assigned.
+                    </p>
+
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+
+                    <table class="table table-bordered table-hover align-middle">
+
+                        <thead class="table-dark">
+
+                            <tr>
+
+                                <th>Lead Code</th>
+
+                                <th>Lead Name</th>
+
+                                <th>Company</th>
+
+                                <th>Phone</th>
+
+                                <th>Source</th>
+
+                                <th>Priority</th>
+
+                                <th>Created</th>
+
+                                <th width="100">Action</th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var lead in Model)
+                            {
+                                <tr>
+
+                                    <td>
+                                        @lead.LeadCode
+                                    </td>
+
+                                    <td>
+                                        @lead.LeadName
+                                    </td>
+
+                                    <td>
+                                        @(lead.CompanyName ?? "-")
+                                    </td>
+
+                                    <td>
+                                        @lead.Phone
+                                    </td>
+
+                                    <td>
+                                        @lead.Source
+                                    </td>
+
+                                    <td>
+
+                                        @switch (lead.Priority)
+                                        {
+                                            case CRMSystem.Enums.LeadPriority.High:
+
+                                                <span class="badge bg-danger">
+                                                    High
+                                                </span>
+
+                                                break;
+
+                                            case CRMSystem.Enums.LeadPriority.Medium:
+
+                                                <span class="badge bg-warning text-dark">
+                                                    Medium
+                                                </span>
+
+                                                break;
+
+                                            case CRMSystem.Enums.LeadPriority.Low:
+
+                                                <span class="badge bg-success">
+                                                    Low
+                                                </span>
+
+                                                break;
+
+                                            default:
+
+                                                <span class="badge bg-secondary">
+                                                    @lead.Priority
+                                                </span>
+
+                                                break;
+                                        }
+
+                                    </td>
+
+                                    <td>
+                                        @lead.CreatedAt.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")
+                                    </td>
+
+                                    <td>
+
+                                        <a asp-action="Assign"
+                                           asp-route-id="@lead.LeadId"
+                                           class="btn btn-sm btn-primary"
+                                           title="Assign Lead">
+
+                                            <i class="bi bi-person-check-fill"></i>
+
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -80,6 +80,10 @@ namespace CRMSystem.Services
 
             using var smtp = new SmtpClient();
 
+            // Disable certificate revocation check because the local
+            // environment cannot reach the certificate revocation service.
+            smtp.CheckCertificateRevocation = false;
+
             await smtp.ConnectAsync(
                 _emailSettings.Host,
                 _emailSettings.Port,

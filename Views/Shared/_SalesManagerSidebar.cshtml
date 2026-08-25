@@ -98,7 +98,11 @@
         <li>
 
             <a asp-controller="SalesManager"
-               asp-action="AssignLead">
+               asp-action="UnassignedLeads"
+               class="@(currentController == "SalesManager" &&
+                               currentAction == "UnassignedLeads"
+                               ? "active"
+                               : "")">
 
                 <i class="bi bi-person-check-fill"></i>
 
