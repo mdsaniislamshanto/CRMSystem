@@ -44,9 +44,16 @@ namespace CRMSystem.Services
             _environment = environment;
         }
 
-        public async Task SubmitFeedbackAsync(SubmitFeedbackViewModel model,long salesOfficerId)
+        public async Task SubmitFeedbackAsync(
+    SubmitFeedbackViewModel model,
+    long salesOfficerId)
         {
+            // =====================================================
+            // 1. Get Assignment + Related Lead
+            // =====================================================
+
             var assignment = await _context.LeadAssignments
+                .Include(a => a.Lead)
                 .FirstOrDefaultAsync(a => a.AssignmentId == model.AssignmentId);
 
             if (assignment == null)
@@ -54,42 +61,86 @@ namespace CRMSystem.Services
                 throw new Exception("Assignment not found.");
             }
 
+
+            // =====================================================
+            // 2. Security Check
+            // =====================================================
+
             if (assignment.SalesOfficerId != salesOfficerId)
             {
                 throw new Exception("Unauthorized feedback submission.");
             }
 
+
+            // =====================================================
+            // 3. Assignment Status Check
+            // =====================================================
+
             if (assignment.AssignmentStatus != AssignmentStatus.Accepted)
             {
-                throw new Exception("Only accepted assignments can submit feedback.");
+                throw new Exception(
+                    "Only accepted assignments can submit feedback.");
             }
+
+
+            // =====================================================
+            // 4. Lead Check
+            // =====================================================
+
+            if (assignment.Lead == null)
+            {
+                throw new Exception("Lead not found.");
+            }
+
+
+            // =====================================================
+            // 5. Validate Summary
+            // =====================================================
 
             if (string.IsNullOrWhiteSpace(model.Summary))
             {
                 throw new Exception("Summary is required.");
             }
 
-            if (model.ProofImage == null && model.VoiceRecording == null)
+
+            // =====================================================
+            // 6. Validate Proof
+            // =====================================================
+
+            if (model.ProofImage == null &&
+                model.VoiceRecording == null)
             {
-                throw new Exception("Please upload either a proof image or a voice recording.");
+                throw new Exception(
+                    "Please upload either a proof image or a voice recording.");
             }
+
+
+            // =====================================================
+            // 7. Validate Follow-up Date
+            // =====================================================
 
             if (model.Status != FeedbackStatus.Completed &&
                 model.Status != FeedbackStatus.Closed)
             {
                 if (!model.NextFollowUpDate.HasValue)
                 {
-                    throw new Exception("Next Follow-up Date is required.");
+                    throw new Exception(
+                        "Next Follow-up Date is required.");
                 }
 
                 if (model.NextFollowUpDate.Value.Date < DateTime.Today)
                 {
-                    throw new Exception("Next Follow-up Date cannot be earlier than today.");
+                    throw new Exception(
+                        "Next Follow-up Date cannot be earlier than today.");
                 }
             }
 
+
+            // =====================================================
+            // 8. Save Proof Image
+            // =====================================================
+
             string? imagePath = null;
-            string? voicePath = null;
 
             if (model.ProofImage != null)
             {
@@ -100,6 +151,13 @@ namespace CRMSystem.Services
                     MaxImageSize);
             }
 
+
+            // =====================================================
+            // 9. Save Voice Recording
+            // =====================================================
+
+            string? voicePath = null;
+
             if (model.VoiceRecording != null)
             {
                 voicePath = await SaveFileAsync(
@@ -108,6 +166,11 @@ namespace CRMSystem.Services
                     AllowedVoiceExtensions,
                     MaxVoiceSize);
             }
+
+
+            // =====================================================
+            // 10. Create Feedback
+            // =====================================================
 
             var feedback = new Feedback
             {
@@ -128,7 +191,34 @@ namespace CRMSystem.Services
                 NextFollowUpDate = model.NextFollowUpDate
             };
 
+
+            // =====================================================
+            // 11. Update Lead Status
+            // =====================================================
+
+            if (model.Status == FeedbackStatus.Completed ||
+                model.Status == FeedbackStatus.Closed)
+            {
+                // Final feedback status
+                assignment.Lead.Status = LeadStatus.Completed;
+            }
+            else
+            {
+                // Any ongoing feedback means lead is in progress
+                assignment.Lead.Status = LeadStatus.InProgress;
+            }
+
+
+            // =====================================================
+            // 12. Add Feedback
+            // =====================================================
+
             _context.Feedbacks.Add(feedback);
+
+
+            // =====================================================
+            // 13. Save Everything
+            // =====================================================
 
             await _context.SaveChangesAsync();
         }

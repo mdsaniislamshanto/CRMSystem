@@ -581,7 +581,7 @@ namespace CRMSystem.Services
 
             if (assignment.Lead != null)
             {
-                assignment.Lead.Status = LeadStatus.InProgress;
+                assignment.Lead.Status = LeadStatus.Accepted;
             }
 
             await _context.SaveChangesAsync();

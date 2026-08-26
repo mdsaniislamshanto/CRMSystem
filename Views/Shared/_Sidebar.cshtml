@@ -148,16 +148,21 @@
 
         <li>
 
-            <a asp-controller="Reports"
-               asp-action="Index"
-               class="@(currentController == "Reports" ? "active" : "")">
+            <!-- Reports -->
 
-                <i class="bi bi-graph-up-arrow"></i>
+            <li>
 
-                Reports
+                <a asp-controller="Report"
+                   asp-action="Index"
+                   class="@(currentController == "Report" ? "active" : "")">
 
-            </a>
+                    <i class="bi bi-graph-up-arrow"></i>
 
+                    Reports
+
+                </a>
+
+            </li>
         </li>
 
         <!-- Settings -->

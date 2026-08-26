@@ -44,6 +44,11 @@ builder.Services.AddScoped<ISLAService, SLAService>();
 //Registrer Backgraound SLAService for dependency injection
 builder.Services.AddHostedService<SLABackgroundService>();
 
+
+
+
+
+
 // Add Cookie Authentication
 builder.Services.AddAuthentication(
     CookieAuthenticationDefaults.AuthenticationScheme)
@@ -106,6 +111,13 @@ builder.Services.AddScoped<ILeadFeedbackService, LeadFeedbackService>();
 
 // Register GoogleFormsService
 builder.Services.AddScoped<IGoogleFormsService, GoogleFormsService>();
+
+//Register ReportService for dependency injection
+builder.Services.AddScoped<IReportService, ReportService>();
+
+
+
+
 
 var app = builder.Build();
 
