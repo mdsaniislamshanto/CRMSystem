@@ -1,0 +1,250 @@
+﻿@model CRMSystem.Models.ViewModels.ProfileViewModel
+
+@{
+    ViewData["Title"] = "Edit Profile";
+    Layout = "_SalesOfficerLayout";
+}
+
+<div class="container-fluid mt-4">
+
+    <!-- Page Header -->
+    <div class="mb-4">
+
+        <h2 class="fw-bold mb-1">
+            Edit Profile
+        </h2>
+
+        <p class="text-muted mb-0">
+            Request changes to your personal account information.
+        </p>
+
+    </div>
+
+
+    <!-- Approval Information -->
+    <div class="alert alert-info shadow-sm mb-4">
+
+        <div class="d-flex align-items-start">
+
+            <i class="bi bi-info-circle-fill me-2 mt-1"></i>
+
+            <div>
+
+                <strong>Admin Approval Required</strong>
+
+                <p class="mb-0 mt-1">
+
+                    Changes to your name, phone number,
+                    or email require approval from an Admin.
+                    Your current information will remain unchanged
+                    until the request is approved.
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Validation Summary -->
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger shadow-sm">
+
+            <div asp-validation-summary="ModelOnly"></div>
+
+        </div>
+    }
+
+
+    <!-- Edit Profile Card -->
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-body p-4">
+
+            <form asp-controller="SalesOfficerSettings"
+                  asp-action="EditProfile"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+
+                <div class="row">
+
+
+                    <!-- First Name -->
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="FirstName"
+                               class="form-label fw-semibold">
+                        </label>
+
+                        <input asp-for="FirstName"
+                               class="form-control"
+                               placeholder="Enter first name" />
+
+                        <span asp-validation-for="FirstName"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+
+                    <!-- Last Name -->
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="LastName"
+                               class="form-label fw-semibold">
+                        </label>
+
+                        <input asp-for="LastName"
+                               class="form-control"
+                               placeholder="Enter last name" />
+
+                        <span asp-validation-for="LastName"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+
+                    <!-- Email -->
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="Email"
+                               class="form-label fw-semibold">
+                        </label>
+
+                        <input asp-for="Email"
+                               type="email"
+                               class="form-control"
+                               placeholder="Enter email address" />
+
+                        <span asp-validation-for="Email"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+
+                    <!-- Phone -->
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="PhoneNumber"
+                               class="form-label fw-semibold">
+                        </label>
+
+                        <input asp-for="PhoneNumber"
+                               type="tel"
+                               class="form-control"
+                               placeholder="Enter phone number" />
+
+                        <span asp-validation-for="PhoneNumber"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+
+                    <!-- Employee Code -->
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="EmployeeCode"
+                               class="form-label fw-semibold">
+                        </label>
+
+                        <input asp-for="EmployeeCode"
+                               class="form-control"
+                               readonly />
+
+                        <small class="text-muted">
+                            Employee Code cannot be changed.
+                        </small>
+
+                    </div>
+
+
+                    <!-- Role -->
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="RoleName"
+                               class="form-label fw-semibold">
+                        </label>
+
+                        <input asp-for="RoleName"
+                               class="form-control"
+                               readonly />
+
+                        <small class="text-muted">
+                            Role can only be managed by an Admin.
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Buttons -->
+                <div class="d-flex gap-2 mt-3">
+
+                    <button type="submit"
+                            class="btn btn-primary">
+
+                        <i class="bi bi-send me-1"></i>
+
+                        Submit Change Request
+
+                    </button>
+
+
+                    <a asp-controller="SalesOfficerSettings"
+                       asp-action="Index"
+                       class="btn btn-outline-secondary">
+
+                        Cancel
+
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- Security Note -->
+    <div class="alert alert-secondary mt-4 shadow-sm">
+
+        <div class="d-flex align-items-start">
+
+            <i class="bi bi-shield-check me-2 mt-1"></i>
+
+            <div>
+
+                <strong>Directly Changeable Information</strong>
+
+                <p class="mb-0 mt-1">
+
+                    Your password and profile picture can be
+                    changed directly without Admin approval.
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+}

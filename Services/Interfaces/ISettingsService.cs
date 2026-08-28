@@ -48,6 +48,12 @@ namespace CRMSystem.Services.Interfaces
             ProfileViewModel model);
 
 
+        // Sales Officer direct profile image update
+        Task<ServiceResult> UpdateProfileImageAsync(
+            long userId,
+            IFormFile profileImage);
+
+
         // =====================================================
         // Password
         // =====================================================

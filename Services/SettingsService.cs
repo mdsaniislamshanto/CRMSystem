@@ -327,6 +327,181 @@ namespace CRMSystem.Services
 
 
         // =====================================================
+        // Direct Profile Image Update for sales officer
+        // =====================================================
+
+        public async Task<ServiceResult>
+            UpdateProfileImageAsync(
+                long userId,
+                IFormFile profileImage)
+        {
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+
+            if (user == null)
+            {
+                return new ServiceResult
+                {
+                    IsSuccess = false,
+                    Message = "User not found."
+                };
+            }
+
+
+            // =====================================================
+            // Validate File
+            // =====================================================
+
+            if (profileImage == null ||
+                profileImage.Length == 0)
+            {
+                return new ServiceResult
+                {
+                    IsSuccess = false,
+                    Message = "Please select a profile image."
+                };
+            }
+
+
+            // =====================================================
+            // Allowed Extensions
+            // =====================================================
+
+            var allowedExtensions = new[]
+            {
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".webp"
+    };
+
+
+            var extension =
+                Path.GetExtension(
+                    profileImage.FileName)
+                    .ToLowerInvariant();
+
+
+            if (!allowedExtensions.Contains(extension))
+            {
+                return new ServiceResult
+                {
+                    IsSuccess = false,
+                    Message =
+                        "Only JPG, JPEG, PNG and WEBP images are allowed."
+                };
+            }
+
+
+            // =====================================================
+            // File Size Validation
+            // =====================================================
+
+            const long maxFileSize =
+                2 * 1024 * 1024;
+
+
+            if (profileImage.Length > maxFileSize)
+            {
+                return new ServiceResult
+                {
+                    IsSuccess = false,
+                    Message =
+                        "Profile image must not exceed 2 MB."
+                };
+            }
+
+
+            // =====================================================
+            // Upload Folder
+            // =====================================================
+
+            var uploadsFolder =
+                Path.Combine(
+                    _environment.WebRootPath,
+                    "uploads",
+                    "profile-images");
+
+
+            Directory.CreateDirectory(
+                uploadsFolder);
+
+
+            // =====================================================
+            // Generate Unique File Name
+            // =====================================================
+
+            var fileName =
+                $"{Guid.NewGuid():N}{extension}";
+
+
+            var filePath =
+                Path.Combine(
+                    uploadsFolder,
+                    fileName);
+
+
+            // =====================================================
+            // Save New Image
+            // =====================================================
+
+            await using (var stream =
+                new FileStream(
+                    filePath,
+                    FileMode.Create))
+            {
+                await profileImage
+                    .CopyToAsync(stream);
+            }
+
+
+            // =====================================================
+            // Delete Old Image
+            // =====================================================
+
+            if (!string.IsNullOrWhiteSpace(
+                    user.ProfileImage))
+            {
+                var oldFileName =
+                    Path.GetFileName(
+                        user.ProfileImage);
+
+
+                var oldFilePath =
+                    Path.Combine(
+                        uploadsFolder,
+                        oldFileName);
+
+
+                if (File.Exists(oldFilePath))
+                {
+                    File.Delete(oldFilePath);
+                }
+            }
+
+
+            // =====================================================
+            // Store New Image Path
+            // =====================================================
+
+            user.ProfileImage =
+                $"/uploads/profile-images/{fileName}";
+
+
+            await _context.SaveChangesAsync();
+
+
+            return new ServiceResult
+            {
+                IsSuccess = true,
+                Message =
+                    "Profile picture updated successfully."
+            };
+        }
+
+
+
+        // =====================================================
         // Password
         // =====================================================
 

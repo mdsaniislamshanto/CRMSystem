@@ -128,6 +128,21 @@
 
         </li>
 
+        <!-- Settings -->
+        <li>
+
+            <a asp-controller="SalesOfficerSettings"
+               asp-action="Index"
+               class="@(currentController == "SalesOfficerSettings" && currentAction == "Index" ? "active" : "")">
+
+                <i class="bi bi-gear-fill"></i>
+
+                Settings
+
+            </a>
+
+        </li>
+
         <!-- Logout -->
         <li class="mt-auto">
 

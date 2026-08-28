@@ -1,0 +1,393 @@
+﻿@model CRMSystem.Models.ViewModels.ProfileViewModel
+
+@{
+    ViewData["Title"] = "Settings";
+    Layout = "_SalesOfficerLayout";
+}
+
+<div class="container-fluid mt-4">
+
+    <!-- =====================================================
+         Page Header
+         ===================================================== -->
+
+    <div class="mb-4">
+
+        <h2 class="fw-bold mb-1">
+            Settings
+        </h2>
+
+        <p class="text-muted mb-0">
+            Manage your account information and security.
+        </p>
+
+    </div>
+
+
+    <!-- =====================================================
+         Success Message
+         ===================================================== -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm"
+             role="alert">
+
+            <i class="bi bi-check-circle me-2"></i>
+
+            @TempData["Success"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+
+        </div>
+    }
+
+
+    <!-- =====================================================
+         Error Message
+         ===================================================== -->
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm"
+             role="alert">
+
+            <i class="bi bi-exclamation-triangle me-2"></i>
+
+            @TempData["Error"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+
+        </div>
+    }
+
+
+    <!-- =====================================================
+         Profile
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white border-0 p-4">
+
+            <h5 class="fw-bold mb-1">
+
+                <i class="bi bi-person-circle me-2"></i>
+
+                My Profile
+
+            </h5>
+
+            <p class="text-muted mb-0">
+
+                View your account information and request
+                changes where required.
+
+            </p>
+
+        </div>
+
+
+        <div class="card-body p-4">
+
+            <div class="row g-4">
+
+                <!-- Update Profile Picture -->
+                <form asp-controller="SalesOfficerSettings"
+                      asp-action="UpdateProfileImage"
+                      method="post"
+                      enctype="multipart/form-data"
+                      class="mt-2">
+
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+
+                        <label for="profileImage"
+                               class="form-label fw-semibold">
+                            Select New Profile Picture
+                        </label>
+
+                        <input type="file"
+                               id="profileImage"
+                               name="profileImage"
+                               class="form-control"
+                               accept=".jpg,.jpeg,.png,.webp" />
+
+                    </div>
+
+                    <button type="submit"
+                            class="btn btn-primary">
+
+                        <i class="bi bi-upload me-1"></i>
+
+                        Update Picture
+
+                    </button>
+
+                </form>
+
+
+                <!-- Profile Information -->
+
+                <div class="col-md-9">
+
+                    <div class="row g-3">
+
+                        <!-- First Name -->
+
+                        <div class="col-md-6">
+
+                            <label class="form-label
+                                fw-semibold">
+
+                                First Name
+
+                            </label>
+
+                            <div class="form-control bg-light">
+
+                                @Model.FirstName
+
+                            </div>
+
+                            <small class="text-muted">
+
+                                Requires Admin approval to change.
+
+                            </small>
+
+                        </div>
+
+
+                        <!-- Last Name -->
+
+                        <div class="col-md-6">
+
+                            <label class="form-label
+                                fw-semibold">
+
+                                Last Name
+
+                            </label>
+
+                            <div class="form-control bg-light">
+
+                                @(string.IsNullOrWhiteSpace(
+                                    Model.LastName)
+                                    ? "—"
+                                    : Model.LastName)
+
+                            </div>
+
+                            <small class="text-muted">
+
+                                Requires Admin approval to change.
+
+                            </small>
+
+                        </div>
+
+
+                        <!-- Email -->
+
+                        <div class="col-md-6">
+
+                            <label class="form-label
+                                fw-semibold">
+
+                                Email
+
+                            </label>
+
+                            <div class="form-control bg-light">
+
+                                @Model.Email
+
+                            </div>
+
+                            <small class="text-muted">
+
+                                Requires Admin approval to change.
+
+                            </small>
+
+                        </div>
+
+
+                        <!-- Phone -->
+
+                        <div class="col-md-6">
+
+                            <label class="form-label
+                                fw-semibold">
+
+                                Phone Number
+
+                            </label>
+
+                            <div class="form-control bg-light">
+
+                                @(string.IsNullOrWhiteSpace(
+                                    Model.PhoneNumber)
+                                    ? "—"
+                                    : Model.PhoneNumber)
+
+                            </div>
+
+                            <small class="text-muted">
+
+                                Requires Admin approval to change.
+
+                            </small>
+
+                        </div>
+
+
+                        <!-- Employee Code -->
+
+                        <div class="col-md-6">
+
+                            <label class="form-label
+                                fw-semibold">
+
+                                Employee Code
+
+                            </label>
+
+                            <div class="form-control bg-light">
+
+                                @Model.EmployeeCode
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Role -->
+
+                        <div class="col-md-6">
+
+                            <label class="form-label
+                                fw-semibold">
+
+                                Role
+
+                            </label>
+
+                            <div class="form-control bg-light">
+
+                                @Model.RoleName
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         Account Actions
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white border-0 p-4">
+
+            <h5 class="fw-bold mb-1">
+
+                <i class="bi bi-shield-lock me-2"></i>
+
+                Account & Security
+
+            </h5>
+
+            <p class="text-muted mb-0">
+
+                Manage information that you can update
+                directly.
+
+            </p>
+
+        </div>
+
+
+        <div class="card-body p-4">
+
+            <div class="d-flex flex-wrap gap-2">
+
+                <!-- Edit Profile -->
+
+                <a asp-controller="SalesOfficerSettings"
+                   asp-action="EditProfile"
+                   class="btn btn-primary">
+
+                    <i class="bi bi-pencil-square me-1"></i>
+
+                    Edit Profile
+
+                </a>
+
+
+                <!-- Change Password -->
+
+                <a asp-controller="SalesOfficerSettings"
+                   asp-action="ChangePassword"
+                   class="btn btn-outline-primary">
+
+                    <i class="bi bi-key me-1"></i>
+
+                    Change Password
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         Approval Notice
+         ===================================================== -->
+
+    <div class="alert alert-info border-0 shadow-sm">
+
+        <div class="d-flex">
+
+            <i class="bi bi-info-circle fs-5 me-3"></i>
+
+            <div>
+
+                <strong>Profile Change Approval</strong>
+
+                <div class="mt-1">
+
+                    Changes to your name, phone number,
+                    or email require approval from an Admin.
+
+                    Password and profile picture changes
+                    can be updated directly.
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
