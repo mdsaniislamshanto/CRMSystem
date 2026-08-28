@@ -18,13 +18,89 @@ namespace CRMSystem.Services
         }
 
         public async Task CreateNotificationAsync(
-            long userId,
-            NotificationType notificationType,
-            string title,
-            string message,
-            long? leadId = null,
-            long? assignmentId = null)
+    long userId,
+    NotificationType notificationType,
+    string title,
+    string message,
+    long? leadId = null,
+    long? assignmentId = null)
         {
+            // =====================================================
+            // Get System Notification Settings
+            // =====================================================
+
+            var settings = await _context.SystemSettings
+                .FirstOrDefaultAsync();
+
+            if (settings == null)
+            {
+                return;
+            }
+
+
+            // =====================================================
+            // Global Notification Check
+            // =====================================================
+
+            if (!settings.GlobalNotificationsEnabled)
+            {
+                return;
+            }
+
+
+            // =====================================================
+            // Notification Type Check
+            // =====================================================
+
+            bool notificationTypeEnabled = notificationType switch
+            {
+                NotificationType.LeadAssigned =>
+                    settings.LeadAssignmentNotificationEnabled,
+
+                NotificationType.AcceptanceSLAMissed =>
+                    settings.OverdueNotificationEnabled,
+
+                NotificationType.FirstFeedbackSLAMissed =>
+                    settings.FeedbackNotificationEnabled,
+
+                NotificationType.NextFeedbackOverdue =>
+                    settings.FollowUpNotificationEnabled,
+
+                _ => true
+            };
+
+
+            if (!notificationTypeEnabled)
+            {
+                return;
+            }
+
+
+            // =====================================================
+            // User Notification Preference
+            // =====================================================
+
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u =>
+                    u.UserId == userId &&
+                    u.IsActive);
+
+            if (user == null)
+            {
+                return;
+            }
+
+
+            if (!user.NotificationsEnabled)
+            {
+                return;
+            }
+
+
+            // =====================================================
+            // Create Notification
+            // =====================================================
+
             var notification = new Notification
             {
                 UserId = userId,

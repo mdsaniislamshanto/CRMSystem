@@ -20,6 +20,8 @@ namespace CRMSystem.Data
         public DbSet<Feedback> Feedbacks { get; set; }
         public DbSet<LeadCaptureLog> LeadCaptureLogs { get; set; }
         public DbSet<SystemSettings> SystemSettings { get; set; }
+        public DbSet<ProfileChangeRequest> ProfileChangeRequests { get; set; }
+        public DbSet<AutoAssignmentRequest> AutoAssignmentRequests { get; set; }
         public DbSet<GoogleOAuthCredential> GoogleOAuthCredentials { get; set; }
 
 

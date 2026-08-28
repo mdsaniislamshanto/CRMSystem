@@ -1,0 +1,197 @@
+﻿@model CRMSystem.Models.ViewModels.ProfileViewModel
+
+@{
+    ViewData["Title"] = "Edit Profile";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid mt-4">
+
+    <!-- Page Header -->
+    <div class="mb-4">
+
+        <h2 class="fw-bold mb-1">
+            Edit Profile
+        </h2>
+
+        <p class="text-muted mb-0">
+            Update your personal account information.
+        </p>
+
+    </div>
+
+
+    <!-- Validation Summary -->
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger shadow-sm">
+
+            <div asp-validation-summary="ModelOnly"></div>
+
+        </div>
+    }
+
+
+    <!-- Edit Profile Card -->
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-body p-4">
+
+            <form asp-controller="Settings"
+                  asp-action="EditProfile"
+                  method="post"
+                  enctype="multipart/form-data">
+
+
+
+                <!-- Profile Picture -->
+                <div class="mb-4">
+
+                    <label asp-for="ProfileImageFile"
+                           class="form-label fw-semibold">
+                    </label>
+
+
+                    @if (!string.IsNullOrWhiteSpace(Model.ProfileImage))
+                    {
+                        <div class="mb-3">
+
+                            <img src="@Model.ProfileImage"
+                                 alt="Profile Picture"
+                                 class="rounded-circle shadow-sm"
+                                 style="width: 110px;
+                            height: 110px;
+                            object-fit: cover;" />
+
+                        </div>
+                    }
+
+
+                    <input asp-for="ProfileImageFile"
+                           type="file"
+                           class="form-control"
+                           accept=".jpg,.jpeg,.png,.webp" />
+
+
+                    <small class="text-muted">
+                        Allowed formats: JPG, JPEG, PNG, WEBP.
+                        Maximum size: 2 MB.
+                    </small>
+
+                </div>
+
+
+
+                <!-- First Name -->
+                <div class="mb-3">
+
+                    <label asp-for="FirstName"
+                           class="form-label fw-semibold">
+                    </label>
+
+                    <input asp-for="FirstName"
+                           class="form-control"
+                           placeholder="Enter first name" />
+
+                    <span asp-validation-for="FirstName"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+
+                <!-- Last Name -->
+                <div class="mb-3">
+
+                    <label asp-for="LastName"
+                           class="form-label fw-semibold">
+                    </label>
+
+                    <input asp-for="LastName"
+                           class="form-control"
+                           placeholder="Enter last name" />
+
+                    <span asp-validation-for="LastName"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+
+                <!-- Email -->
+                <div class="mb-3">
+
+                    <label asp-for="Email"
+                           class="form-label fw-semibold">
+                    </label>
+
+                    <input asp-for="Email"
+                           class="form-control"
+                           placeholder="Enter email address" />
+
+                    <span asp-validation-for="Email"
+                          class="text-danger">
+                    </span>
+
+                    <small class="text-muted">
+                        As an Admin, you can change your email directly.
+                    </small>
+
+                </div>
+
+
+                <!-- Phone Number -->
+                <div class="mb-4">
+
+                    <label asp-for="PhoneNumber"
+                           class="form-label fw-semibold">
+                    </label>
+
+                    <input asp-for="PhoneNumber"
+                           class="form-control"
+                           placeholder="Enter phone number" />
+
+                    <span asp-validation-for="PhoneNumber"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+
+                <!-- Buttons -->
+                <div class="d-flex gap-2">
+
+                    <button type="submit"
+                            class="btn btn-primary">
+
+                        <i class="bi bi-check-lg me-1"></i>
+
+                        Save Changes
+
+                    </button>
+
+
+                    <a asp-controller="Settings"
+                       asp-action="Index"
+                       class="btn btn-outline-secondary">
+
+                        Cancel
+
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+}

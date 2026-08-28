@@ -1,0 +1,574 @@
+﻿@model CRMSystem.Models.ViewModels.AdminSettingsViewModel
+
+@{
+    ViewData["Title"] = "Settings";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid mt-4">
+
+    <!-- Page Header -->
+    <div class="mb-4">
+
+        <h2 class="fw-bold mb-1">
+            Settings
+        </h2>
+
+        <p class="text-muted mb-0">
+            Manage CRM system settings, notifications and your profile.
+        </p>
+
+    </div>
+
+
+    <!-- Success Message -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm"
+             role="alert">
+
+            <i class="bi bi-check-circle me-2"></i>
+
+            @TempData["Success"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close">
+            </button>
+
+        </div>
+    }
+
+
+    <!-- =====================================================
+         Auto Assignment
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body p-4">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <h5 class="fw-bold mb-1">
+                        Auto Lead Assignment
+                    </h5>
+
+                    <p class="text-muted mb-0">
+                        Automatically assign newly captured leads to available
+                        Sales Officers.
+                    </p>
+
+                </div>
+
+
+                <form asp-controller="Settings"
+                      asp-action="UpdateAutoAssignment"
+                      method="post">
+
+                    @Html.AntiForgeryToken()
+
+                    <div class="form-check form-switch">
+
+                        <input class="form-check-input"
+                               type="checkbox"
+                               role="switch"
+                               name="enabled"
+                               value="true"
+                        @(Model.AutoAssignmentEnabled ? "checked" : "")
+                               onchange="this.form.submit();" />
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+     Global Notifications
+     ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body p-4">
+
+            <div class="mb-4">
+
+                <h5 class="fw-bold mb-1">
+                    Notifications
+                </h5>
+
+                <p class="text-muted mb-0">
+                    Manage important CRM notification preferences.
+                </p>
+
+            </div>
+
+
+            <!-- =================================================
+             Global Notification Form
+             ================================================= -->
+
+            <form asp-controller="Settings"
+                  asp-action="UpdateGlobalNotifications"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+
+                <!-- =================================================
+                 Global Notifications
+                 ================================================= -->
+
+                <div class="d-flex justify-content-between align-items-center
+                    border-bottom py-3">
+
+                    <div>
+
+                        <h6 class="mb-1 fw-semibold">
+                            Global Notifications
+                        </h6>
+
+                        <small class="text-muted">
+                            Enable or disable CRM notifications for all users.
+                        </small>
+
+                    </div>
+
+
+                    <div class="form-check form-switch">
+
+                        <!-- Checkbox sends TRUE when ON -->
+                        <input class="form-check-input"
+                               type="checkbox"
+                               role="switch"
+                               name="globalNotificationsEnabled"
+                               value="true"
+                        @(Model.GlobalNotificationsEnabled
+                            ? "checked"
+                            : "") />
+
+                        <!-- Hidden value sends FALSE when checkbox is OFF -->
+                        <input type="hidden"
+                               name="globalNotificationsEnabled"
+                               value="false" />
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                 Lead Assignment Email
+                 ================================================= -->
+
+                <div class="d-flex justify-content-between align-items-center
+                    border-bottom py-3">
+
+                    <div>
+
+                        <h6 class="mb-1 fw-semibold">
+                            Lead Assignment Email
+                        </h6>
+
+                        <small class="text-muted">
+                            Send email notifications when a lead is assigned.
+                        </small>
+
+                    </div>
+
+
+                    <div class="form-check form-switch">
+
+                        <!-- Checkbox sends TRUE when ON -->
+                        <input class="form-check-input"
+                               type="checkbox"
+                               role="switch"
+                               name="leadAssignmentNotificationEnabled"
+                               value="true"
+                        @(Model.LeadAssignmentNotificationEnabled
+                            ? "checked"
+                            : "") />
+
+                        <!-- Hidden value sends FALSE when checkbox is OFF -->
+                        <input type="hidden"
+                               name="leadAssignmentNotificationEnabled"
+                               value="false" />
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                 Follow-up Reminder
+                 ================================================= -->
+
+                <div class="d-flex justify-content-between align-items-center
+                    border-bottom py-3">
+
+                    <div>
+
+                        <h6 class="mb-1 fw-semibold">
+                            Follow-up Reminder
+                        </h6>
+
+                        <small class="text-muted">
+                            Receive reminders for upcoming lead follow-ups.
+                        </small>
+
+                    </div>
+
+
+                    <div class="form-check form-switch">
+
+                        <!-- Checkbox sends TRUE when ON -->
+                        <input class="form-check-input"
+                               type="checkbox"
+                               role="switch"
+                               name="followUpNotificationEnabled"
+                               value="true"
+                        @(Model.FollowUpNotificationEnabled
+                            ? "checked"
+                            : "") />
+
+                        <!-- Hidden value sends FALSE when checkbox is OFF -->
+                        <input type="hidden"
+                               name="followUpNotificationEnabled"
+                               value="false" />
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                 Feedback Notification
+                 ================================================= -->
+
+                <div class="d-flex justify-content-between align-items-center
+                    border-bottom py-3">
+
+                    <div>
+
+                        <h6 class="mb-1 fw-semibold">
+                            Feedback Notification
+                        </h6>
+
+                        <small class="text-muted">
+                            Receive notifications when feedback is submitted.
+                        </small>
+
+                    </div>
+
+
+                    <div class="form-check form-switch">
+
+                        <!-- Checkbox sends TRUE when ON -->
+                        <input class="form-check-input"
+                               type="checkbox"
+                               role="switch"
+                               name="feedbackNotificationEnabled"
+                               value="true"
+                        @(Model.FeedbackNotificationEnabled
+                            ? "checked"
+                            : "") />
+
+                        <!-- Hidden value sends FALSE when checkbox is OFF -->
+                        <input type="hidden"
+                               name="feedbackNotificationEnabled"
+                               value="false" />
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                 Overdue Notification
+                 ================================================= -->
+
+                <div class="d-flex justify-content-between align-items-center
+                    py-3">
+
+                    <div>
+
+                        <h6 class="mb-1 fw-semibold">
+                            Overdue Notification
+                        </h6>
+
+                        <small class="text-muted">
+                            Receive notifications for overdue activities.
+                        </small>
+
+                    </div>
+
+
+                    <div class="form-check form-switch">
+
+                        <!-- Checkbox sends TRUE when ON -->
+                        <input class="form-check-input"
+                               type="checkbox"
+                               role="switch"
+                               name="overdueNotificationEnabled"
+                               value="true"
+                        @(Model.OverdueNotificationEnabled
+                            ? "checked"
+                            : "") />
+
+                        <!-- Hidden value sends FALSE when checkbox is OFF -->
+                        <input type="hidden"
+                               name="overdueNotificationEnabled"
+                               value="false" />
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                 Save Button
+                 ================================================= -->
+
+                <div class="mt-4">
+
+                    <button type="submit"
+                            class="btn btn-primary">
+
+                        <i class="bi bi-check-lg me-1"></i>
+
+                        Save Notification Settings
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+     My Notifications
+     ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body p-4">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <h5 class="fw-bold mb-1">
+                        My Notifications
+                    </h5>
+
+                    <p class="text-muted mb-0">
+                        Control notifications for your own Admin account.
+                    </p>
+
+                </div>
+
+
+                <!-- =================================================
+                 Admin Personal Notification Form
+                 ================================================= -->
+
+                <form asp-controller="Settings"
+                      asp-action="UpdateMyNotifications"
+                      method="post">
+
+                    @Html.AntiForgeryToken()
+
+
+                    <div class="form-check form-switch">
+
+                        <!-- Checkbox sends TRUE when ON -->
+                        <input class="form-check-input"
+                               type="checkbox"
+                               role="switch"
+                               name="enabled"
+                               value="true"
+                        @(Model.MyNotificationsEnabled
+                            ? "checked"
+                            : "")
+                               onchange="this.form.submit();" />
+
+                        <!-- Hidden value sends FALSE when OFF -->
+                        <input type="hidden"
+                               name="enabled"
+                               value="false" />
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         Profile
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body p-4">
+
+            <div class="mb-4">
+
+                <h5 class="fw-bold mb-1">
+                    My Profile
+                </h5>
+
+                <p class="text-muted mb-0">
+                    Manage your personal account information and security.
+                </p>
+
+            </div>
+
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
+
+                    <label class="form-label fw-semibold">
+                        Name
+                    </label>
+
+                    <input type="text"
+                           class="form-control"
+                           value="@Model.Profile.FirstName @Model.Profile.LastName"
+                           disabled />
+
+                </div>
+
+
+                <div class="col-md-6">
+
+                    <label class="form-label fw-semibold">
+                        Phone Number
+                    </label>
+
+                    <input type="text"
+                           class="form-control"
+                           value="@Model.Profile.PhoneNumber"
+                           disabled />
+
+                </div>
+
+
+                <div class="col-md-6">
+
+                    <label class="form-label fw-semibold">
+                        Email
+                    </label>
+
+                    <input type="email"
+                           class="form-control"
+                           value="@Model.Profile.Email"
+                           disabled />
+
+                </div>
+
+
+                <div class="col-md-6">
+
+                    <label class="form-label fw-semibold">
+                        Profile Picture
+                    </label>
+
+                    <input type="file"
+                           class="form-control"
+                           disabled />
+
+                </div>
+
+            </div>
+
+
+            <div class="mt-4">
+
+                <a asp-controller="Settings"
+                   asp-action="EditProfile"
+                   class="btn btn-outline-primary me-2">
+
+                    <i class="bi bi-pencil me-1"></i>
+
+                    Edit Profile
+
+                </a>
+
+
+                <a asp-controller="Settings"
+                   asp-action="ChangePassword"
+                   class="btn btn-outline-secondary">
+
+                    <i class="bi bi-key me-1"></i>
+
+                    Change Password
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         Approval Requests
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body p-4">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <h5 class="fw-bold mb-1">
+                        Approval Requests
+                    </h5>
+
+                    <p class="text-muted mb-0">
+                        Review profile and auto-assignment requests from
+                        Sales Managers and Sales Officers.
+                    </p>
+
+                </div>
+
+
+                <a asp-controller="Settings"
+                   asp-action="ApprovalRequests"
+                   class="btn btn-outline-primary">
+
+                    <i class="bi bi-list-check me-1"></i>
+
+                    View Requests
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

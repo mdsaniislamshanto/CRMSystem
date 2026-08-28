@@ -4,6 +4,7 @@ using CRMSystem.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CRMSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260826154145_AddSettingsApprovalRequests")]
+    partial class AddSettingsApprovalRequests
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -673,25 +676,10 @@ namespace CRMSystem.Migrations
                     b.Property<long?>("DeletedBy")
                         .HasColumnType("bigint");
 
-                    b.Property<bool>("FeedbackNotificationEnabled")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool>("FollowUpNotificationEnabled")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool>("GlobalNotificationsEnabled")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<bool>("IsActive")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool>("LeadAssignmentNotificationEnabled")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool>("OverdueNotificationEnabled")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<DateTime?>("UpdatedAt")
@@ -758,9 +746,6 @@ namespace CRMSystem.Migrations
 
                     b.Property<DateTime?>("LastPasswordChangedAt")
                         .HasColumnType("datetime(6)");
-
-                    b.Property<bool>("NotificationsEnabled")
-                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()

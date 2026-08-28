@@ -51,6 +51,8 @@ namespace CRMSystem.Models.Entities
         public DateTime? LastPasswordChangedAt { get; set; }
         public bool IsActive { get; set; } = true;
 
+        public bool NotificationsEnabled { get; set; } = true;
+
         // Navigation Property
         [ForeignKey(nameof(RoleId))]
         public Role? Role { get; set; }
