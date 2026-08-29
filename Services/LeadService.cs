@@ -17,17 +17,20 @@ namespace CRMSystem.Services
         private readonly IEmailService _emailService;
         private readonly IAutoAssignmentService _autoAssignmentService;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly INotificationService _notificationService; 
 
         public LeadService(
             ApplicationDbContext context,
             IEmailService emailService,
             IAutoAssignmentService autoAssignmentService,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            INotificationService notificationService)
         {
             _context = context;
             _emailService = emailService;
             _autoAssignmentService = autoAssignmentService;
             _httpContextAccessor = httpContextAccessor;
+            _notificationService = notificationService;
         }
 
 
@@ -523,6 +526,8 @@ namespace CRMSystem.Services
                 throw new Exception("Admin not found.");
             }
 
+
+            // Email Notification for Sales Officer
             await _emailService.SendLeadAssignmentEmailAsync(
                 salesOfficer.Email,
                 $"{salesOfficer.FirstName} {salesOfficer.LastName}",
@@ -530,6 +535,16 @@ namespace CRMSystem.Services
                 lead.LeadName,
                 $"{admin.FirstName} {admin.LastName}",
                 assignment.AssignedAt);
+
+
+            // Create In-App Notification for Sales Officer
+            await _notificationService.CreateNotificationAsync(
+                salesOfficer.UserId,
+                NotificationType.LeadAssigned,
+                "New Lead Assigned",
+                $"A new lead ({lead.LeadCode}) has been assigned to you.",
+                lead.LeadId,
+                assignment.AssignmentId);
         }
 
         //for Sales Officer Login করার পরে শুধুমাত্র তার নিজের Assigned Leads দেখতে পারবে

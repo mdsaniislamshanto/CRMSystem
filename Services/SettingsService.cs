@@ -1,4 +1,5 @@
-﻿using CRMSystem.Data;
+﻿using CRMSystem.Constants;
+using CRMSystem.Data;
 using CRMSystem.Enums;
 using CRMSystem.Models.DTOs;
 using CRMSystem.Models.Entities;
@@ -14,10 +15,13 @@ namespace CRMSystem.Services
 
         private readonly IWebHostEnvironment _environment;
 
-        public SettingsService(ApplicationDbContext context, IWebHostEnvironment environment)
+        private readonly INotificationService _notificationService;
+
+        public SettingsService(ApplicationDbContext context, IWebHostEnvironment environment, INotificationService notificationService)
         {
             _context = context;
             _environment = environment;
+            _notificationService = notificationService;
         }
 
 
@@ -48,7 +52,7 @@ namespace CRMSystem.Services
 
             await _context.SaveChangesAsync();
         }
-                
+
 
         // =====================================================
         // Notification Settings
@@ -60,7 +64,9 @@ namespace CRMSystem.Services
             bool enabled)
         {
             var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.UserId == userId);
+                .Include(u => u.Role)
+                .FirstOrDefaultAsync(u =>
+                    u.UserId == userId);
 
             if (user == null)
             {
@@ -68,11 +74,22 @@ namespace CRMSystem.Services
                     "User not found.");
             }
 
+
+            // =====================================================
+            // Admin-only Personal Notification Preference
+            // =====================================================
+
+            if (user.Role?.RoleKey != RoleKeys.Admin)
+            {
+                throw new InvalidOperationException(
+                    "Only Admin can change personal notification settings.");
+            }
+
+
             user.NotificationsEnabled = enabled;
 
             await _context.SaveChangesAsync();
         }
-
 
         // =====================================================
         // Notification Settings
@@ -931,6 +948,15 @@ namespace CRMSystem.Services
 
             await _context.SaveChangesAsync();
 
+            //for in app notification to user about approval of profile change request
+            await _notificationService.CreateNotificationAsync(
+                request.UserId,
+                NotificationType.ProfileChangeApproved,
+                "Profile Change Approved",
+                $"Your {request.FieldName} change request has been approved by Admin.",
+                null,
+                null);
+
             return new ServiceResult
             {
                 IsSuccess = true,
@@ -985,10 +1011,19 @@ namespace CRMSystem.Services
 
             await _context.SaveChangesAsync();
 
+            //for in app notification to user about rejection of profile change request
+            await _notificationService.CreateNotificationAsync(
+                request.UserId,
+                NotificationType.ProfileChangeRejected,
+                "Profile Change Rejected",
+                $"Your {request.FieldName} change request has been rejected by Admin.",
+                null,
+                null);
+
             return new ServiceResult
             {
                 IsSuccess = true,
-                Message = "Profile change request rejected."
+                Message = "Profile change request rejected successfully."
             };
         }
 

@@ -8,6 +8,10 @@
 
         FirstFeedbackSLAMissed,
 
-        NextFeedbackOverdue
+        NextFeedbackOverdue,
+
+        ProfileChangeApproved,
+
+        ProfileChangeRejected
     }
 }

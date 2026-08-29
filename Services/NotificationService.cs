@@ -1,4 +1,5 @@
-﻿using CRMSystem.Data;
+﻿using CRMSystem.Constants;
+using CRMSystem.Data;
 using CRMSystem.Enums;
 using CRMSystem.Models.Entities;
 using CRMSystem.Models.ViewModels;
@@ -81,9 +82,10 @@ namespace CRMSystem.Services
             // =====================================================
 
             var user = await _context.Users
-                .FirstOrDefaultAsync(u =>
-                    u.UserId == userId &&
-                    u.IsActive);
+            .Include(u => u.Role)
+            .FirstOrDefaultAsync(u =>
+          u.UserId == userId &&
+          u.IsActive);
 
             if (user == null)
             {
@@ -91,7 +93,18 @@ namespace CRMSystem.Services
             }
 
 
-            if (!user.NotificationsEnabled)
+            // =====================================================
+            // Admin Personal Notification Preference
+            // =====================================================
+            //
+            // Only Admin can disable personal notifications.
+            // Sales Manager / Sales Officer / other roles
+            // will always receive notifications when global
+            // notifications are enabled.
+            //
+
+            if (user.Role?.RoleKey == RoleKeys.Admin &&
+                !user.NotificationsEnabled)
             {
                 return;
             }
