@@ -1142,6 +1142,10 @@ namespace CRMSystem.Services
         // Approve Auto Assignment Request
         // =====================================================
 
+        // =====================================================
+        // Approve Auto Assignment Request
+        // =====================================================
+
         public async Task<ServiceResult>
             ApproveAutoAssignmentRequestAsync(
                 long requestId,
@@ -1173,11 +1177,26 @@ namespace CRMSystem.Services
                 };
             }
 
+
+            // =====================================================
+            // Get Current System Settings
+            // =====================================================
+
             var settings =
                 await GetSettingsAsync();
 
+
+            // =====================================================
+            // Apply Requested Auto Assignment Status
+            // =====================================================
+
             settings.AutoAssignmentEnabled =
                 request.RequestedStatus;
+
+
+            // =====================================================
+            // Update Request Status
+            // =====================================================
 
             request.Status =
                 ApprovalStatus.Approved;
@@ -1193,7 +1212,32 @@ namespace CRMSystem.Services
                     ? null
                     : adminComment.Trim();
 
+
+            // =====================================================
+            // Save Approval
+            // =====================================================
+
             await _context.SaveChangesAsync();
+
+
+            // =====================================================
+            // Notify Sales Manager
+            // =====================================================
+
+            var requestedState =
+                request.RequestedStatus
+                    ? "ON"
+                    : "OFF";
+
+
+            await _notificationService.CreateNotificationAsync(
+                request.RequestedBy,
+                NotificationType.AutoAssignmentApproved,
+                "Auto Assignment Request Approved",
+                $"Your Auto Lead Assignment {requestedState} request has been approved by Admin.",
+                null,
+                null);
+
 
             return new ServiceResult
             {
@@ -1203,6 +1247,9 @@ namespace CRMSystem.Services
             };
         }
 
+        // =====================================================
+        // Reject Auto Assignment Request
+        // =====================================================
 
         // =====================================================
         // Reject Auto Assignment Request
@@ -1239,6 +1286,11 @@ namespace CRMSystem.Services
                 };
             }
 
+
+            // =====================================================
+            // Update Request Status
+            // =====================================================
+
             request.Status =
                 ApprovalStatus.Rejected;
 
@@ -1253,7 +1305,32 @@ namespace CRMSystem.Services
                     ? null
                     : adminComment.Trim();
 
+
+            // =====================================================
+            // Save Rejection
+            // =====================================================
+
             await _context.SaveChangesAsync();
+
+
+            // =====================================================
+            // Notify Sales Manager
+            // =====================================================
+
+            var requestedState =
+                request.RequestedStatus
+                    ? "ON"
+                    : "OFF";
+
+
+            await _notificationService.CreateNotificationAsync(
+                request.RequestedBy,
+                NotificationType.AutoAssignmentRejected,
+                "Auto Assignment Request Rejected",
+                $"Your Auto Lead Assignment {requestedState} request has been rejected by Admin.",
+                null,
+                null);
+
 
             return new ServiceResult
             {
@@ -1261,6 +1338,63 @@ namespace CRMSystem.Services
                 Message =
                     "Auto Assignment request rejected."
             };
+        }
+
+
+        // =====================================================
+        // Get Sales Manager's Auto Assignment Requests
+        // =====================================================
+
+        public async Task<List<AutoAssignmentRequestViewModel>>
+            GetMyAutoAssignmentRequestsAsync(
+                long salesManagerId)
+        {
+            return await _context.AutoAssignmentRequests
+                .AsNoTracking()
+                .Where(r =>
+                    r.RequestedBy == salesManagerId)
+                .OrderByDescending(r =>
+                    r.RequestedAt)
+                .Select(r => new AutoAssignmentRequestViewModel
+                {
+                    RequestId = r.RequestId,
+
+                    RequestedBy = r.RequestedBy,
+
+                    EmployeeCode =
+                        r.Requester != null
+                            ? r.Requester.EmployeeCode
+                            : string.Empty,
+
+                    SalesManagerName =
+                        r.Requester != null
+                            ? r.Requester.FullName
+                            : string.Empty,
+
+                    RequestedStatus =
+                        r.RequestedStatus,
+
+                    Status =
+                        r.Status,
+
+                    RequestedAt =
+                        r.RequestedAt,
+
+                    ReviewedBy =
+                        r.ReviewedBy,
+
+                    ReviewerName =
+                        r.Reviewer != null
+                            ? r.Reviewer.FullName
+                            : null,
+
+                    ReviewedAt =
+                        r.ReviewedAt,
+
+                    AdminComment =
+                        r.AdminComment
+                })
+                .ToListAsync();
         }
     }
 }

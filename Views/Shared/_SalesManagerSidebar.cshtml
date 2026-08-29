@@ -175,8 +175,9 @@
         <!-- Settings -->
         <li>
 
-            <a asp-controller="SalesManager"
-               asp-action="Settings">
+            <a asp-controller="SalesManagerSettings"
+               asp-action="Index"
+               class="@(currentController == "SalesManagerSettings" ? "active" : "")">
 
                 <i class="bi bi-gear-fill"></i>
 

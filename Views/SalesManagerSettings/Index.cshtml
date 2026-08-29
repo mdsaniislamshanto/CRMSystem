@@ -1,0 +1,1094 @@
+﻿@model CRMSystem.Models.ViewModels.ProfileViewModel
+
+@{
+    ViewData["Title"] = "Settings";
+    Layout = "_SalesManagerLayout";
+
+    // =====================================================
+    // Auto Assignment Current Status
+    // =====================================================
+
+    bool autoAssignmentEnabled =
+        ViewBag.AutoAssignmentEnabled != null &&
+        (bool)ViewBag.AutoAssignmentEnabled;
+
+
+    // =====================================================
+    // Auto Assignment Requests
+    // =====================================================
+
+    var autoAssignmentRequests =
+        ViewBag.AutoAssignmentRequests
+        as List<CRMSystem.Models.ViewModels.AutoAssignmentRequestViewModel>
+        ?? new List<CRMSystem.Models.ViewModels.AutoAssignmentRequestViewModel>();
+
+
+    // =====================================================
+    // Current Request
+    // =====================================================
+    // Pending request gets priority.
+    // If there is no pending request, the latest request
+    // based on RequestedAt will be displayed.
+
+    var currentAutoAssignmentRequest =
+        autoAssignmentRequests
+            .OrderByDescending(r =>
+                r.Status == CRMSystem.Enums.ApprovalStatus.Pending)
+            .ThenByDescending(r => r.RequestedAt)
+            .FirstOrDefault();
+
+
+    // =====================================================
+    // Formatted Request Dates
+    // =====================================================
+
+    string requestedAtText = "—";
+
+    string reviewedAtText = "—";
+
+
+    if (currentAutoAssignmentRequest != null)
+    {
+        requestedAtText =
+            currentAutoAssignmentRequest.RequestedAt
+                .ToLocalTime()
+                .ToString("dd MMM yyyy, hh:mm tt");
+
+
+        if (currentAutoAssignmentRequest.ReviewedAt.HasValue)
+        {
+            reviewedAtText =
+                currentAutoAssignmentRequest.ReviewedAt.Value
+                    .ToLocalTime()
+                    .ToString("dd MMM yyyy, hh:mm tt");
+        }
+    }
+}
+
+
+<div class="container-fluid py-4">
+
+
+    <!-- =====================================================
+         Page Header
+         ===================================================== -->
+
+    <div class="d-flex justify-content-between
+        align-items-center
+        flex-wrap
+        gap-3
+        mb-4">
+
+        <div>
+
+            <div class="d-flex align-items-center gap-2 mb-1">
+
+                <i class="bi bi-gear-fill text-primary fs-4"></i>
+
+                <h2 class="fw-bold mb-0">
+                    Settings
+                </h2>
+
+            </div>
+
+            <p class="text-muted mb-0">
+                Manage your profile, security and system requests.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         Profile Card
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+
+        <div class="card-body p-4">
+
+
+            <!-- Profile Header -->
+
+            <div class="d-flex justify-content-between
+                align-items-center
+                flex-wrap
+                gap-3
+                mb-4">
+
+                <div>
+
+                    <h5 class="fw-bold mb-1">
+
+                        <i class="bi bi-person-circle
+                        text-primary
+                        me-2"></i>
+
+                        My Profile
+
+                    </h5>
+
+                    <p class="text-muted small mb-0">
+
+                        Manage your personal account information.
+
+                    </p>
+
+                </div>
+
+
+                <!-- Edit Profile -->
+
+                <a asp-controller="SalesManagerSettings"
+                   asp-action="EditProfile"
+                   class="btn btn-primary rounded-3 px-4">
+
+                    <i class="bi bi-pencil-square me-1"></i>
+
+                    Edit Profile
+
+                </a>
+
+            </div>
+
+
+            <div class="row g-4 align-items-center">
+
+
+                <!-- =================================================
+                     Profile Picture
+                     ================================================= -->
+
+                <div class="col-lg-3 col-md-4 text-center">
+
+                    <div class="profile-image-wrapper mx-auto">
+
+                        @if (!string.IsNullOrWhiteSpace(Model.ProfileImage))
+                        {
+                            <img src="@Model.ProfileImage"
+                                 alt="Profile Image"
+                                 class="rounded-circle shadow-sm profile-image" />
+                        }
+                        else
+                        {
+                            <div class="profile-placeholder">
+
+                                <i class="bi bi-person-fill"></i>
+
+                            </div>
+                        }
+
+                    </div>
+
+
+                    <!-- Update Profile Picture -->
+
+                    <form asp-controller="SalesManagerSettings"
+                          asp-action="UpdateProfileImage"
+                          method="post"
+                          enctype="multipart/form-data"
+                          class="mt-3">
+
+                        @Html.AntiForgeryToken()
+
+
+                        <input type="file"
+                               name="profileImage"
+                               class="form-control form-control-sm rounded-3 mb-2"
+                               accept=".jpg,.jpeg,.png,.webp" />
+
+
+                        <button type="submit"
+                                class="btn btn-outline-primary
+                            btn-sm
+                            rounded-3
+                            px-3">
+
+                            <i class="bi bi-camera me-1"></i>
+
+                            Update Picture
+
+                        </button>
+
+                    </form>
+
+
+                    <small class="text-muted d-block mt-2">
+
+                        JPG, PNG or WEBP
+
+                    </small>
+
+                </div>
+
+
+                <!-- =================================================
+                     Profile Information
+                     ================================================= -->
+
+                <div class="col-lg-9 col-md-8">
+
+                    <div class="row g-3">
+
+
+                        <!-- Full Name -->
+
+                        <div class="col-md-6">
+
+                            <div class="profile-info-box">
+
+                                <span class="profile-label">
+
+                                    <i class="bi bi-person me-1"></i>
+
+                                    Full Name
+
+                                </span>
+
+                                <div class="profile-value">
+
+                                    @Model.FirstName @Model.LastName
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Email -->
+
+                        <div class="col-md-6">
+
+                            <div class="profile-info-box">
+
+                                <span class="profile-label">
+
+                                    <i class="bi bi-envelope me-1"></i>
+
+                                    Email
+
+                                </span>
+
+                                <div class="profile-value">
+
+                                    @Model.Email
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Phone -->
+
+                        <div class="col-md-6">
+
+                            <div class="profile-info-box">
+
+                                <span class="profile-label">
+
+                                    <i class="bi bi-telephone me-1"></i>
+
+                                    Phone Number
+
+                                </span>
+
+                                <div class="profile-value">
+
+                                    @if (!string.IsNullOrWhiteSpace(Model.PhoneNumber))
+                                    {
+                                        @Model.PhoneNumber
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">
+                                            Not provided
+                                        </span>
+                                    }
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Employee Code -->
+
+                        <div class="col-md-6">
+
+                            <div class="profile-info-box">
+
+                                <span class="profile-label">
+
+                                    <i class="bi bi-person-badge me-1"></i>
+
+                                    Employee Code
+
+                                </span>
+
+                                <div class="profile-value">
+
+                                    @Model.EmployeeCode
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Role -->
+
+                        <div class="col-md-6">
+
+                            <div class="profile-info-box">
+
+                                <span class="profile-label">
+
+                                    <i class="bi bi-shield-check me-1"></i>
+
+                                    Role
+
+                                </span>
+
+                                <div class="profile-value">
+
+                                    <span class="badge
+                                        bg-primary-subtle
+                                        text-primary
+                                        rounded-pill
+                                        px-3 py-2">
+
+                                        @Model.RoleName
+
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Profile Change Information -->
+
+                        <div class="col-md-6">
+
+                            <div class="profile-info-box">
+
+                                <span class="profile-label">
+
+                                    <i class="bi bi-info-circle me-1"></i>
+
+                                    Profile Changes
+
+                                </span>
+
+                                <div class="profile-value small">
+
+                                    Name, email and phone changes
+                                    require Admin approval.
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         Security Card
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+
+        <div class="card-body p-4">
+
+            <div class="d-flex justify-content-between
+                align-items-center
+                flex-wrap
+                gap-3">
+
+
+                <div class="d-flex align-items-start">
+
+                    <div class="settings-icon
+                        bg-primary-subtle
+                        text-primary
+                        me-3">
+
+                        <i class="bi bi-shield-lock-fill"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <h5 class="fw-bold mb-1">
+                            Security
+                        </h5>
+
+                        <p class="text-muted small mb-0">
+
+                            Manage your account password and security.
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Change Password -->
+
+                <a asp-controller="SalesManagerSettings"
+                   asp-action="ChangePassword"
+                   class="btn btn-outline-primary rounded-3 px-4">
+
+                    <i class="bi bi-key me-1"></i>
+
+                    Change Password
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         Auto Lead Assignment Card
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+
+        <div class="card-body p-4">
+
+
+            <!-- Header -->
+
+            <div class="d-flex justify-content-between
+                align-items-start
+                flex-wrap
+                gap-3
+                mb-4">
+
+
+                <div class="d-flex align-items-start">
+
+                    <div class="settings-icon
+                        bg-success-subtle
+                        text-success
+                        me-3">
+
+                        <i class="bi bi-arrow-repeat"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <h5 class="fw-bold mb-1">
+                            Auto Lead Assignment
+                        </h5>
+
+                        <p class="text-muted small mb-0">
+
+                            Request Admin approval to change
+                            automatic lead assignment.
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Current Status -->
+                @if (autoAssignmentEnabled)
+                {
+                    <span class="badge
+                        bg-success-subtle
+                        text-success
+                        rounded-pill
+                        px-3 py-2">
+
+                        <i class="bi bi-check-circle me-1"></i>
+
+                        Currently ON
+
+                    </span>
+                }
+                else
+                {
+                    <span class="badge
+                        bg-secondary-subtle
+                        text-secondary
+                        rounded-pill
+                        px-3 py-2">
+
+                        <i class="bi bi-x-circle me-1"></i>
+
+                        Currently OFF
+
+                    </span>
+                }
+
+            </div>
+
+
+            <!-- Information -->
+
+            <div class="alert alert-warning
+                border-0
+                rounded-3
+                d-flex
+                align-items-start">
+
+                <i class="bi bi-info-circle-fill me-2 mt-1"></i>
+
+
+                <div>
+
+                    <strong>
+                        Admin Approval Required
+                    </strong>
+
+
+                    <div class="small mt-1">
+
+                        Changing Auto Lead Assignment requires
+                        approval from an Admin.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Request Button -->
+
+            <div class="mt-3">
+
+                @if (!autoAssignmentEnabled)
+                {
+                    <form asp-controller="SalesManagerSettings"
+                          asp-action="RequestAutoAssignment"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+
+                        <input type="hidden"
+                               name="enabled"
+                               value="true" />
+
+
+                        <button type="submit"
+                                class="btn btn-success rounded-3 px-4">
+
+                            <i class="bi bi-check-circle me-1"></i>
+
+                            Request ON
+
+                        </button>
+
+                    </form>
+                }
+                else
+                {
+                    <form asp-controller="SalesManagerSettings"
+                          asp-action="RequestAutoAssignment"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+
+                        <input type="hidden"
+                               name="enabled"
+                               value="false" />
+
+
+                        <button type="submit"
+                                class="btn btn-outline-danger rounded-3 px-4">
+
+                            <i class="bi bi-x-circle me-1"></i>
+
+                            Request OFF
+
+                        </button>
+
+                    </form>
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         Current Auto Assignment Request
+         ===================================================== -->
+    @if (currentAutoAssignmentRequest != null)
+    {
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+
+            <div class="card-body p-4">
+
+
+                <!-- Header -->
+
+                <div class="d-flex justify-content-between
+                    align-items-center
+                    flex-wrap
+                    gap-3
+                    mb-4">
+
+
+                    <div class="d-flex align-items-start">
+
+                        <div class="settings-icon
+                            bg-info-subtle
+                            text-info
+                            me-3">
+
+                            <i class="bi bi-clock-history"></i>
+
+                        </div>
+
+
+                        <div>
+
+                            <h5 class="fw-bold mb-1">
+
+                                Current Auto Assignment Request
+
+                            </h5>
+
+
+                            <p class="text-muted small mb-0">
+
+                                Your latest Auto Lead Assignment
+                                request and its current status.
+
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Current Request Status -->
+                    @if (currentAutoAssignmentRequest.Status
+                                            == CRMSystem.Enums.ApprovalStatus.Pending)
+                    {
+                        <span class="badge
+                            bg-warning-subtle
+                            text-warning-emphasis
+                            rounded-pill
+                            px-3 py-2">
+
+                            <i class="bi bi-hourglass-split me-1"></i>
+
+                            Pending
+
+                        </span>
+                    }
+                    else if (currentAutoAssignmentRequest.Status
+                        == CRMSystem.Enums.ApprovalStatus.Approved)
+                    {
+                        <span class="badge
+                            bg-success-subtle
+                            text-success
+                            rounded-pill
+                            px-3 py-2">
+
+                            <i class="bi bi-check-circle me-1"></i>
+
+                            Approved
+
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge
+                            bg-danger-subtle
+                            text-danger
+                            rounded-pill
+                            px-3 py-2">
+
+                            <i class="bi bi-x-circle me-1"></i>
+
+                            Rejected
+
+                        </span>
+                    }
+
+                </div>
+
+
+                <!-- =================================================
+                     Current Request Table
+                     ================================================= -->
+
+                <div class="table-responsive">
+
+                    <table class="table
+                        table-hover
+                        align-middle
+                        mb-0">
+
+
+                        <thead class="table-light">
+
+                            <tr>
+
+                                <th>
+                                    Requested Status
+                                </th>
+
+                                <th>
+                                    Requested At
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th>
+                                    Reviewed At
+                                </th>
+
+                                <th>
+                                    Admin Comment
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            <tr>
+
+
+                                <!-- Requested Status -->
+
+                                <td>
+
+                                    @if (currentAutoAssignmentRequest.RequestedStatus)
+                                    {
+                                        <span class="badge
+                                            bg-success-subtle
+                                            text-success
+                                            rounded-pill
+                                            px-3 py-2">
+
+                                            <i class="bi bi-toggle-on me-1"></i>
+
+                                            ON
+
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge
+                                            bg-secondary-subtle
+                                            text-secondary
+                                            rounded-pill
+                                            px-3 py-2">
+
+                                            <i class="bi bi-toggle-off me-1"></i>
+
+                                            OFF
+
+                                        </span>
+                                    }
+
+                                </td>
+
+
+                                <!-- Requested At -->
+
+                                <td class="small">
+
+                                    @requestedAtText
+
+                                </td>
+
+
+                                <!-- Status -->
+
+                                <td>
+
+                                    @if (currentAutoAssignmentRequest.Status
+                                        == CRMSystem.Enums.ApprovalStatus.Pending)
+                                    {
+                                        <span class="badge
+                                            bg-warning-subtle
+                                            text-warning-emphasis
+                                            rounded-pill
+                                            px-3 py-2">
+
+                                            Pending
+
+                                        </span>
+                                    }
+                                    else if (currentAutoAssignmentRequest.Status
+                                        == CRMSystem.Enums.ApprovalStatus.Approved)
+                                    {
+                                        <span class="badge
+                                            bg-success-subtle
+                                            text-success
+                                            rounded-pill
+                                            px-3 py-2">
+
+                                            Approved
+
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge
+                                            bg-danger-subtle
+                                            text-danger
+                                            rounded-pill
+                                            px-3 py-2">
+
+                                            Rejected
+
+                                        </span>
+                                    }
+
+                                </td>
+
+
+                                <!-- Reviewed At -->
+
+                                <td class="small">
+
+                                    @reviewedAtText
+
+                                </td>
+
+
+                                <!-- Admin Comment -->
+
+                                <td class="small">
+
+                                    @if (!string.IsNullOrWhiteSpace(
+                                        currentAutoAssignmentRequest.AdminComment))
+                                    {
+                                        @currentAutoAssignmentRequest.AdminComment
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">
+                                            —
+                                        </span>
+                                    }
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+    }
+
+
+    <!-- =====================================================
+         Notification Information
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+
+        <div class="card-body p-4">
+
+            <div class="d-flex align-items-start">
+
+
+                <div class="settings-icon
+                    bg-primary-subtle
+                    text-primary
+                    me-3">
+
+                    <i class="bi bi-bell-fill"></i>
+
+                </div>
+
+
+                <div>
+
+                    <h5 class="fw-bold mb-1">
+                        Notifications
+                    </h5>
+
+
+                    <p class="text-muted small mb-2">
+
+                        Notification preferences are managed
+                        by the system administrator.
+
+                    </p>
+
+
+                    <div class="small text-muted">
+
+                        <i class="bi bi-shield-check me-1"></i>
+
+                        Sales Managers cannot change their own
+                        notification preference.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     Page Specific Styles
+     ========================================================= -->
+
+<style>
+
+    /* =====================================================
+           Profile Image
+           ===================================================== */
+
+    .profile-image-wrapper {
+        width: 130px;
+        height: 130px;
+    }
+
+
+    .profile-image {
+        width: 130px;
+        height: 130px;
+        object-fit: cover;
+        border: 4px solid #f1f5f9;
+    }
+
+
+    .profile-placeholder {
+        width: 130px;
+        height: 130px;
+        border-radius: 50%;
+        background: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748b;
+        border: 4px solid #e2e8f0;
+    }
+
+
+        .profile-placeholder i {
+            font-size: 3.5rem;
+        }
+
+
+    /* =====================================================
+           Profile Information
+           ===================================================== */
+
+    .profile-info-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 14px 16px;
+        height: 100%;
+    }
+
+
+    .profile-label {
+        display: block;
+        color: #64748b;
+        font-size: 0.78rem;
+        font-weight: 600;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+
+    .profile-value {
+        color: #1e293b;
+        font-weight: 600;
+        word-break: break-word;
+    }
+
+
+    /* =====================================================
+           Settings Icons
+           ===================================================== */
+
+    .settings-icon {
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+
+    /* =====================================================
+           Cards
+           ===================================================== */
+
+    .card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+
+        .card:hover {
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08) !important;
+        }
+
+
+    /* =====================================================
+           Table
+           ===================================================== */
+
+    .table > :not(caption) > * > * {
+        padding: 14px 12px;
+    }
+
+</style>

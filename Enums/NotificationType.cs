@@ -12,6 +12,10 @@
 
         ProfileChangeApproved,
 
-        ProfileChangeRejected
+        ProfileChangeRejected,
+
+        AutoAssignmentApproved,
+
+        AutoAssignmentRejected
     }
 }

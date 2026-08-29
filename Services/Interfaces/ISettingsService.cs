@@ -105,5 +105,15 @@ namespace CRMSystem.Services.Interfaces
             long requestId,
             long adminId,
             string? adminComment);
+
+
+
+        // =====================================================
+        // Sales Manager - Auto Assignment Request History
+        // =====================================================
+
+        Task<List<AutoAssignmentRequestViewModel>>
+            GetMyAutoAssignmentRequestsAsync(
+                long salesManagerId);
     }
 }
