@@ -2,10 +2,8 @@
 
 namespace CRMSystem.Models.ViewModels
 {
-    public class FeedbackHistoryViewModel
+    public class SalesOfficerCurrentFeedbackViewModel
     {
-        public long FeedbackId { get; set; }
-
         public long AssignmentId { get; set; }
 
         public long LeadId { get; set; }
@@ -14,12 +12,14 @@ namespace CRMSystem.Models.ViewModels
 
         public string LeadName { get; set; } = string.Empty;
 
-        public FeedbackStatus Status { get; set; }
+        public string? Summary { get; set; }
 
-        public DateTime SubmittedAt { get; set; }
+        public FeedbackStatus? Status { get; set; }
+
+        public DateTime? SubmittedAt { get; set; }
 
         public DateTime? NextFollowUpDate { get; set; }
 
-        public string Summary { get; set; } = string.Empty;
+        public long? LatestFeedbackId { get; set; }
     }
 }

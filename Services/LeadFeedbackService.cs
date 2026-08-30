@@ -223,6 +223,63 @@ namespace CRMSystem.Services
             await _context.SaveChangesAsync();
         }
 
+
+
+        // =====================================================
+        // Retrieves accepted leads with their latest feedback
+        // =====================================================
+
+        public async Task<List<SalesOfficerCurrentFeedbackViewModel>>
+            GetCurrentFeedbackAsync(long salesOfficerId)
+        {
+            var assignments = await _context.LeadAssignments
+                .Include(a => a.Lead)
+                .Include(a => a.Feedbacks)
+                .Where(a =>
+                    a.SalesOfficerId == salesOfficerId &&
+                    a.AssignmentStatus == AssignmentStatus.Accepted)
+                .OrderByDescending(a => a.AssignmentId)
+                .ToListAsync();
+
+            var result = assignments
+                .Where(a => a.Lead != null)
+                .Select(a =>
+                {
+                    var latestFeedback = a.Feedbacks?
+                        .OrderByDescending(f => f.SubmittedAt)
+                        .FirstOrDefault();
+
+                    return new SalesOfficerCurrentFeedbackViewModel
+                    {
+                        AssignmentId = a.AssignmentId,
+
+                        LeadId = a.LeadId,
+
+                        CompanyName = a.Lead!.CompanyName,
+
+                        LeadName = a.Lead.LeadName,
+
+                        Summary = latestFeedback?.Summary,
+
+                        Status = latestFeedback?.Status,
+
+                        SubmittedAt = latestFeedback?.SubmittedAt,
+
+                        NextFollowUpDate =
+                            latestFeedback?.NextFollowUpDate,
+
+                        LatestFeedbackId =
+                            latestFeedback?.FeedbackId
+                    };
+                })
+                .ToList();
+
+            return result;
+        }
+
+
+
+
         // Retrieves the feedback history for a specific sales officer
         public async Task<List<FeedbackHistoryViewModel>> GetFeedbackHistoryAsync(long salesOfficerId)
         {
@@ -240,7 +297,8 @@ namespace CRMSystem.Services
                     LeadName = f.LeadAssignment.Lead.LeadName,
                     Status = f.Status,
                     SubmittedAt = f.SubmittedAt,
-                    NextFollowUpDate = f.NextFollowUpDate
+                    NextFollowUpDate = f.NextFollowUpDate,
+                    Summary = f.Summary
                 })
                 .ToListAsync();
 

@@ -84,7 +84,11 @@
         <li>
 
             <a asp-controller="SalesOfficer"
-               asp-action="Feedback">
+               asp-action="Feedback"
+               class="@(currentController == "SalesOfficer" &&
+                               currentAction == "Feedback"
+                               ? "active"
+                               : "")">
 
                 <i class="bi bi-chat-left-text-fill"></i>
 

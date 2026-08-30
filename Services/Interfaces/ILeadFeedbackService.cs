@@ -8,7 +8,6 @@ namespace CRMSystem.Services.Interfaces
         Task<List<FeedbackHistoryViewModel>> GetFeedbackHistoryAsync(long salesOfficerId);
         Task<FeedbackDetailsViewModel?> GetFeedbackDetailsAsync(long feedbackId, long salesOfficerId);
         Task<List<SalesOfficerFollowUpViewModel>> GetSalesOfficerFollowUpsAsync(long salesOfficerId);
-
-
+        Task<List<SalesOfficerCurrentFeedbackViewModel>> GetCurrentFeedbackAsync(long salesOfficerId);
     }
 }

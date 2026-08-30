@@ -1,0 +1,780 @@
+﻿@model CRMSystem.Models.ViewModels.SalesOfficerPerformanceViewModel
+
+@{
+    ViewData["Title"] = "My Performance";
+    ViewData["Breadcrumb"] = "My Performance";
+    Layout = "_SalesOfficerLayout";
+}
+
+<div class="container-fluid py-4">
+
+    <!-- =====================================================
+         Page Header
+         ===================================================== -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold mb-1">
+                My Performance
+            </h2>
+
+            <p class="text-muted mb-0">
+                Track your lead performance, SLA compliance,
+                follow-up performance, and feedback activity.
+            </p>
+        </div>
+
+        <div class="text-end">
+
+            <span class="badge bg-light text-dark border px-3 py-2">
+                <i class="bi bi-person-circle me-1"></i>
+
+                @Model.SalesOfficerName
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         Lead Performance
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body p-4">
+
+            <div class="d-flex align-items-center mb-4">
+
+                <div class="icon-box bg-primary-subtle text-primary me-3">
+
+                    <i class="bi bi-bar-chart-line fs-4"></i>
+
+                </div>
+
+                <div>
+
+                    <h5 class="fw-bold mb-1">
+                        Lead Performance
+                    </h5>
+
+                    <p class="text-muted small mb-0">
+                        Overview of your assigned and accepted leads.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="row g-3">
+
+                <!-- Total Assigned -->
+
+                <div class="col-md-6 col-lg">
+
+                    <div class="metric-card">
+
+                        <div class="metric-label">
+                            Total Assigned
+                        </div>
+
+                        <div class="metric-value text-primary">
+                            @Model.TotalAssignedLeads
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Accepted -->
+
+                <div class="col-md-6 col-lg">
+
+                    <div class="metric-card">
+
+                        <div class="metric-label">
+                            Accepted
+                        </div>
+
+                        <div class="metric-value text-success">
+                            @Model.AcceptedLeads
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Pending -->
+
+                <div class="col-md-6 col-lg">
+
+                    <div class="metric-card">
+
+                        <div class="metric-label">
+                            Pending Acceptance
+                        </div>
+
+                        <div class="metric-value text-warning">
+                            @Model.PendingAcceptance
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Acceptance Rate -->
+
+                <div class="col-md-6 col-lg">
+
+                    <div class="metric-card">
+
+                        <div class="metric-label">
+                            Acceptance Rate
+                        </div>
+
+                        <div class="metric-value text-info">
+                            @Model.AcceptanceRate.ToString("0.0")%
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Completed -->
+
+                <div class="col-md-6 col-lg">
+
+                    <div class="metric-card">
+
+                        <div class="metric-label">
+                            Completed Leads
+                        </div>
+
+                        <div class="metric-value text-success">
+                            @Model.CompletedLeads
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         Acceptance SLA
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body p-4">
+
+            <div class="d-flex align-items-center mb-4">
+
+                <div class="icon-box bg-primary-subtle text-primary me-3">
+
+                    <i class="bi bi-clock-history fs-4"></i>
+
+                </div>
+
+                <div>
+
+                    <h5 class="fw-bold mb-1">
+                        Acceptance SLA
+                    </h5>
+
+                    <p class="text-muted small mb-0">
+                        Lead acceptance within the required SLA.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="row g-3">
+
+                <!-- SLA Met -->
+
+                <div class="col-md-4">
+
+                    <div class="metric-card">
+
+                        <div class="metric-label">
+                            SLA Met
+                        </div>
+
+                        <div class="metric-value text-success">
+                            @Model.AcceptanceSLAMet
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- SLA Missed -->
+
+                <div class="col-md-4">
+
+                    <div class="metric-card">
+
+                        <div class="metric-label">
+                            SLA Missed
+                        </div>
+
+                        <div class="metric-value text-danger">
+                            @Model.AcceptanceSLAMissed
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Compliance -->
+
+                <div class="col-md-4">
+
+                    <div class="metric-card">
+
+                        <div class="metric-label">
+                            Compliance Rate
+                        </div>
+
+                        <div class="metric-value text-primary">
+                            @Model.AcceptanceSLAComplianceRate.ToString("0.0")%
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         First Feedback SLA
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body p-4">
+
+            <div class="d-flex align-items-center mb-4">
+
+                <div class="icon-box bg-success-subtle text-success me-3">
+
+                    <i class="bi bi-chat-left-text fs-4"></i>
+
+                </div>
+
+                <div>
+
+                    <h5 class="fw-bold mb-1">
+                        First Feedback SLA
+                    </h5>
+
+                    <p class="text-muted small mb-0">
+                        First feedback submitted within the required time.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="row g-3">
+
+                <!-- SLA Met -->
+
+                <div class="col-md-4">
+
+                    <div class="metric-card">
+
+                        <div class="metric-label">
+                            SLA Met
+                        </div>
+
+                        <div class="metric-value text-success">
+                            @Model.FirstFeedbackSLAMet
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- SLA Missed -->
+
+                <div class="col-md-4">
+
+                    <div class="metric-card">
+
+                        <div class="metric-label">
+                            SLA Missed
+                        </div>
+
+                        <div class="metric-value text-danger">
+                            @Model.FirstFeedbackSLAMissed
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Compliance -->
+
+                <div class="col-md-4">
+
+                    <div class="metric-card">
+
+                        <div class="metric-label">
+                            Compliance Rate
+                        </div>
+
+                        <div class="metric-value text-success">
+                            @Model.FirstFeedbackSLAComplianceRate.ToString("0.0")%
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         Follow-up Performance
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body p-4">
+
+            <div class="d-flex align-items-center mb-4">
+
+                <div class="icon-box bg-warning-subtle text-warning me-3">
+
+                    <i class="bi bi-calendar-check fs-4"></i>
+
+                </div>
+
+                <div>
+
+                    <h5 class="fw-bold mb-1">
+                        Follow-up Performance
+                    </h5>
+
+                    <p class="text-muted small mb-0">
+                        Track the timeliness of your follow-ups.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="row g-3">
+
+                <!-- On Time -->
+
+                <div class="col-md-4">
+
+                    <div class="metric-card">
+
+                        <div class="metric-label">
+                            Completed On Time
+                        </div>
+
+                        <div class="metric-value text-success">
+                            @Model.FollowUpsCompletedOnTime
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Late -->
+
+                <div class="col-md-4">
+
+                    <div class="metric-card">
+
+                        <div class="metric-label">
+                            Completed Late
+                        </div>
+
+                        <div class="metric-value text-warning">
+                            @Model.FollowUpsCompletedLate
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Overdue -->
+
+                <div class="col-md-4">
+
+                    <div class="metric-card">
+
+                        <div class="metric-label">
+                            Overdue
+                        </div>
+
+                        <div class="metric-value text-danger">
+                            @Model.OverdueFollowUps
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Timeliness Rate -->
+
+            <div class="mt-4">
+
+                <div class="d-flex justify-content-between mb-2">
+
+                    <span class="fw-semibold">
+                        Follow-up Timeliness
+                    </span>
+
+                    <span class="fw-bold">
+                        @Model.FollowUpTimelinessRate.ToString("0.0")%
+                    </span>
+
+                </div>
+
+                <div class="progress"
+                     style="height: 8px;">
+
+                    <div class="progress-bar"
+                         role="progressbar"
+                         style="width: @Model.FollowUpTimelinessRate%;"
+                         aria-valuenow="@Model.FollowUpTimelinessRate"
+                         aria-valuemin="0"
+                         aria-valuemax="100">
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         Feedback Overview
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body p-4">
+
+            <div class="d-flex align-items-center justify-content-between mb-4">
+
+                <div class="d-flex align-items-center">
+
+                    <div class="icon-box bg-info-subtle text-info me-3">
+
+                        <i class="bi bi-bar-chart-line fs-4"></i>
+
+                    </div>
+
+                    <div>
+
+                        <h5 class="fw-bold mb-1">
+                            Feedback Overview
+                        </h5>
+
+                        <p class="text-muted small mb-0">
+                            Feedback activity by status.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="text-end">
+
+                    <div class="small text-muted">
+                        Total Feedbacks
+                    </div>
+
+                    <div class="fs-4 fw-bold">
+                        @Model.TotalFeedbacks
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="row g-3">
+
+                <!-- Interested -->
+
+                <div class="col-md-3 col-sm-6">
+
+                    <div class="status-card">
+
+                        <span>
+                            Interested
+                        </span>
+
+                        <strong>
+                            @Model.InterestedCount
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Follow-up Required -->
+
+                <div class="col-md-3 col-sm-6">
+
+                    <div class="status-card">
+
+                        <span>
+                            Follow-up Required
+                        </span>
+
+                        <strong>
+                            @Model.FollowUpRequiredCount
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Meeting Scheduled -->
+
+                <div class="col-md-3 col-sm-6">
+
+                    <div class="status-card">
+
+                        <span>
+                            Meeting Scheduled
+                        </span>
+
+                        <strong>
+                            @Model.MeetingScheduledCount
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Visited -->
+
+                <div class="col-md-3 col-sm-6">
+
+                    <div class="status-card">
+
+                        <span>
+                            Visited
+                        </span>
+
+                        <strong>
+                            @Model.VisitedCount
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Quotation Sent -->
+
+                <div class="col-md-3 col-sm-6">
+
+                    <div class="status-card">
+
+                        <span>
+                            Quotation Sent
+                        </span>
+
+                        <strong>
+                            @Model.QuotationSentCount
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Negotiation -->
+
+                <div class="col-md-3 col-sm-6">
+
+                    <div class="status-card">
+
+                        <span>
+                            Negotiation
+                        </span>
+
+                        <strong>
+                            @Model.NegotiationCount
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Completed -->
+
+                <div class="col-md-3 col-sm-6">
+
+                    <div class="status-card">
+
+                        <span>
+                            Completed
+                        </span>
+
+                        <strong>
+                            @Model.CompletedCount
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Closed -->
+
+                <div class="col-md-3 col-sm-6">
+
+                    <div class="status-card">
+
+                        <span>
+                            Closed
+                        </span>
+
+                        <strong>
+                            @Model.ClosedCount
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<style>
+
+    .icon-box {
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+
+    .metric-card {
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        text-align: center;
+        border: 1px solid #edf0f2;
+        height: 100%;
+    }
+
+
+    .metric-label {
+        font-size: 14px;
+        color: #6c757d;
+        margin-bottom: 8px;
+    }
+
+
+    .metric-value {
+        font-size: 28px;
+        font-weight: 700;
+    }
+
+
+    .status-card {
+        padding: 18px;
+        background: #f8f9fa;
+        border: 1px solid #edf0f2;
+        border-radius: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 100%;
+    }
+
+
+        .status-card span {
+            font-size: 14px;
+            color: #495057;
+        }
+
+
+        .status-card strong {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+
+    .card {
+        border-radius: 16px;
+    }
+
+
+    .progress {
+        background-color: #e9ecef;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+
+    .progress-bar {
+        border-radius: 10px;
+    }
+
+</style>

@@ -1,10 +1,21 @@
-﻿namespace CRMSystem.Models.ViewModels
+﻿using CRMSystem.Enums;
+
+namespace CRMSystem.Models.ViewModels
 {
     public class SalesOfficerPerformanceViewModel
     {
+        // =====================================================
+        // Sales Officer Information
+        // =====================================================
+
         public long SalesOfficerId { get; set; }
 
         public string SalesOfficerName { get; set; } = string.Empty;
+
+
+        // =====================================================
+        // Lead Performance
+        // =====================================================
 
         public int TotalAssignedLeads { get; set; }
 
@@ -12,14 +23,76 @@
 
         public int PendingAcceptance { get; set; }
 
-        public int CompletedLeads { get; set; }
+        public double AcceptanceRate { get; set; }
 
-        public int TotalFeedbacks { get; set; }
+
+        // =====================================================
+        // Acceptance SLA
+        // =====================================================
+
+        public int AcceptanceSLAMet { get; set; }
 
         public int AcceptanceSLAMissed { get; set; }
 
+        public double AcceptanceSLAComplianceRate { get; set; }
+
+
+        // =====================================================
+        // First Feedback SLA
+        // =====================================================
+
+        public int FirstFeedbackSLAMet { get; set; }
+
         public int FirstFeedbackSLAMissed { get; set; }
 
+        public double FirstFeedbackSLAComplianceRate { get; set; }
+
+
+        // =====================================================
+        // Lead Completion
+        // =====================================================
+
+        public int CompletedLeads { get; set; }
+
+
+        // =====================================================
+        // Feedback Performance
+        // =====================================================
+
+        public int TotalFeedbacks { get; set; }
+
+
+        // =====================================================
+        // Follow-up Performance
+        // =====================================================
+
+        public int FollowUpsCompletedOnTime { get; set; }
+
+        public int FollowUpsCompletedLate { get; set; }
+
         public int OverdueFollowUps { get; set; }
+
+        public double FollowUpTimelinessRate { get; set; }
+
+
+        // =====================================================
+        // Feedback Status Overview
+        // =====================================================
+
+        public int InterestedCount { get; set; }
+
+        public int FollowUpRequiredCount { get; set; }
+
+        public int MeetingScheduledCount { get; set; }
+
+        public int VisitedCount { get; set; }
+
+        public int QuotationSentCount { get; set; }
+
+        public int NegotiationCount { get; set; }
+
+        public int CompletedCount { get; set; }
+
+        public int ClosedCount { get; set; }
     }
 }

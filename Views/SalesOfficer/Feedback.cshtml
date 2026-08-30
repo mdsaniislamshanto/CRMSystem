@@ -1,0 +1,457 @@
+﻿@model List<CRMSystem.Models.ViewModels.SalesOfficerCurrentFeedbackViewModel>
+
+@{
+    ViewData["Title"] = "Feedback";
+    ViewData["Breadcrumb"] = "Feedback";
+    Layout = "_SalesOfficerLayout";
+}
+
+<div class="container-fluid mt-4">
+
+    <!-- =========================
+         Page Header
+         ========================= -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+
+                <i class="bi bi-chat-left-text-fill text-primary me-2"></i>
+
+                Feedback
+
+            </h2>
+
+            <p class="text-muted mb-0">
+
+                Manage feedback for your accepted leads.
+
+            </p>
+
+        </div>
+
+
+        <a asp-controller="SalesOfficer"
+           asp-action="FeedbackHistory"
+           class="btn btn-outline-primary">
+
+            <i class="bi bi-clock-history me-1"></i>
+
+            Feedback History
+
+        </a>
+
+    </div>
+
+
+    <!-- =========================
+         Summary Cards
+         ========================= -->
+
+    <div class="row g-3 mb-4">
+
+
+        <!-- Accepted Leads -->
+
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <div class="text-muted small">
+                                Accepted Leads
+                            </div>
+
+                            <h3 class="fw-bold mb-0">
+                                @Model.Count
+                            </h3>
+
+                        </div>
+
+                        <div class="fs-2 text-primary">
+
+                            <i class="bi bi-people-fill"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Feedback Pending -->
+
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <div class="text-muted small">
+                                Feedback Pending
+                            </div>
+
+                            <h3 class="fw-bold mb-0 text-warning">
+
+                                @Model.Count(x =>
+                                    !x.LatestFeedbackId.HasValue)
+
+                            </h3>
+
+                        </div>
+
+                        <div class="fs-2 text-warning">
+
+                            <i class="bi bi-clock-fill"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Feedback Submitted -->
+
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <div class="text-muted small">
+                                Feedback Submitted
+                            </div>
+
+                            <h3 class="fw-bold mb-0 text-success">
+
+                                @Model.Count(x =>
+                                    x.LatestFeedbackId.HasValue)
+
+                            </h3>
+
+                        </div>
+
+                        <div class="fs-2 text-success">
+
+                            <i class="bi bi-check-circle-fill"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         Feedback Table
+         ========================= -->
+
+    <div class="card border-0 shadow-sm">
+
+        <!-- Card Header -->
+
+        <div class="card-header bg-primary text-white py-3">
+
+            <h5 class="mb-0">
+
+                <i class="bi bi-chat-square-text me-2"></i>
+
+                Accepted Leads
+
+            </h5>
+
+        </div>
+
+
+        <div class="card-body p-0">
+
+
+            @if (Model == null || !Model.Any())
+            {
+                <!-- Empty State -->
+
+                <div class="p-4">
+
+                    <div class="alert alert-info mb-0">
+
+                        <i class="bi bi-info-circle me-2"></i>
+
+                        No accepted leads are currently available
+                        for feedback.
+
+                    </div>
+
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead class="table-light">
+
+                            <tr>
+
+                                <th class="ps-4">
+                                    Lead
+                                </th>
+
+                                <th>
+                                    Last Feedback Summary
+                                </th>
+
+                                <th>
+                                    Feedback Status
+                                </th>
+
+                                <th>
+                                    Submitted At
+                                </th>
+
+                                <th>
+                                    Next Follow-up
+                                </th>
+
+                                <th class="text-end pe-4">
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+
+                                    <!-- =========================
+                                         Lead Information
+                                         ========================= -->
+
+                                    <td class="ps-4">
+
+                                        <div class="fw-semibold">
+
+                                            @item.LeadName
+
+                                        </div>
+
+                                        <small class="text-muted">
+
+                                            @item.CompanyName
+
+                                        </small>
+
+                                        <br />
+
+                                        <small class="text-muted">
+
+                                            Lead ID: @item.LeadId
+
+                                        </small>
+
+                                    </td>
+
+
+                                    <!-- =========================
+                                         Latest Feedback Summary
+                                         ========================= -->
+
+                                    <td style="max-width: 300px;">
+
+                                        @if (!string.IsNullOrWhiteSpace(
+                                            item.Summary))
+                                        {
+                                            <div class="text-truncate"
+                                                 title="@item.Summary">
+
+                                                @item.Summary
+
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted fst-italic">
+
+                                                No feedback submitted yet.
+
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- =========================
+                                         Feedback Status
+                                         ========================= -->
+
+                                    <td>
+
+                                        @if (item.Status.HasValue)
+                                        {
+                                            <span class="badge bg-success">
+
+                                                @(item.Status.Value)
+
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+
+                                                —
+
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- =========================
+                                         Submitted At
+                                         ========================= -->
+
+                                    <td>
+
+                                        @if (item.SubmittedAt.HasValue)
+                                        {
+                                            @(
+                                                item.SubmittedAt
+                                                    .Value
+                                                    .ToLocalTime()
+                                                    .ToString(
+                                                        "dd MMM yyyy hh:mm tt")
+                                            )
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+
+                                                —
+
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- =========================
+                                         Next Follow-up
+                                         ========================= -->
+
+                                    <td>
+
+                                        @if (item.NextFollowUpDate.HasValue)
+                                        {
+                                            @(
+                                                item.NextFollowUpDate
+                                                    .Value
+                                                    .ToString(
+                                                        "dd MMM yyyy")
+                                            )
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+
+                                                —
+
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- =========================
+                                         Actions
+                                         ========================= -->
+
+                                    <td class="text-end pe-4">
+
+                                        <div class="d-flex
+                                            justify-content-end
+                                            gap-2
+                                            flex-wrap">
+
+
+                                            <!-- Submit Feedback -->
+
+                                            <a asp-controller="SalesOfficer"
+                                               asp-action="SubmitFeedback"
+                                               asp-route-assignmentId="@item.AssignmentId"
+                                               class="btn btn-primary btn-sm">
+
+                                                <i class="bi bi-chat-left-text me-1"></i>
+
+                                                Submit Feedback
+
+                                            </a>
+
+
+                                            <!-- View Previous Feedback -->
+                                            @if (item.LatestFeedbackId.HasValue)
+                                            {
+                                                <a asp-controller="SalesOfficer"
+                                                   asp-action="FeedbackHistory"
+                                                   class="btn btn-outline-secondary btn-sm">
+
+                                                    <i class="bi bi-clock-history me-1"></i>
+
+                                                    View Previous Feedback
+
+                                                </a>
+                                            }
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>

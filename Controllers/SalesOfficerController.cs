@@ -9,13 +9,15 @@ namespace CRMSystem.Controllers
     {
         private readonly ILeadService _leadService;
         private readonly ISalesOfficerDashboardService _dashboardService;
-        private readonly ILeadFeedbackService _leadFeedbackService; 
+        private readonly ILeadFeedbackService _leadFeedbackService;
+        private readonly ISalesOfficerPerformanceService _performanceService; 
 
-        public SalesOfficerController(ILeadService leadService, ISalesOfficerDashboardService dashboardService, ILeadFeedbackService leadFeedbackService)
+        public SalesOfficerController(ILeadService leadService, ISalesOfficerDashboardService dashboardService, ILeadFeedbackService leadFeedbackService, ISalesOfficerPerformanceService performanceService)
         {
             _leadService = leadService;
             _dashboardService = dashboardService;
             _leadFeedbackService = leadFeedbackService;
+            _performanceService = performanceService;
         }
 
 
@@ -204,5 +206,72 @@ namespace CRMSystem.Controllers
 
             return View(followUps);
         }
+
+
+        // =====================================================
+        // GET: SalesOfficer/Feedback
+        // =====================================================
+
+        [HttpGet]
+        public async Task<IActionResult> Feedback()
+        {
+            var userId =
+                HttpContext.Session.GetString(SessionKeys.UserId);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var salesOfficerId = long.Parse(userId);
+
+            ViewData["Title"] = "Feedback";
+            ViewData["Breadcrumb"] = "Feedback";
+
+            var feedbacks =
+                await _leadFeedbackService
+                    .GetCurrentFeedbackAsync(salesOfficerId);
+
+            return View(feedbacks);
+        }
+
+
+
+        // =====================================================
+        // GET: SalesOfficer/MyPerformance
+        // =====================================================
+
+        [HttpGet]
+        public async Task<IActionResult> MyPerformance()
+        {
+            var userId =
+                HttpContext.Session.GetString(SessionKeys.UserId);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            if (!long.TryParse(userId, out var salesOfficerId))
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            ViewData["Title"] = "My Performance";
+            ViewData["Breadcrumb"] = "My Performance";
+
+            var performance =
+                await _performanceService
+                    .GetPerformanceAsync(salesOfficerId);
+
+            if (performance == null)
+            {
+                return NotFound();
+            }
+
+            return View(performance);
+        }
+
+
     }
 }

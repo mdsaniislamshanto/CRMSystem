@@ -44,7 +44,8 @@ builder.Services.AddScoped<ISLAService, SLAService>();
 //Registrer Backgraound SLAService for dependency injection
 builder.Services.AddHostedService<SLABackgroundService>();
 
-
+// Register SalesOfficerPerformanceService for dependency injection
+builder.Services.AddScoped< ISalesOfficerPerformanceService, SalesOfficerPerformanceService>();
 
 
 
