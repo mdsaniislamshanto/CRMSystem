@@ -4,6 +4,19 @@ namespace CRMSystem.Services.Interfaces
 {
     public interface IReportService
     {
-        Task<AdminReportViewModel> GetAdminReportAsync();
+        // =====================================================
+        // Admin Report
+        // =====================================================
+
+        Task<AdminReportViewModel>
+            GetAdminReportAsync();
+
+
+        // =====================================================
+        // Sales Manager Report
+        // =====================================================
+
+        Task<SalesManagerReportViewModel>
+            GetSalesManagerReportAsync();
     }
 }

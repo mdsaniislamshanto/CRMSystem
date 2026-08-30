@@ -15,17 +15,21 @@ namespace CRMSystem.Controllers
         private readonly ILeadService _leadService;
         private readonly ISettingsService _settingsService;
         private readonly ILeadCaptureService _leadCaptureService;
+        private readonly IReportService _reportService;
 
         public SalesManagerController(
             ISalesManagerDashboardService dashboardService,
             ILeadService leadService,
             ISettingsService settingsService,
-            ILeadCaptureService leadCaptureService)
+            ILeadCaptureService leadCaptureService,
+            IReportService reportService)
+          
         {
             _dashboardService = dashboardService;
             _leadService = leadService;
             _settingsService = settingsService;
             _leadCaptureService = leadCaptureService;
+            _reportService = reportService;
         }
 
         // ==========================
@@ -354,13 +358,6 @@ namespace CRMSystem.Controllers
         }
 
 
-        // ==========================
-        // Reports
-        // ==========================
-        public IActionResult Reports()
-        {
-            return View();
-        }
 
         // ==========================
         // Settings
@@ -451,6 +448,24 @@ namespace CRMSystem.Controllers
             var leads = await _leadService.GetUnassignedLeadsAsync();
 
             return View(leads);
+        }
+
+
+        // ==========================
+        // Reports
+        // ==========================
+
+        [HttpGet]
+        public async Task<IActionResult> Reports()
+        {
+            ViewData["Title"] = "Reports";
+            ViewData["Breadcrumb"] = "Reports";
+
+            var report =
+                await _reportService
+                    .GetSalesManagerReportAsync();
+
+            return View(report);
         }
 
     }

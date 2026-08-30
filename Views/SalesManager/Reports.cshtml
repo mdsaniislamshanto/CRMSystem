@@ -1,6 +1,736 @@
-﻿@{
+﻿
+
+@model CRMSystem.Models.ViewModels.SalesManagerReportViewModel
+
+@{
     ViewData["Title"] = "Reports";
     Layout = "_SalesManagerLayout";
+    ViewData["Breadcrumb"] = "Reports";
 }
 
-<h2>Reports</h2>
+<div class="container-fluid py-4">
+
+    <!-- =====================================================
+         PAGE HEADER
+    ====================================================== -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-bar-chart-fill text-primary me-2"></i>
+                Reports
+            </h2>
+
+            <p class="text-muted mb-0">
+                View team performance, lead activity and SLA reports.
+            </p>
+        </div>
+
+        <div class="text-muted">
+            <i class="bi bi-calendar3 me-1"></i>
+            Team Performance
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         TEAM SUMMARY
+    ====================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-primary text-white py-3">
+
+            <h5 class="mb-0">
+                <i class="bi bi-people-fill me-2"></i>
+                Team Summary
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="row g-3">
+
+                <!-- Total Sales Officers -->
+
+                <div class="col-xl-3 col-md-6">
+
+                    <div class="report-card">
+
+                        <div class="report-icon bg-primary-subtle text-primary">
+                            <i class="bi bi-person-badge-fill"></i>
+                        </div>
+
+                        <div>
+                            <small class="text-muted">
+                                Sales Officers
+                            </small>
+
+                            <h3 class="fw-bold mb-0">
+                                @Model.TotalSalesOfficers
+                            </h3>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Total Assigned -->
+
+                <div class="col-xl-3 col-md-6">
+
+                    <div class="report-card">
+
+                        <div class="report-icon bg-info-subtle text-info">
+                            <i class="bi bi-list-task"></i>
+                        </div>
+
+                        <div>
+                            <small class="text-muted">
+                                Total Assigned Leads
+                            </small>
+
+                            <h3 class="fw-bold mb-0">
+                                @Model.TotalAssignedLeads
+                            </h3>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Accepted -->
+
+                <div class="col-xl-3 col-md-6">
+
+                    <div class="report-card">
+
+                        <div class="report-icon bg-success-subtle text-success">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+
+                        <div>
+                            <small class="text-muted">
+                                Accepted Leads
+                            </small>
+
+                            <h3 class="fw-bold text-success mb-0">
+                                @Model.TotalAcceptedLeads
+                            </h3>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Pending -->
+
+                <div class="col-xl-3 col-md-6">
+
+                    <div class="report-card">
+
+                        <div class="report-icon bg-warning-subtle text-warning">
+                            <i class="bi bi-clock-fill"></i>
+                        </div>
+
+                        <div>
+                            <small class="text-muted">
+                                Pending Acceptance
+                            </small>
+
+                            <h3 class="fw-bold text-warning mb-0">
+                                @Model.TotalPendingAcceptance
+                            </h3>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Acceptance Rate -->
+
+                <div class="col-xl-3 col-md-6">
+
+                    <div class="report-card">
+
+                        <div class="report-icon bg-primary-subtle text-primary">
+                            <i class="bi bi-percent"></i>
+                        </div>
+
+                        <div>
+                            <small class="text-muted">
+                                Overall Acceptance Rate
+                            </small>
+
+                            <h3 class="fw-bold text-primary mb-0">
+                                @Model.OverallAcceptanceRate.ToString("0.0")%
+                            </h3>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Completed -->
+
+                <div class="col-xl-3 col-md-6">
+
+                    <div class="report-card">
+
+                        <div class="report-icon bg-success-subtle text-success">
+                            <i class="bi bi-check2-all"></i>
+                        </div>
+
+                        <div>
+                            <small class="text-muted">
+                                Completed Leads
+                            </small>
+
+                            <h3 class="fw-bold text-success mb-0">
+                                @Model.TotalCompletedLeads
+                            </h3>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Feedback -->
+
+                <div class="col-xl-3 col-md-6">
+
+                    <div class="report-card">
+
+                        <div class="report-icon bg-info-subtle text-info">
+                            <i class="bi bi-chat-left-text-fill"></i>
+                        </div>
+
+                        <div>
+                            <small class="text-muted">
+                                Total Feedbacks
+                            </small>
+
+                            <h3 class="fw-bold mb-0">
+                                @Model.TotalFeedbacks
+                            </h3>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Overdue -->
+
+                <div class="col-xl-3 col-md-6">
+
+                    <div class="report-card">
+
+                        <div class="report-icon bg-danger-subtle text-danger">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                        </div>
+
+                        <div>
+                            <small class="text-muted">
+                                Overdue Follow-ups
+                            </small>
+
+                            <h3 class="fw-bold text-danger mb-0">
+                                @Model.TotalOverdueFollowUps
+                            </h3>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         SLA SUMMARY
+    ====================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white py-3">
+
+            <h5 class="mb-0 fw-bold">
+                <i class="bi bi-stopwatch-fill text-primary me-2"></i>
+                SLA Performance
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
+
+                    <div class="sla-box">
+
+                        <div>
+                            <span class="text-muted">
+                                Acceptance SLA Missed
+                            </span>
+
+                            <h4 class="text-danger fw-bold mb-0">
+                                @Model.TotalAcceptanceSLAMissed
+                            </h4>
+                        </div>
+
+                        <i class="bi bi-clock-history text-danger fs-3"></i>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-6">
+
+                    <div class="sla-box">
+
+                        <div>
+                            <span class="text-muted">
+                                First Feedback SLA Missed
+                            </span>
+
+                            <h4 class="text-danger fw-bold mb-0">
+                                @Model.TotalFirstFeedbackSLAMissed
+                            </h4>
+                        </div>
+
+                        <i class="bi bi-chat-square-text text-danger fs-3"></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         SALES OFFICER REPORT
+    ====================================================== -->
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-primary text-white py-3">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <h5 class="mb-0">
+
+                    <i class="bi bi-person-lines-fill me-2"></i>
+
+                    Sales Officer Performance
+
+                </h5>
+
+                <span class="badge bg-light text-primary">
+
+                    @Model.SalesOfficerReports.Count Officers
+
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="card-body p-0">
+
+            @if (Model.SalesOfficerReports.Any())
+            {
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead class="table-light">
+
+                            <tr>
+
+                                <th class="ps-4">
+                                    Employee
+                                </th>
+
+                                <th>
+                                    Assigned
+                                </th>
+
+                                <th>
+                                    Accepted
+                                </th>
+
+                                <th>
+                                    Pending
+                                </th>
+
+                                <th>
+                                    Acceptance Rate
+                                </th>
+
+                                <th>
+                                    Completed
+                                </th>
+
+                                <th>
+                                    Feedbacks
+                                </th>
+
+                                <th>
+                                    Acceptance SLA
+                                </th>
+
+                                <th>
+                                    First Feedback SLA
+                                </th>
+
+                                <th>
+                                    Overdue
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            @foreach (var officer in Model.SalesOfficerReports)
+                            {
+                                <tr>
+
+                                    <!-- Employee -->
+
+                                    <td class="ps-4">
+
+                                        <div class="fw-semibold">
+                                            @officer.FullName
+                                        </div>
+
+                                        <small class="text-muted">
+                                            @officer.EmployeeCode
+                                        </small>
+
+                                    </td>
+
+
+                                    <!-- Assigned -->
+
+                                    <td>
+                                        <span class="fw-semibold">
+                                            @officer.AssignedLeads
+                                        </span>
+                                    </td>
+
+
+                                    <!-- Accepted -->
+
+                                    <td>
+
+                                        <span class="badge bg-success-subtle text-success">
+                                            @officer.AcceptedLeads
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- Pending -->
+
+                                    <td>
+
+                                        <span class="badge bg-warning-subtle text-warning">
+                                            @officer.PendingAcceptance
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- Acceptance Rate -->
+
+                                    <td style="min-width:150px;">
+
+                                        <div class="d-flex justify-content-between mb-1">
+
+                                            <small class="text-muted">
+                                                Rate
+                                            </small>
+
+                                            <small class="fw-semibold">
+                                                @officer.AcceptanceRate.ToString("0.0")%
+                                            </small>
+
+                                        </div>
+
+                                        <div class="progress"
+                                             style="height:6px;">
+
+                                            <div class="progress-bar"
+                                                 role="progressbar"
+                                                 style="width:@officer.AcceptanceRate%;">
+                                            </div>
+
+                                        </div>
+
+                                    </td>
+
+
+                                    <!-- Completed -->
+
+                                    <td>
+
+                                        <span class="badge bg-success-subtle text-success">
+
+                                            @officer.CompletedLeads
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- Feedback -->
+
+                                    <td>
+
+                                        <span class="fw-semibold">
+
+                                            @officer.TotalFeedbacks
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- Acceptance SLA -->
+
+                                    <td>
+
+                                        @if (officer.AcceptanceSLAMissed > 0)
+                                        {
+                                            <span class="badge bg-danger">
+
+                                                @officer.AcceptanceSLAMissed
+
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">
+
+                                                0
+
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- First Feedback SLA -->
+
+                                    <td>
+
+                                        @if (officer.FirstFeedbackSLAMissed > 0)
+                                        {
+                                            <span class="badge bg-danger">
+
+                                                @officer.FirstFeedbackSLAMissed
+
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">
+
+                                                0
+
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- Overdue -->
+
+                                    <td>
+
+                                        @if (officer.OverdueFollowUps > 0)
+                                        {
+                                            <span class="badge bg-danger">
+
+                                                @officer.OverdueFollowUps
+
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">
+
+                                                0
+
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+
+                    <i class="bi bi-people fs-1 text-muted"></i>
+
+                    <h5 class="mt-3">
+                        No Sales Officers Found
+                    </h5>
+
+                    <p class="text-muted mb-0">
+                        There are currently no Sales Officers available.
+                    </p>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<style>
+
+    .report-card {
+
+        height: 100%;
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 15px;
+
+        padding: 18px;
+
+        border: 1px solid #edf0f4;
+
+        border-radius: 12px;
+
+        background: #fff;
+
+        transition: all 0.2s ease;
+
+    }
+
+
+    .report-card:hover {
+
+        transform: translateY(-2px);
+
+        box-shadow: 0 5px 18px rgba(0,0,0,0.06);
+
+    }
+
+
+    .report-icon {
+
+        width: 48px;
+
+        height: 48px;
+
+        min-width: 48px;
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        border-radius: 12px;
+
+        font-size: 21px;
+
+    }
+
+
+    .sla-box {
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: space-between;
+
+        padding: 20px;
+
+        border: 1px solid #edf0f4;
+
+        border-radius: 12px;
+
+        background: #fafbfc;
+
+    }
+
+
+    .table th {
+
+        font-size: 13px;
+
+        font-weight: 600;
+
+        white-space: nowrap;
+
+    }
+
+
+    .table td {
+
+        font-size: 13px;
+
+        white-space: nowrap;
+
+    }
+
+
+    .progress {
+
+        background-color: #edf0f4;
+
+        border-radius: 10px;
+
+    }
+
+
+    .progress-bar {
+
+        border-radius: 10px;
+
+    }
+
+</style>
