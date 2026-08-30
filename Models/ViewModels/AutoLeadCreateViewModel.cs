@@ -39,5 +39,7 @@ namespace CRMSystem.Models.ViewModels
         public string? PayloadJson { get; set; }
 
         public bool IsAlreadyImported { get; set; }
+
+        public DateTime? SubmittedAt { get; set; }
     }
 }

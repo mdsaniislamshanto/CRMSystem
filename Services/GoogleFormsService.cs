@@ -362,7 +362,8 @@ namespace CRMSystem.Services.GoogleForms
 
                     PayloadJson = JsonSerializer.Serialize(response),
 
-                    IsAlreadyImported = alreadyImported
+                    IsAlreadyImported = alreadyImported,
+                    SubmittedAt = response.CreateTimeDateTimeOffset?.DateTime
                 });
             }
 

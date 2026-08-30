@@ -1,4 +1,6 @@
-﻿@using CRMSystem.Constants
+﻿@model CRMSystem.Models.ViewModels.GoogleFormImportViewModel
+
+@using CRMSystem.Constants
 @using Microsoft.AspNetCore.Http
 
 @{
@@ -219,6 +221,8 @@
 
                             <th>Address</th>
 
+                            <th>Submitted At</th>
+
                             <th>Source</th>
 
                             <th>Status</th>
@@ -234,49 +238,85 @@
                         {
                             var index = 1;
 
-                            foreach (var candidate in Model.Candidates)
+                            foreach (var candidate in Model.Candidates
+                                .OrderByDescending(x => x.SubmittedAt))
                             {
                                 <tr>
 
+                                    <!-- Index -->
                                     <td>
                                         @index
                                     </td>
 
 
+                                    <!-- Lead Name -->
                                     <td class="fw-semibold">
                                         @candidate.LeadName
                                     </td>
 
 
+                                    <!-- Company -->
                                     <td>
                                         @(candidate.CompanyName ?? "-")
                                     </td>
 
 
+                                    <!-- Email -->
                                     <td>
                                         @(candidate.Email ?? "-")
                                     </td>
 
 
+                                    <!-- Phone -->
                                     <td>
                                         @candidate.Phone
                                     </td>
 
 
+                                    <!-- Address -->
                                     <td>
                                         @(candidate.Address ?? "-")
                                     </td>
 
 
+                                    <!-- Submitted At -->
+                                    <td>
+
+                                        @if (candidate.SubmittedAt.HasValue)
+                                        {
+                                            <div class="fw-semibold">
+                                                @candidate.SubmittedAt.Value.ToString("dd MMM yyyy")
+                                            </div>
+
+                                            <small class="text-muted">
+                                                @candidate.SubmittedAt.Value.ToString("hh:mm tt")
+                                            </small>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+                                                -
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- Source -->
                                     <td>
 
                                         <span class="badge bg-primary">
+
+                                            <i class="bi bi-google me-1"></i>
+
                                             Google Form
+
                                         </span>
 
                                     </td>
 
 
+                                    <!-- Status -->
                                     <td>
 
                                         @if (candidate.IsAlreadyImported)
@@ -311,7 +351,7 @@
                         {
                             <tr>
 
-                                <td colspan="8"
+                                <td colspan="9"
                                     class="text-center py-5">
 
                                     <div class="text-muted">

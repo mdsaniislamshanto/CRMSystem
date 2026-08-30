@@ -114,6 +114,7 @@ namespace CRMSystem.Services
         {
             return await _context.Leads
                 .Where(l => !l.IsArchived)
+                .OrderByDescending(l => l.CreatedAt)
                 .Select(l => new LeadViewModel
                 {
                     LeadId = l.LeadId,
