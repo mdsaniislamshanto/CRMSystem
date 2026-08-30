@@ -47,7 +47,8 @@ builder.Services.AddHostedService<SLABackgroundService>();
 // Register SalesOfficerPerformanceService for dependency injection
 builder.Services.AddScoped< ISalesOfficerPerformanceService, SalesOfficerPerformanceService>();
 
-
+// Register SalesOfficerService for dependency injection
+builder.Services.AddScoped<ISalesOfficerServiceForSalesManager,SalesOfficerServiceForSalesManager>();
 
 
 // Add Cookie Authentication

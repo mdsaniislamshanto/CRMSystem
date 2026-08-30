@@ -1,0 +1,828 @@
+﻿@model CRMSystem.Models.ViewModels.SalesOfficerDetailsViewModel
+
+@{
+    ViewData["Title"] = "Sales Officer Details";
+    ViewData["Breadcrumb"] = "Sales Officer Details";
+    Layout = "_SalesManagerLayout";
+}
+
+<div class="container-fluid py-4">
+
+    <!-- =====================================================
+         Page Header
+         ===================================================== -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold mb-1">
+                Sales Officer Details
+            </h2>
+
+            <p class="text-muted mb-0">
+                View profile, workload, SLA performance and recent activity.
+            </p>
+        </div>
+
+        <a asp-controller="SalesManager"
+           asp-action="SalesOfficers"
+           class="btn btn-outline-secondary">
+
+            <i class="bi bi-arrow-left me-2"></i>
+            Back to Sales Officers
+
+        </a>
+
+    </div>
+
+
+    <!-- =====================================================
+         Profile Card
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body p-4">
+
+            <div class="row align-items-center">
+
+                <!-- Profile Image -->
+
+                <div class="col-auto">
+
+                    @if (!string.IsNullOrWhiteSpace(Model.ProfileImage))
+                    {
+                        <img src="@Model.ProfileImage"
+                             alt="@Model.FullName"
+                             class="rounded-circle border"
+                             style="width:90px;height:90px;object-fit:cover;" />
+                    }
+                    else
+                    {
+                        <div class="rounded-circle bg-primary bg-opacity-10
+                            d-flex align-items-center justify-content-center"
+                             style="width:90px;height:90px;">
+
+                            <i class="bi bi-person-fill text-primary fs-1"></i>
+
+                        </div>
+                    }
+
+                </div>
+
+
+                <!-- Profile Information -->
+
+                <div class="col">
+
+                    <div class="d-flex align-items-center gap-2 mb-1">
+
+                        <h3 class="fw-bold mb-0">
+                            @Model.FullName
+                        </h3>
+
+                        @if (Model.IsActive)
+                        {
+                            <span class="badge bg-success">
+                                Active
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">
+                                Inactive
+                            </span>
+                        }
+
+                    </div>
+
+                    <div class="text-muted mb-2">
+                        @Model.EmployeeCode
+                    </div>
+
+                    <div class="row g-2">
+
+                        <div class="col-md-4">
+
+                            <small class="text-muted d-block">
+                                Email
+                            </small>
+
+                            <span>
+                                @Model.Email
+                            </span>
+
+                        </div>
+
+                        <div class="col-md-4">
+
+                            <small class="text-muted d-block">
+                                Phone
+                            </small>
+
+                            <span>
+                                @(Model.PhoneNumber ?? "Not provided")
+                            </span>
+
+                        </div>
+
+                        <div class="col-md-4">
+
+                            <small class="text-muted d-block">
+                                Employee Code
+                            </small>
+
+                            <span>
+                                @Model.EmployeeCode
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         KPI Cards
+         ===================================================== -->
+
+    <div class="row g-4 mb-4">
+
+        <!-- Assigned -->
+
+        <div class="col-xl-3 col-md-6">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between">
+
+                        <div>
+                            <div class="text-muted small">
+                                Assigned Leads
+                            </div>
+
+                            <h3 class="fw-bold mt-2 mb-0">
+                                @Model.AssignedLeads
+                            </h3>
+                        </div>
+
+                        <div class="bg-primary bg-opacity-10
+                            rounded p-3">
+
+                            <i class="bi bi-person-plus-fill
+                            text-primary fs-4"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Accepted -->
+
+        <div class="col-xl-3 col-md-6">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between">
+
+                        <div>
+                            <div class="text-muted small">
+                                Accepted Leads
+                            </div>
+
+                            <h3 class="fw-bold mt-2 mb-0 text-success">
+                                @Model.AcceptedLeads
+                            </h3>
+                        </div>
+
+                        <div class="bg-success bg-opacity-10
+                            rounded p-3">
+
+                            <i class="bi bi-check-circle-fill
+                            text-success fs-4"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Pending -->
+
+        <div class="col-xl-3 col-md-6">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between">
+
+                        <div>
+                            <div class="text-muted small">
+                                Pending Acceptance
+                            </div>
+
+                            <h3 class="fw-bold mt-2 mb-0 text-warning">
+                                @Model.PendingAcceptance
+                            </h3>
+                        </div>
+
+                        <div class="bg-warning bg-opacity-10
+                            rounded p-3">
+
+                            <i class="bi bi-hourglass-split
+                            text-warning fs-4"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Completed -->
+
+        <div class="col-xl-3 col-md-6">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between">
+
+                        <div>
+                            <div class="text-muted small">
+                                Completed Leads
+                            </div>
+
+                            <h3 class="fw-bold mt-2 mb-0 text-info">
+                                @Model.CompletedLeads
+                            </h3>
+                        </div>
+
+                        <div class="bg-info bg-opacity-10
+                            rounded p-3">
+
+                            <i class="bi bi-check2-all
+                            text-info fs-4"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         Performance & SLA
+         ===================================================== -->
+
+    <div class="row g-4 mb-4">
+
+        <!-- Performance -->
+
+        <div class="col-xl-6">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-header bg-white py-3">
+
+                    <h5 class="fw-semibold mb-0">
+                        <i class="bi bi-graph-up me-2 text-primary"></i>
+                        Performance Overview
+                    </h5>
+
+                </div>
+
+                <div class="card-body">
+
+                    <!-- Acceptance Rate -->
+
+                    <div class="mb-4">
+
+                        <div class="d-flex justify-content-between mb-2">
+
+                            <span class="text-muted">
+                                Acceptance Rate
+                            </span>
+
+                            <strong>
+                                @Model.AcceptanceRate.ToString("0.0")%
+                            </strong>
+
+                        </div>
+
+                        <div class="progress"
+                             style="height:8px;">
+
+                            <div class="progress-bar"
+                                 role="progressbar"
+                                 style="width:@Math.Min(Model.AcceptanceRate, 100)%;">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Feedback -->
+
+                    <div class="d-flex justify-content-between
+                        align-items-center border-bottom pb-3 mb-3">
+
+                        <span>
+                            <i class="bi bi-chat-left-text me-2"></i>
+                            Total Feedbacks
+                        </span>
+
+                        <span class="badge bg-primary">
+                            @Model.TotalFeedbacks
+                        </span>
+
+                    </div>
+
+
+                    <!-- Overdue -->
+
+                    <div class="d-flex justify-content-between
+                        align-items-center">
+
+                        <span>
+                            <i class="bi bi-clock-history me-2"></i>
+                            Overdue Follow-ups
+                        </span>
+
+                        @if (Model.OverdueFollowUps > 0)
+                        {
+                            <span class="badge bg-danger">
+                                @Model.OverdueFollowUps
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">
+                                0
+                            </span>
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- SLA -->
+
+        <div class="col-xl-6">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-header bg-white py-3">
+
+                    <h5 class="fw-semibold mb-0">
+
+                        <i class="bi bi-stopwatch me-2 text-danger"></i>
+
+                        SLA Performance
+
+                    </h5>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row g-3">
+
+                        <!-- Acceptance SLA -->
+
+                        <div class="col-md-4">
+
+                            <div class="border rounded p-3 text-center">
+
+                                <div class="text-muted small mb-2">
+                                    Acceptance SLA
+                                </div>
+
+                                <h4 class="fw-bold
+                                    @(Model.AcceptanceSLAMissed > 0
+                                        ? "text-danger"
+                                        : "text-success")">
+
+                                    @Model.AcceptanceSLAMissed
+
+                                </h4>
+
+                                <small class="text-muted">
+                                    Missed
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- First Feedback SLA -->
+
+                        <div class="col-md-4">
+
+                            <div class="border rounded p-3 text-center">
+
+                                <div class="text-muted small mb-2">
+                                    First Feedback SLA
+                                </div>
+
+                                <h4 class="fw-bold
+                                    @(Model.FirstFeedbackSLAMissed > 0
+                                        ? "text-danger"
+                                        : "text-success")">
+
+                                    @Model.FirstFeedbackSLAMissed
+
+                                </h4>
+
+                                <small class="text-muted">
+                                    Missed
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Next Feedback SLA -->
+
+                        <div class="col-md-4">
+
+                            <div class="border rounded p-3 text-center">
+
+                                <div class="text-muted small mb-2">
+                                    Next Feedback SLA
+                                </div>
+
+                                <h4 class="fw-bold
+                                    @(Model.NextFeedbackSLAMissed > 0
+                                        ? "text-danger"
+                                        : "text-success")">
+
+                                    @Model.NextFeedbackSLAMissed
+
+                                </h4>
+
+                                <small class="text-muted">
+                                    Missed
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         Recent Lead Activity
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white py-3">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <h5 class="fw-semibold mb-0">
+
+                    <i class="bi bi-kanban me-2 text-primary"></i>
+
+                    Recent Lead Activity
+
+                </h5>
+
+                <span class="badge bg-primary">
+                    @Model.RecentLeads.Count
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th>Lead</th>
+
+                            <th>Assigned</th>
+
+                            <th>Accepted</th>
+
+                            <th>Status</th>
+
+                            <th>Next Follow-up</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        @if (Model.RecentLeads.Any())
+                        {
+                            foreach (var lead in Model.RecentLeads)
+                            {
+                                <tr>
+
+                                    <td>
+
+                                        <div class="fw-semibold">
+                                            @lead.LeadName
+                                        </div>
+
+                                        <small class="text-muted">
+                                            @lead.LeadCode
+                                        </small>
+
+                                    </td>
+
+
+                                    <td>
+                                        @lead.AssignedAt.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")
+                                    </td>
+
+
+                                    <td>
+
+                                        @if (lead.AcceptedAt.HasValue)
+                                        {
+                                                @lead.AcceptedAt.Value.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning text-dark">
+                                                Pending
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <span class="badge bg-primary">
+                                            @lead.Status
+                                        </span>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        @if (lead.NextFollowUpDate.HasValue)
+                                        {
+                                                @lead.NextFollowUpDate.Value.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+                                                -
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+
+                                <td colspan="5"
+                                    class="text-center py-4 text-muted">
+
+                                    No recent lead activity found.
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         Recent Feedback Activity
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white py-3">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <h5 class="fw-semibold mb-0">
+
+                    <i class="bi bi-chat-square-text me-2 text-success"></i>
+
+                    Recent Feedback Activity
+
+                </h5>
+
+                <span class="badge bg-success">
+                    @Model.RecentFeedbacks.Count
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th>Lead</th>
+
+                            <th>Submitted</th>
+
+                            <th>Status</th>
+
+                            <th>Next Follow-up</th>
+
+                            <th>Next Feedback SLA</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        @if (Model.RecentFeedbacks.Any())
+                        {
+                            foreach (var feedback in Model.RecentFeedbacks)
+                            {
+                                <tr>
+
+                                    <td>
+
+                                        <div class="fw-semibold">
+                                            @feedback.LeadName
+                                        </div>
+
+                                        <small class="text-muted">
+                                            Lead ID: @feedback.LeadId
+                                        </small>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        @feedback.SubmittedAt.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <span class="badge bg-secondary">
+                                            @feedback.Status
+                                        </span>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        @if (feedback.NextFollowUpDate.HasValue)
+                                        {
+                                            @feedback.NextFollowUpDate.Value.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+                                                -
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <td>
+
+                                        @if (feedback.NextFeedbackSLAMissed)
+                                        {
+                                            <span class="badge bg-danger">
+
+                                                <i class="bi bi-exclamation-circle me-1"></i>
+
+                                                Missed
+
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">
+
+                                                <i class="bi bi-check-circle me-1"></i>
+
+                                                On Time
+
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+
+                                <td colspan="5"
+                                    class="text-center py-4 text-muted">
+
+                                    No feedback activity found.
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

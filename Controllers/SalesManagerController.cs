@@ -1,9 +1,10 @@
 ﻿using CRMSystem.Constants;
 using CRMSystem.Enums;
 using CRMSystem.Models.ViewModels;
+using CRMSystem.Services;
 using CRMSystem.Services.Interfaces;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 
 
@@ -16,20 +17,23 @@ namespace CRMSystem.Controllers
         private readonly ISettingsService _settingsService;
         private readonly ILeadCaptureService _leadCaptureService;
         private readonly IReportService _reportService;
+        private readonly ISalesOfficerServiceForSalesManager _salesOfficerServiceForSalesManager;
 
         public SalesManagerController(
             ISalesManagerDashboardService dashboardService,
             ILeadService leadService,
             ISettingsService settingsService,
             ILeadCaptureService leadCaptureService,
-            IReportService reportService)
-          
+            IReportService reportService,
+          ISalesOfficerServiceForSalesManager salesOfficerServiceForSalesManager)
+
         {
             _dashboardService = dashboardService;
             _leadService = leadService;
             _settingsService = settingsService;
             _leadCaptureService = leadCaptureService;
             _reportService = reportService;
+            _salesOfficerServiceForSalesManager = salesOfficerServiceForSalesManager;
         }
 
         // ==========================
@@ -336,12 +340,20 @@ namespace CRMSystem.Controllers
         }
 
         // ==========================
-        // Sales Officers
+        // GET: SalesOfficers
         // ==========================
-        public IActionResult SalesOfficers()
+        [HttpGet]
+        public async Task<IActionResult> SalesOfficers()
         {
-            return View();
+            ViewData["Title"] = "Sales Officers";
+            ViewData["Breadcrumb"] = "Sales Officers";
+
+            var salesOfficers =
+                await _salesOfficerServiceForSalesManager.GetSalesOfficersAsync();
+
+            return View(salesOfficers);
         }
+        
 
         // =====================================================
         // Sales Officer Performance
@@ -466,6 +478,28 @@ namespace CRMSystem.Controllers
                     .GetSalesManagerReportAsync();
 
             return View(report);
+        }
+
+        // ==========================
+        // Sales Officer Details
+        // ==========================
+
+        [HttpGet]
+        public async Task<IActionResult> SalesOfficerDetails(long id)
+        {
+            ViewData["Title"] = "Sales Officer Details";
+            ViewData["Breadcrumb"] = "Sales Officer Details";
+
+            var officer =
+                await _salesOfficerServiceForSalesManager
+                    .GetSalesOfficerDetailsAsync(id);
+
+            if (officer == null)
+            {
+                return NotFound();
+            }
+
+            return View(officer);
         }
 
     }
