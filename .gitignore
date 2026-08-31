@@ -18,3 +18,6 @@ obj/
 # OS files
 Thumbs.db
 Desktop.ini
+
+# Runtime uploaded files
+wwwroot/uploads/

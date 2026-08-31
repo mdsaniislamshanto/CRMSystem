@@ -1,7 +1,7 @@
 ﻿using CRMSystem.Data;
+using CRMSystem.Enums;
 using CRMSystem.Models.ViewModels;
 using CRMSystem.Services.Interfaces;
-using CRMSystem.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace CRMSystem.Services
@@ -27,6 +27,7 @@ namespace CRMSystem.Services
             // ==========================
             // Total New Leads
             // ==========================
+
             model.TotalNewLeads = await _context.Leads
                 .CountAsync(l => l.Status == LeadStatus.New);
 
@@ -34,6 +35,7 @@ namespace CRMSystem.Services
             // ==========================
             // Auto Assignment Status
             // ==========================
+
             var systemSettings = await _context.SystemSettings
                 .FirstOrDefaultAsync();
 
@@ -58,11 +60,9 @@ namespace CRMSystem.Services
 
             var feedbacks = await _context.Feedbacks
 
-                // Load LeadAssignment
                 .Include(f => f.LeadAssignment)
                     .ThenInclude(a => a!.Lead)
 
-                // Load Sales Officer
                 .Include(f => f.LeadAssignment)
                     .ThenInclude(a => a!.SalesOfficer)
 
@@ -113,17 +113,13 @@ namespace CRMSystem.Services
                         followUpStatus = "Upcoming";
                     }
 
-
                     return new SalesManagerFollowUpViewModel
                     {
-                        FeedbackId =
-                            f.FeedbackId,
+                        FeedbackId = f.FeedbackId,
 
-                        AssignmentId =
-                            f.AssignmentId,
+                        AssignmentId = f.AssignmentId,
 
-                        LeadId =
-                            f.LeadAssignment!.LeadId,
+                        LeadId = f.LeadAssignment!.LeadId,
 
                         LeadName =
                             f.LeadAssignment.Lead?.LeadName
@@ -133,33 +129,24 @@ namespace CRMSystem.Services
                             f.LeadAssignment.SalesOfficer?.FullName
                             ?? "Unknown Sales Officer",
 
-                        Summary =
-                            f.Summary,
+                        Summary = f.Summary,
 
                         FeedbackStatus =
                             f.Status.ToString(),
 
-                        SubmittedAt =
-                            f.SubmittedAt,
+                        SubmittedAt = f.SubmittedAt,
 
-                        FollowUpDate =
-                            followUpDate,
+                        FollowUpDate = followUpDate,
 
-                        IsOverdue =
-                            isOverdue,
+                        IsOverdue = isOverdue,
 
-                        IsDueToday =
-                            isDueToday,
+                        IsDueToday = isDueToday,
 
-                        FollowUpStatus =
-                            followUpStatus
+                        FollowUpStatus = followUpStatus
                     };
                 })
-
                 .OrderBy(f => f.FollowUpDate)
-
                 .ToList();
-
 
             return followUps;
         }
@@ -173,11 +160,6 @@ namespace CRMSystem.Services
             GetFollowUpDetailsAsync(long leadId)
         {
             var now = DateTime.UtcNow;
-
-
-            // =================================================
-            // Get all feedback history for the selected Lead
-            // =================================================
 
             var feedbacks = await _context.Feedbacks
 
@@ -198,19 +180,11 @@ namespace CRMSystem.Services
                 .ToListAsync();
 
 
-            // =================================================
-            // Lead has no feedback
-            // =================================================
-
             if (!feedbacks.Any())
             {
                 return null;
             }
 
-
-            // =================================================
-            // Get first available assignment
-            // =================================================
 
             var firstFeedback =
                 feedbacks.First();
@@ -225,15 +199,10 @@ namespace CRMSystem.Services
             }
 
 
-            // =================================================
-            // Create Details ViewModel
-            // =================================================
-
             var model =
                 new SalesManagerFollowUpDetailsViewModel
                 {
-                    LeadId =
-                        leadId,
+                    LeadId = leadId,
 
                     LeadName =
                         assignment.Lead?.LeadName
@@ -244,10 +213,6 @@ namespace CRMSystem.Services
                         ?? "Unknown Sales Officer"
                 };
 
-
-            // =================================================
-            // Map Complete Feedback History
-            // =================================================
 
             model.FeedbackHistory =
                 feedbacks
@@ -299,139 +264,10 @@ namespace CRMSystem.Services
             return model;
         }
 
-        // =====================================================
-        // Sales Officer Performance
-        // =====================================================
-
-        public async Task<List<SalesOfficerPerformanceViewModel>>
-            GetPerformanceAsync()
-        {
-            var now = DateTime.UtcNow;
-
-            var performance = await _context.Users
-
-                // Only Sales Officers
-                .Where(u =>
-                    u.Role != null &&
-                    u.Role.RoleKey == "SALES_OFFICER" &&
-                    u.IsActive &&
-                    !u.IsDeleted)
-
-                .Select(u => new SalesOfficerPerformanceViewModel
-                {
-                    // -----------------------------------------
-                    // Sales Officer Information
-                    // -----------------------------------------
-
-                    SalesOfficerId = u.UserId,
-
-                    SalesOfficerName = u.FullName,
 
 
-                    // -----------------------------------------
-                    // Total Assigned Leads
-                    // -----------------------------------------
-
-                    TotalAssignedLeads = _context.LeadAssignments
-                        .Count(a =>
-                            a.SalesOfficerId == u.UserId &&
-                            a.IsActive &&
-                            !a.IsDeleted),
 
 
-                    // -----------------------------------------
-                    // Accepted Leads
-                    // -----------------------------------------
-
-                    AcceptedLeads = _context.LeadAssignments
-                        .Count(a =>
-                            a.SalesOfficerId == u.UserId &&
-                            a.IsActive &&
-                            !a.IsDeleted &&
-                            a.AcceptedAt.HasValue),
-
-
-                    // -----------------------------------------
-                    // Pending Acceptance
-                    // -----------------------------------------
-
-                    PendingAcceptance = _context.LeadAssignments
-                        .Count(a =>
-                            a.SalesOfficerId == u.UserId &&
-                            a.IsActive &&
-                            !a.IsDeleted &&
-                            a.AssignmentStatus == AssignmentStatus.Pending),
-
-
-                    // -----------------------------------------
-                    // Completed Leads
-                    // -----------------------------------------
-
-                    CompletedLeads = _context.LeadAssignments
-                        .Count(a =>
-                            a.SalesOfficerId == u.UserId &&
-                            a.IsActive &&
-                            !a.IsDeleted &&
-                            a.Lead != null &&
-                            a.Lead.Status == LeadStatus.Completed),
-
-
-                    // -----------------------------------------
-                    // Total Feedbacks
-                    // -----------------------------------------
-
-                    TotalFeedbacks = _context.Feedbacks
-                        .Count(f =>
-                            f.LeadAssignment != null &&
-                            f.LeadAssignment.SalesOfficerId == u.UserId &&
-                            f.IsActive &&
-                            !f.IsDeleted),
-
-
-                    // -----------------------------------------
-                    // Acceptance SLA Missed
-                    // -----------------------------------------
-
-                    AcceptanceSLAMissed = _context.LeadAssignments
-                        .Count(a =>
-                            a.SalesOfficerId == u.UserId &&
-                            a.IsActive &&
-                            !a.IsDeleted &&
-                            a.AcceptanceSLAMissed),
-
-
-                    // -----------------------------------------
-                    // First Feedback SLA Missed
-                    // -----------------------------------------
-
-                    FirstFeedbackSLAMissed = _context.LeadAssignments
-                        .Count(a =>
-                            a.SalesOfficerId == u.UserId &&
-                            a.IsActive &&
-                            !a.IsDeleted &&
-                            a.FirstFeedbackSLAMissed),
-
-
-                    // -----------------------------------------
-                    // Overdue Follow-ups
-                    // -----------------------------------------
-
-                    OverdueFollowUps = _context.Feedbacks
-                        .Count(f =>
-                            f.LeadAssignment != null &&
-                            f.LeadAssignment.SalesOfficerId == u.UserId &&
-                            f.IsActive &&
-                            !f.IsDeleted &&
-                            f.NextFollowUpDate.HasValue &&
-                            f.NextFollowUpDate.Value < now)
-                })
-
-                .AsNoTracking()
-
-                .ToListAsync();
-
-            return performance;
-        }
 
     }
 }

@@ -18,6 +18,8 @@ namespace CRMSystem.Controllers
         private readonly ILeadCaptureService _leadCaptureService;
         private readonly IReportService _reportService;
         private readonly ISalesOfficerServiceForSalesManager _salesOfficerServiceForSalesManager;
+        private readonly ISalesOfficerPerformanceService _salesOfficerPerformanceService;
+        private readonly IPerformanceExportService _performanceExportService;
 
         public SalesManagerController(
             ISalesManagerDashboardService dashboardService,
@@ -25,7 +27,7 @@ namespace CRMSystem.Controllers
             ISettingsService settingsService,
             ILeadCaptureService leadCaptureService,
             IReportService reportService,
-          ISalesOfficerServiceForSalesManager salesOfficerServiceForSalesManager)
+          ISalesOfficerServiceForSalesManager salesOfficerServiceForSalesManager, ISalesOfficerPerformanceService salesOfficerPerformanceService, IPerformanceExportService performanceExportService)
 
         {
             _dashboardService = dashboardService;
@@ -34,6 +36,8 @@ namespace CRMSystem.Controllers
             _leadCaptureService = leadCaptureService;
             _reportService = reportService;
             _salesOfficerServiceForSalesManager = salesOfficerServiceForSalesManager;
+            _salesOfficerPerformanceService = salesOfficerPerformanceService;
+            _performanceExportService = performanceExportService;
         }
 
         // ==========================
@@ -353,7 +357,6 @@ namespace CRMSystem.Controllers
 
             return View(salesOfficers);
         }
-        
 
         // =====================================================
         // Sales Officer Performance
@@ -361,13 +364,131 @@ namespace CRMSystem.Controllers
 
         [HttpGet]
         [Authorize(Roles = "ADMIN,SALES_MANAGER")]
-        public async Task<IActionResult> Performance()
+        public async Task<IActionResult> Performance(
+            PerformanceFilterViewModel? filter)
         {
+            // -------------------------------------------------
+            // Create default filter if no filter was supplied
+            // -------------------------------------------------
+
+            filter ??=
+                new PerformanceFilterViewModel();
+
+
+            // -------------------------------------------------
+            // Default Range
+            // -------------------------------------------------
+
+            if (string.IsNullOrWhiteSpace(filter.Range))
+            {
+                filter.Range =
+                    "ThisMonth";
+            }
+
+
+            // -------------------------------------------------
+            // Validate Custom Range
+            // -------------------------------------------------
+
+            if (string.Equals(
+                    filter.Range,
+                    "Custom",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                if (!filter.FromDate.HasValue ||
+                    !filter.ToDate.HasValue)
+                {
+                    TempData["Error"] =
+                        "Please select both From Date and To Date.";
+
+                    filter.Range =
+                        "ThisMonth";
+
+                    filter.FromDate =
+                        null;
+
+                    filter.ToDate =
+                        null;
+                }
+                else if (
+                    filter.FromDate.Value.Date >
+                    filter.ToDate.Value.Date)
+                {
+                    TempData["Error"] =
+                        "From Date cannot be later than To Date.";
+
+                    filter.Range =
+                        "ThisMonth";
+
+                    filter.FromDate =
+                        null;
+
+                    filter.ToDate =
+                        null;
+                }
+            }
+
+
+            // -------------------------------------------------
+            // Get Filtered Performance
+            // -------------------------------------------------
+
             var performance =
-                await _dashboardService.GetPerformanceAsync();
+                await _salesOfficerPerformanceService
+                    .GetPerformanceAsync(filter);
+
+
+            // -------------------------------------------------
+            // Get Top Performer
+            // -------------------------------------------------
+
+            var topPerformer =
+                await _salesOfficerPerformanceService
+                    .GetTopPerformerAsync(filter);
+
+
+            // -------------------------------------------------
+            // Get Needs Attention Officer
+            // -------------------------------------------------
+
+            var needsAttention =
+                await _salesOfficerPerformanceService
+                    .GetNeedsAttentionAsync(filter);
+
+
+            // -------------------------------------------------
+            // Send Filter To View
+            // -------------------------------------------------
+
+            ViewData["PerformanceFilter"] =
+                filter;
+
+
+            // -------------------------------------------------
+            // Send Top Performer To View
+            // -------------------------------------------------
+
+            ViewData["TopPerformer"] =
+                topPerformer;
+
+
+            // -------------------------------------------------
+            // Send Needs Attention To View
+            // -------------------------------------------------
+
+            ViewData["NeedsAttention"] =
+                needsAttention;
+
+
+            // -------------------------------------------------
+            // Return Existing Performance List
+            // -------------------------------------------------
 
             return View(performance);
         }
+
+
+
 
 
 
@@ -501,6 +622,122 @@ namespace CRMSystem.Controllers
 
             return View(officer);
         }
+
+        // =====================================================
+        // Performance Trend
+        // =====================================================
+
+        [HttpGet]
+        [Authorize(Roles = "ADMIN,SALES_MANAGER")]
+        public async Task<IActionResult> PerformanceTrend(
+            PerformanceFilterViewModel? filter)
+        {
+            filter ??=
+                new PerformanceFilterViewModel();
+
+
+            // -------------------------------------------------
+            // Default Range
+            // -------------------------------------------------
+
+            if (string.IsNullOrWhiteSpace(filter.Range))
+            {
+                filter.Range =
+                    "ThisMonth";
+            }
+
+
+            // -------------------------------------------------
+            // Get Trend
+            // -------------------------------------------------
+
+            var trend =
+                await _salesOfficerPerformanceService
+                    .GetPerformanceTrendAsync(filter);
+
+
+            return Json(trend);
+        }
+
+
+        // =====================================================
+        // SLA Trend
+        // =====================================================
+
+        [HttpGet]
+        public async Task<IActionResult> SLATrend(
+            PerformanceFilterViewModel? filter = null)
+        {
+            var trend =
+                await _salesOfficerPerformanceService
+                    .GetSLATrendAsync(filter);
+
+            return Json(trend);
+        }
+
+        // =====================================================
+        // Completion Trend
+        // =====================================================
+
+        [HttpGet]
+        public async Task<IActionResult> GetCompletionTrend(
+            PerformanceFilterViewModel? filter = null)
+        {
+            var trend =
+                await _salesOfficerPerformanceService
+                    .GetCompletionTrendAsync(filter);
+
+            return Json(trend);
+        }
+
+
+        // =====================================================
+        // Export Performance Report To Excel
+        // =====================================================
+
+        [HttpGet]
+        public async Task<IActionResult> ExportPerformanceExcel(
+            PerformanceFilterViewModel? filter = null)
+        {
+            var fileBytes =
+                await _performanceExportService
+                    .ExportPerformanceToExcelAsync(filter);
+
+
+            var fileName =
+                $"SalesOfficerPerformance_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+
+
+            const string contentType =
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+
+            return File(
+                fileBytes,
+                contentType,
+                fileName);
+        }
+
+        // =====================================================
+        // Export Performance Report To PDF
+        // =====================================================
+        [HttpGet]
+        public async Task<IActionResult> ExportPerformancePdf(
+    PerformanceFilterViewModel? filter = null)
+        {
+            var pdfBytes =
+                await _performanceExportService
+                    .ExportPerformanceToPdfAsync(filter);
+
+            var fileName =
+                $"SalesOfficerPerformance_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+
+            return File(
+                pdfBytes,
+                "application/pdf",
+                fileName);
+        }
+
 
     }
 }

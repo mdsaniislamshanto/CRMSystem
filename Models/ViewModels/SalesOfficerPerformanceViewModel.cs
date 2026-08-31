@@ -49,10 +49,28 @@ namespace CRMSystem.Models.ViewModels
 
 
         // =====================================================
+        // Next Feedback SLA
+        // =====================================================
+
+        public int NextFeedbackSLAMet { get; set; }
+
+        public int NextFeedbackSLAMissed { get; set; }
+
+        public double NextFeedbackSLAComplianceRate { get; set; }
+
+
+        // =====================================================
         // Lead Completion
         // =====================================================
 
         public int CompletedLeads { get; set; }
+
+
+        // =====================================================
+        // Overall Performance
+        // =====================================================
+
+        public double PerformanceScore { get; set; }
 
 
         // =====================================================
@@ -73,6 +91,15 @@ namespace CRMSystem.Models.ViewModels
         public int OverdueFollowUps { get; set; }
 
         public double FollowUpTimelinessRate { get; set; }
+
+
+        // =====================================================
+        // Lead Completion
+        // =====================================================
+
+      
+
+        public double CompletionRate { get; set; }
 
 
         // =====================================================

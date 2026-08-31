@@ -10,6 +10,6 @@ namespace CRMSystem.Services.Interfaces
 
         Task<SalesManagerFollowUpDetailsViewModel?> GetFollowUpDetailsAsync(long leadId);
 
-        Task<List<SalesOfficerPerformanceViewModel>> GetPerformanceAsync();
+        
     }
 }

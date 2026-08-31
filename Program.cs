@@ -7,8 +7,10 @@ using CRMSystem.Services.GoogleForms;
 using CRMSystem.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using QuestPDF.Infrastructure;
 
-
+//For QuestPDF License
+QuestPDF.Settings.License = LicenseType.Community;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,6 +52,8 @@ builder.Services.AddScoped< ISalesOfficerPerformanceService, SalesOfficerPerform
 // Register SalesOfficerService for dependency injection
 builder.Services.AddScoped<ISalesOfficerServiceForSalesManager,SalesOfficerServiceForSalesManager>();
 
+// Register PerformanceExportService for dependency injection
+builder.Services.AddScoped<IPerformanceExportService, PerformanceExportService>();
 
 // Add Cookie Authentication
 builder.Services.AddAuthentication(

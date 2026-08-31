@@ -5,24 +5,1014 @@
     ViewData["Breadcrumb"] = "Performance";
     Layout = "_SalesManagerLayout";
 
+    var filter =
+        ViewData["PerformanceFilter"]
+        as CRMSystem.Models.ViewModels.PerformanceFilterViewModel
+        ?? new CRMSystem.Models.ViewModels.PerformanceFilterViewModel();
+
+    var topPerformer =
+        ViewData["TopPerformer"]
+        as CRMSystem.Models.ViewModels.PerformanceHighlightViewModel;
+
+    var needsAttention =
+        ViewData["NeedsAttention"]
+        as CRMSystem.Models.ViewModels.PerformanceHighlightViewModel;
+
     var totalOfficers = Model.Count;
 
-    var totalAssigned = Model.Sum(x => x.TotalAssignedLeads);
+    var totalAssigned =
+        Model.Sum(x => x.TotalAssignedLeads);
 
-    var totalAccepted = Model.Sum(x => x.AcceptedLeads);
+    var totalAccepted =
+        Model.Sum(x => x.AcceptedLeads);
 
-    var totalFeedbacks = Model.Sum(x => x.TotalFeedbacks);
+    var totalFeedbacks =
+        Model.Sum(x => x.TotalFeedbacks);
 
-    var totalOverdue = Model.Sum(x => x.OverdueFollowUps);
+    var totalOverdue =
+        Model.Sum(x => x.OverdueFollowUps);
+
+    var totalCompleted =
+        Model.Sum(x => x.CompletedLeads);
+
+    var totalAcceptanceRate =
+        totalAssigned > 0
+            ? (double)totalAccepted / totalAssigned * 100
+            : 0;
+
+    var totalCompletionRate =
+        totalAccepted > 0
+            ? (double)totalCompleted / totalAccepted * 100
+            : 0;
+
+    var rangeText =
+        filter.Range switch
+        {
+            "Today" => "Today",
+            "ThisWeek" => "This Week",
+            "Custom" => "Custom Range",
+            _ => "This Month"
+        };
 }
 
-<div class="container-fluid py-4">
 
-    <!-- ==========================================
-         Page Header
-         ========================================== -->
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<style>
+    /* =========================================================
+               SALES MANAGER PERFORMANCE - UI POLISH
+               Presentation-only styles. Existing functionality preserved.
+               ========================================================= */
+
+    .performance-page {
+        --pm-primary: #0d6efd;
+        --pm-success: #198754;
+        --pm-warning: #f0ad00;
+        --pm-danger: #dc3545;
+        --pm-border: #e9ecef;
+        --pm-muted: #6c757d;
+        --pm-surface: #ffffff;
+        --pm-soft: #f8f9fa;
+        --pm-shadow: 0 6px 20px rgba(33, 37, 41, .055);
+        --pm-shadow-hover: 0 10px 28px rgba(33, 37, 41, .09);
+    }
+
+        .performance-page .pm-page-header {
+            padding: .35rem 0 .5rem;
+        }
+
+        .performance-page .pm-page-title {
+            letter-spacing: -.025em;
+        }
+
+        .performance-page .pm-page-subtitle {
+            max-width: 820px;
+            line-height: 1.55;
+        }
+
+        .performance-page .card {
+            border: 1px solid var(--pm-border) !important;
+            border-radius: 16px;
+            box-shadow: var(--pm-shadow) !important;
+            background: var(--pm-surface);
+        }
+
+        .performance-page .card-header {
+            border-color: var(--pm-border) !important;
+            background: var(--pm-surface) !important;
+        }
+
+        .performance-page .card:not(.pm-static-card) {
+            transition: box-shadow .2s ease, transform .2s ease;
+        }
+
+            .performance-page .card:not(.pm-static-card):hover {
+                box-shadow: var(--pm-shadow-hover) !important;
+            }
+
+        .performance-page .pm-filter-card {
+            border-radius: 14px;
+        }
+
+            .performance-page .pm-filter-card .form-label {
+                font-size: .82rem;
+                color: #495057;
+                margin-bottom: .45rem;
+            }
+
+        .performance-page .form-select,
+        .performance-page .form-control {
+            min-height: 44px;
+            border-radius: 10px;
+            border-color: #dee2e6;
+            box-shadow: none;
+        }
+
+            .performance-page .form-select:focus,
+            .performance-page .form-control:focus {
+                border-color: rgba(13, 110, 253, .45);
+                box-shadow: 0 0 0 .2rem rgba(13, 110, 253, .08);
+            }
+
+        .performance-page .btn {
+            min-height: 44px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .performance-page .pm-action-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .6rem;
+        }
+
+        .performance-page .pm-highlight-card {
+            overflow: hidden;
+            position: relative;
+        }
+
+            .performance-page .pm-highlight-card::before {
+                content: "";
+                position: absolute;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                width: 4px;
+            }
+
+        .performance-page .pm-highlight-success::before {
+            background: var(--pm-success);
+        }
+
+        .performance-page .pm-highlight-danger::before {
+            background: var(--pm-danger);
+        }
+
+        .performance-page .pm-avatar {
+            width: 48px;
+            height: 48px;
+            min-width: 48px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .performance-page .pm-avatar-lg {
+            width: 56px;
+            height: 56px;
+            min-width: 56px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .performance-page .pm-score {
+            letter-spacing: -.03em;
+            line-height: 1;
+        }
+
+        .performance-page .pm-metric {
+            background: var(--pm-soft);
+            border: 1px solid transparent;
+            border-radius: 12px;
+            padding: .85rem .95rem;
+            height: 100%;
+            transition: border-color .2s ease, background .2s ease;
+        }
+
+            .performance-page .pm-metric:hover {
+                border-color: var(--pm-border);
+                background: #fff;
+            }
+
+        .performance-page .pm-kpi-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .performance-page .pm-kpi-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .performance-page .pm-kpi-value {
+            font-size: 1.8rem;
+            letter-spacing: -.03em;
+            line-height: 1.1;
+        }
+
+        .performance-page .pm-overview-item {
+            border-right: 1px solid var(--pm-border);
+        }
+
+            .performance-page .pm-overview-item:last-child {
+                border-right: 0;
+            }
+
+        .performance-page .pm-trend-card .card-body {
+            padding: 1rem 1.25rem 1.25rem;
+        }
+
+        .performance-page .pm-chart-wrap {
+            position: relative;
+            width: 100%;
+            height: 360px;
+        }
+
+            .performance-page .pm-chart-wrap.pm-chart-tall {
+                height: 380px;
+            }
+
+            .performance-page .pm-chart-wrap canvas {
+                width: 100% !important;
+                height: 100% !important;
+            }
+
+        .performance-page .pm-chart-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: .75rem;
+            flex-wrap: wrap;
+            margin-bottom: .5rem;
+        }
+
+        .performance-page .pm-chart-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .75rem 1.25rem;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .performance-page .pm-chart-legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+            color: var(--pm-muted);
+            font-size: .78rem;
+        }
+
+        .performance-page .pm-legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .performance-page .pm-table-card .card-body {
+            padding: 0;
+        }
+
+        .performance-page .table-responsive {
+            border-radius: 0 0 16px 16px;
+        }
+
+        .performance-page .table {
+            --bs-table-hover-bg: rgba(13, 110, 253, .025);
+            margin-bottom: 0;
+        }
+
+            .performance-page .table thead th {
+                white-space: nowrap;
+                font-size: .72rem;
+                text-transform: uppercase;
+                letter-spacing: .035em;
+                color: #6c757d;
+                background: #f8f9fa;
+                border-bottom: 1px solid var(--pm-border);
+                padding: .85rem .8rem;
+            }
+
+            .performance-page .table tbody td {
+                padding: .85rem .8rem;
+                border-color: #f0f1f2;
+            }
+
+            .performance-page .table tbody tr:last-child td {
+                border-bottom: 0;
+            }
+
+        .performance-page .pm-officer-cell {
+            min-width: 210px;
+        }
+
+        .performance-page .pm-number-badge {
+            min-width: 42px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .performance-page .pm-ranking-card {
+            background: linear-gradient(180deg, #fff 0%, #f8f9fa 100%);
+            border: 1px solid var(--pm-border);
+            border-radius: 14px;
+            height: 100%;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .performance-page .pm-ranking-card.pm-first {
+                border-color: rgba(240, 173, 0, .28);
+            }
+
+            .performance-page .pm-ranking-card.pm-second {
+                border-color: rgba(108, 117, 125, .25);
+            }
+
+            .performance-page .pm-ranking-card.pm-third {
+                border-color: rgba(33, 37, 41, .15);
+            }
+
+        .performance-page .pm-ranking-medal {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1rem;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.55rem;
+        }
+
+        .performance-page .pm-ranking-mini {
+            background: #fff;
+            border: 1px solid var(--pm-border);
+            border-radius: 10px;
+            padding: .55rem .3rem;
+        }
+
+        .performance-page .pm-empty {
+            padding: 3.5rem 1rem;
+        }
+
+        .performance-page .pm-empty-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            color: #adb5bd;
+            font-size: 1.65rem;
+        }
+
+    @@media (max-width: 991.98px) {
+        .performance-page .pm-overview-item {
+            border-right: 0;
+        }
+
+        .performance-page .pm-chart-wrap,
+        .performance-page .pm-chart-wrap.pm-chart-tall {
+            height: 330px;
+        }
+    }
+
+    @@media (max-width: 767.98px) {
+        .performance-page {
+            padding-left: .75rem !important;
+            padding-right: .75rem !important;
+        }
+
+            .performance-page .pm-page-header {
+                align-items: flex-start !important;
+            }
+
+                .performance-page .pm-page-header > div:last-child {
+                    display: none;
+                }
+
+            .performance-page .pm-chart-wrap,
+            .performance-page .pm-chart-wrap.pm-chart-tall {
+                height: 300px;
+            }
+
+            .performance-page .card-header {
+                padding: 1rem !important;
+            }
+
+            .performance-page .card-body {
+                padding: 1rem !important;
+            }
+
+            .performance-page .pm-trend-card .card-body {
+                padding: .75rem !important;
+            }
+
+            .performance-page .pm-table-card .card-body {
+                padding: 0 !important;
+            }
+    }
+
+    @@media (max-width: 575.98px) {
+        .performance-page .pm-chart-wrap,
+        .performance-page .pm-chart-wrap.pm-chart-tall {
+            height: 270px;
+        }
+
+        .performance-page .pm-chart-toolbar {
+            align-items: flex-start;
+        }
+
+        .performance-page .pm-chart-legend {
+            gap: .5rem .9rem;
+        }
+    }
+</style>
+
+
+<style>
+    /* =========================================================
+           PERFORMANCE PAGE - FINAL VISUAL POLISH
+           UI ONLY: no business logic / routing / data changes.
+           ========================================================= */
+
+    .performance-page {
+        --pm-primary: #2563eb;
+        --pm-primary-soft: #eff6ff;
+        --pm-success: #16845b;
+        --pm-success-soft: #effaf5;
+        --pm-warning: #b7791f;
+        --pm-warning-soft: #fff8e8;
+        --pm-danger: #d64b59;
+        --pm-danger-soft: #fff4f5;
+        --pm-info: #147d9b;
+        --pm-info-soft: #effaff;
+        --pm-text: #172033;
+        --pm-muted: #667085;
+        --pm-border: #e8ecf2;
+        --pm-surface: #ffffff;
+        --pm-soft: #f8fafc;
+        --pm-soft-2: #f5f7fa;
+        --pm-shadow: 0 5px 18px rgba(15, 23, 42, .045);
+        --pm-shadow-hover: 0 9px 26px rgba(15, 23, 42, .075);
+    }
+
+    /* Overall page rhythm */
+    .performance-page {
+        color: var(--pm-text);
+    }
+
+        .performance-page > .pm-filter-card,
+        .performance-page > .alert,
+        .performance-page > .row,
+        .performance-page > .card {
+            margin-bottom: 2rem !important;
+        }
+
+        .performance-page .pm-page-header {
+            padding: .35rem 0 .65rem;
+            margin-bottom: 1.75rem !important;
+        }
+
+        .performance-page .pm-page-title {
+            letter-spacing: -.025em;
+        }
+
+        .performance-page .pm-page-subtitle {
+            max-width: 820px;
+            line-height: 1.55;
+        }
+
+        /* Cards */
+        .performance-page .card {
+            border: 1px solid var(--pm-border) !important;
+            border-radius: 16px;
+            box-shadow: var(--pm-shadow) !important;
+            background: var(--pm-surface);
+        }
+
+        .performance-page .card-header {
+            border-color: var(--pm-border) !important;
+            background: var(--pm-surface) !important;
+        }
+
+        .performance-page .card:not(.pm-static-card) {
+            transition: box-shadow .2s ease, transform .2s ease;
+        }
+
+            .performance-page .card:not(.pm-static-card):hover {
+                box-shadow: var(--pm-shadow-hover) !important;
+            }
+
+        /* Filter area */
+        .performance-page .pm-filter-card {
+            border-radius: 16px;
+        }
+
+            .performance-page .pm-filter-card .card-body {
+                padding: 1.25rem 1.35rem;
+            }
+
+            .performance-page .pm-filter-card .form-label {
+                font-size: .78rem;
+                color: #667085;
+                margin-bottom: .45rem;
+            }
+
+        .performance-page .form-select,
+        .performance-page .form-control {
+            min-height: 44px;
+            border-radius: 10px;
+            border-color: #dfe4ea;
+            background: #fff;
+            box-shadow: none;
+        }
+
+            .performance-page .form-select:focus,
+            .performance-page .form-control:focus {
+                border-color: rgba(37, 99, 235, .42);
+                box-shadow: 0 0 0 .2rem rgba(37, 99, 235, .08);
+            }
+
+        .performance-page .btn {
+            min-height: 44px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        /* Export actions - compact, quiet, professional */
+        .performance-page .pm-export-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: .55rem;
+            margin-left: auto;
+        }
+
+        .performance-page .pm-export-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .45rem;
+            min-width: 122px;
+            min-height: 40px;
+            padding: .45rem .85rem;
+            border-radius: 9px;
+            border: 1px solid #e1e6ec;
+            background: #fff;
+            color: #475467;
+            font-size: .8rem;
+            font-weight: 600;
+            text-decoration: none;
+            box-shadow: none;
+            transition: all .18s ease;
+        }
+
+            .performance-page .pm-export-btn:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(15, 23, 42, .06);
+            }
+
+        .performance-page .pm-export-excel {
+            color: var(--pm-success);
+            background: #f8fcfa;
+            border-color: #d8eee4;
+        }
+
+            .performance-page .pm-export-excel:hover {
+                color: #11734e;
+                background: var(--pm-success-soft);
+                border-color: #c4e5d5;
+            }
+
+        .performance-page .pm-export-pdf {
+            color: var(--pm-danger);
+            background: #fffafa;
+            border-color: #f0d8dc;
+        }
+
+            .performance-page .pm-export-pdf:hover {
+                color: #c63f4d;
+                background: var(--pm-danger-soft);
+                border-color: #e9c5ca;
+            }
+
+        /* Highlight cards */
+        .performance-page .pm-highlight-card {
+            overflow: hidden;
+            position: relative;
+        }
+
+            .performance-page .pm-highlight-card::before {
+                content: "";
+                position: absolute;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                width: 3px;
+            }
+
+        .performance-page .pm-highlight-success::before {
+            background: #8ed1b4;
+        }
+
+        .performance-page .pm-highlight-danger::before {
+            background: #ef9aa5;
+        }
+
+        .performance-page .pm-highlight-success .card-header,
+        .performance-page .pm-highlight-danger .card-header {
+            padding: 1.15rem 1.25rem !important;
+        }
+
+        /* Soften the large solid highlight avatars without touching progress bars */
+        .performance-page .pm-highlight-success .card-body > .d-flex > .d-flex > .bg-success {
+            background: var(--pm-success-soft) !important;
+            color: var(--pm-success) !important;
+        }
+
+        .performance-page .pm-highlight-danger .card-body > .d-flex > .d-flex > .bg-danger {
+            background: var(--pm-danger-soft) !important;
+            color: var(--pm-danger) !important;
+        }
+
+        .performance-page .pm-highlight-success .display-6 {
+            color: var(--pm-success) !important;
+        }
+
+        .performance-page .pm-highlight-danger .display-6 {
+            color: var(--pm-danger) !important;
+        }
+
+        .performance-page .pm-highlight-success .progress {
+            background: #eaf0ee;
+        }
+
+        .performance-page .pm-highlight-success .progress-bar {
+            background: var(--pm-success) !important;
+        }
+
+        /* Highlight metrics */
+        .performance-page .pm-highlight-card .bg-light {
+            background: #f8fafc !important;
+        }
+
+        .performance-page .pm-highlight-card .border-danger-subtle {
+            border-color: #f0d8dc !important;
+            background: #fffafa;
+        }
+
+        .performance-page .pm-highlight-card .text-danger {
+            color: var(--pm-danger) !important;
+        }
+
+        .performance-page .pm-highlight-card .text-success {
+            color: var(--pm-success) !important;
+        }
+
+        /* Summary KPI cards */
+        .performance-page .row > [class*="col-"] > .card {
+            min-height: 100%;
+        }
+
+            .performance-page .row > [class*="col-"] > .card .card-body {
+                padding: 1.05rem 1.15rem;
+            }
+
+            .performance-page .row > [class*="col-"] > .card .fs-3 {
+                font-size: 1.25rem !important;
+                width: 42px;
+                height: 42px;
+                border-radius: 11px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                background: var(--pm-primary-soft);
+                color: var(--pm-primary) !important;
+            }
+
+        /* Overview strip */
+        .performance-page > .card:not(.pm-trend-card):not(.pm-table-card) .pm-overview-item {
+            border-right: 1px solid var(--pm-border);
+        }
+
+        .performance-page .pm-overview-item:last-child {
+            border-right: 0;
+        }
+
+        /* Trend cards: consistent visual language */
+        .performance-page .pm-trend-card {
+            overflow: hidden;
+        }
+
+            .performance-page .pm-trend-card .card-header {
+                padding: 1.15rem 1.25rem !important;
+            }
+
+            .performance-page .pm-trend-card .card-body {
+                padding: 1rem 1.25rem 1.25rem;
+            }
+
+        .performance-page .pm-chart-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: .75rem;
+            flex-wrap: wrap;
+            margin-bottom: .5rem;
+        }
+
+            .performance-page .pm-chart-toolbar h5 {
+                color: var(--pm-text);
+                letter-spacing: -.01em;
+            }
+
+            .performance-page .pm-chart-toolbar > div:first-child {
+                min-width: 0;
+            }
+
+            .performance-page .pm-chart-toolbar .badge {
+                font-weight: 600;
+                border: 1px solid #dbe7fb;
+                background: var(--pm-primary-soft) !important;
+                color: var(--pm-primary) !important;
+            }
+
+        .performance-page .pm-chart-wrap {
+            position: relative;
+            width: 100%;
+            height: 360px;
+        }
+
+            .performance-page .pm-chart-wrap.pm-chart-tall {
+                height: 360px;
+            }
+
+            .performance-page .pm-chart-wrap canvas {
+                width: 100% !important;
+                height: 100% !important;
+            }
+
+        .performance-page .pm-chart-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .55rem 1.2rem;
+            margin: 0 0 .85rem;
+            padding: 0;
+            list-style: none;
+        }
+
+        .performance-page .pm-chart-legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+            color: var(--pm-muted);
+            font-size: .78rem;
+        }
+
+        .performance-page .pm-legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        /* Comparison and performance tables */
+        .performance-page .pm-table-card .card-body {
+            padding: 0;
+        }
+
+        .performance-page .table-responsive {
+            border-radius: 0 0 16px 16px;
+        }
+
+        .performance-page .table {
+            --bs-table-hover-bg: rgba(37, 99, 235, .022);
+            margin-bottom: 0;
+        }
+
+            .performance-page .table thead th {
+                white-space: nowrap;
+                font-size: .7rem;
+                text-transform: uppercase;
+                letter-spacing: .035em;
+                color: #667085;
+                background: #f8fafc;
+                border-bottom: 1px solid var(--pm-border);
+                padding: .85rem .8rem;
+            }
+
+            .performance-page .table tbody td {
+                padding: .85rem .8rem;
+                border-color: #f0f2f5;
+            }
+
+            .performance-page .table tbody tr:last-child td {
+                border-bottom: 0;
+            }
+
+            /* Smaller, calmer table badges */
+            .performance-page .table .badge.fs-6 {
+                font-size: .78rem !important;
+                font-weight: 600;
+            }
+
+        /* Ranking */
+        .performance-page .pm-ranking-card {
+            background: linear-gradient(180deg, #fff 0%, #f8fafc 100%);
+            border: 1px solid var(--pm-border);
+            border-radius: 14px;
+            height: 100%;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .performance-page .pm-ranking-card.pm-first {
+                border-color: rgba(240, 173, 0, .28);
+            }
+
+            .performance-page .pm-ranking-card.pm-second {
+                border-color: rgba(108, 117, 125, .25);
+            }
+
+            .performance-page .pm-ranking-card.pm-third {
+                border-color: rgba(33, 37, 41, .15);
+            }
+
+        .performance-page .pm-ranking-medal {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1rem;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.55rem;
+        }
+
+        .performance-page .pm-ranking-mini {
+            background: #fff;
+            border: 1px solid var(--pm-border);
+            border-radius: 10px;
+            padding: .55rem .3rem;
+        }
+
+        /* Empty states */
+        .performance-page .pm-empty {
+            padding: 3.5rem 1rem;
+        }
+
+        .performance-page .pm-empty-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #f3f5f8;
+            color: #98a2b3;
+            font-size: 1.65rem;
+        }
+
+        /* Alert */
+        .performance-page > .alert {
+            border-radius: 12px;
+            border: 1px solid #f0d8dc;
+            background: #fffafa;
+            color: #8f3440;
+        }
+
+    /* Responsive */
+    @@media (max-width: 1199.98px) {
+        .performance-page .pm-export-actions {
+            width: 100%;
+            margin-left: 0;
+            justify-content: flex-start;
+        }
+    }
+
+    @@media (max-width: 991.98px) {
+        .performance-page .pm-overview-item {
+            border-right: 0 !important;
+        }
+
+        .performance-page .pm-chart-wrap,
+        .performance-page .pm-chart-wrap.pm-chart-tall {
+            height: 330px;
+        }
+    }
+
+    @@media (max-width: 767.98px) {
+        .performance-page {
+            padding-left: .75rem !important;
+            padding-right: .75rem !important;
+        }
+
+            .performance-page > .pm-filter-card,
+            .performance-page > .alert,
+            .performance-page > .row,
+            .performance-page > .card {
+                margin-bottom: 1.5rem !important;
+            }
+
+            .performance-page .pm-page-header {
+                align-items: flex-start !important;
+                margin-bottom: 1.35rem !important;
+            }
+
+                .performance-page .pm-page-header > div:last-child {
+                    display: none;
+                }
+
+            .performance-page .pm-export-actions {
+                gap: .5rem;
+            }
+
+            .performance-page .pm-export-btn {
+                flex: 1 1 auto;
+                min-width: 0;
+            }
+
+            .performance-page .pm-chart-wrap,
+            .performance-page .pm-chart-wrap.pm-chart-tall {
+                height: 300px;
+            }
+
+            .performance-page .card-header {
+                padding: 1rem !important;
+            }
+
+            .performance-page .card-body {
+                padding: 1rem !important;
+            }
+
+            .performance-page .pm-trend-card .card-body {
+                padding: .75rem !important;
+            }
+
+            .performance-page .pm-table-card .card-body {
+                padding: 0 !important;
+            }
+    }
+
+    @@media (max-width: 575.98px) {
+        .performance-page .pm-chart-wrap,
+        .performance-page .pm-chart-wrap.pm-chart-tall {
+            height: 270px;
+        }
+
+        .performance-page .pm-chart-toolbar {
+            align-items: flex-start;
+        }
+
+            .performance-page .pm-chart-toolbar .badge {
+                margin-top: .25rem;
+            }
+
+        .performance-page .pm-chart-legend {
+            gap: .5rem .85rem;
+        }
+
+        .performance-page .pm-export-actions {
+            width: 100%;
+        }
+
+        .performance-page .pm-export-btn {
+            min-height: 38px;
+        }
+    }
+</style>
+
+<div class="container-fluid py-4 performance-page">
+
+    <!-- =====================================================
+         PAGE HEADER
+         ===================================================== -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4 pm-page-header">
 
         <div>
 
@@ -52,13 +1042,861 @@
     </div>
 
 
-    <!-- ==========================================
-         Summary Cards
-         ========================================== -->
+    <!-- =====================================================
+         DATE RANGE FILTER
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4 pm-filter-card">
+
+        <div class="card-body">
+
+            <form method="get"
+                  asp-controller="SalesManager"
+                  asp-action="Performance">
+
+                <div class="row g-3 align-items-end">
+
+                    <!-- Range -->
+
+                    <div class="col-md-4 col-lg-3">
+
+                        <label class="form-label fw-semibold">
+                            Date Range
+                        </label>
+
+                        <select id="rangeSelect"
+                                name="Range"
+                                class="form-select">
+
+                            <option value="Today"
+                                    selected="@(filter.Range == "Today")">
+                                Today
+                            </option>
+
+                            <option value="ThisWeek"
+                                    selected="@(filter.Range == "ThisWeek")">
+                                This Week
+                            </option>
+
+                            <option value="ThisMonth"
+                                    selected="@(filter.Range == "ThisMonth")">
+                                This Month
+                            </option>
+
+                            <option value="Custom"
+                                    selected="@(filter.Range == "Custom")">
+                                Custom Range
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- Custom Dates -->
+
+                    <div id="customDateFields"
+                         class="col-md-5 col-lg-5"
+                         style="display:@(
+                         filter.Range == "Custom"
+                             ? "block"
+                             : "none"
+                                                                                     );">
+
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+
+                                <label class="form-label fw-semibold">
+                                    From Date
+                                </label>
+
+                                <input type="date"
+                                       name="FromDate"
+                                       class="form-control"
+                                       value="@(
+                                       filter.FromDate?.ToString("yyyy-MM-dd")
+                                                                                                                           )" />
+
+                            </div>
+
+
+                            <div class="col-md-6">
+
+                                <label class="form-label fw-semibold">
+                                    To Date
+                                </label>
+
+                                <input type="date"
+                                       name="ToDate"
+                                       class="form-control"
+                                       value="@(
+                                       filter.ToDate?.ToString("yyyy-MM-dd")
+                                                                                                                           )" />
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Apply -->
+
+                    <div class="col-md-3 col-lg-2">
+
+                        <button type="submit"
+                                class="btn btn-primary w-100">
+
+                            <i class="bi bi-funnel me-1"></i>
+
+                            Apply Filter
+
+                        </button>
+
+                    </div>
+
+                    <!-- Export actions: UI-only wrapper -->
+                    <div class="col-12 col-lg-auto pm-export-actions">
+
+                        <!-- Excel Export button -->
+                        <a id="exportExcelButton"
+                           href="@Url.Action("ExportPerformanceExcel", "SalesManager")"
+                           class="pm-export-btn pm-export-excel">
+                            <i class="bi bi-file-earmark-excel"></i>
+                            <span>Export Excel</span>
+                        </a>
+
+                        <!-- PDF Export button -->
+                        <a asp-controller="SalesManager"
+                           asp-action="ExportPerformancePdf"
+                           asp-route-Range="@Context.Request.Query["Range"].ToString()"
+                           asp-route-FromDate="@Context.Request.Query["FromDate"].ToString()"
+                           asp-route-ToDate="@Context.Request.Query["ToDate"].ToString()"
+                           class="pm-export-btn pm-export-pdf">
+                            <i class="bi bi-file-earmark-pdf"></i>
+                            <span>Export PDF</span>
+                        </a>
+
+                    </div>
+
+     
+
+
+                    <!-- Current Range -->
+
+                    <div class="col-md-12 col-lg-2">
+
+                        <div class="text-muted small">
+                            Current Range
+                        </div>
+
+                        <div class="fw-semibold">
+                            @rangeText
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         TEMP DATA ERROR
+         ===================================================== -->
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show"
+             role="alert">
+
+            <i class="bi bi-exclamation-triangle me-2"></i>
+
+            @TempData["Error"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+
+        </div>
+    }
+
+
+    <!-- =====================================================
+         PERFORMANCE HIGHLIGHTS
+         ===================================================== -->
 
     <div class="row g-4 mb-4">
 
-        <!-- Total Officers -->
+        <!-- =================================================
+             TOP PERFORMER
+             ================================================= -->
+
+        <div class="col-xl-6">
+
+            <div class="card border-0 shadow-sm h-100 overflow-hidden pm-highlight-card pm-highlight-success">
+
+                <div class="card-header bg-white border-0 py-3">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div class="d-flex align-items-center">
+
+                            <div class="
+                                rounded-circle
+                                bg-success-subtle
+                                text-success
+                                d-flex
+                                align-items-center
+                                justify-content-center
+                                me-3"
+                                 style="
+                                width:44px;
+                                height:44px;
+                                ">
+
+                                <i class="bi bi-trophy-fill fs-5"></i>
+
+                            </div>
+
+                            <div>
+
+                                <h5 class="fw-bold mb-0">
+                                    Top Performer
+                                </h5>
+
+                                <small class="text-muted">
+                                    Best overall performance in @rangeText
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+                        <span class="badge bg-success-subtle text-success px-3 py-2">
+                            <i class="bi bi-star-fill me-1"></i>
+                            Best
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="card-body">
+
+                    @if (topPerformer == null)
+                    {
+                        <div class="text-center py-4">
+
+                            <i class="bi bi-person-x fs-1 text-muted"></i>
+
+                            <h6 class="fw-semibold mt-3">
+                                No Performance Data
+                            </h6>
+
+                            <p class="text-muted small mb-0">
+                                No Sales Officer performance data is
+                                available for the selected period.
+                            </p>
+
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="d-flex justify-content-between align-items-start mb-4">
+
+                            <div class="d-flex align-items-center">
+
+                                <div class="
+                                    rounded-circle
+                                    bg-success
+                                    text-white
+                                    d-flex
+                                    align-items-center
+                                    justify-content-center
+                                    me-3"
+                                     style="
+                                    width:56px;
+                                    height:56px;
+                                    ">
+
+                                    <i class="bi bi-person-fill fs-4"></i>
+
+                                </div>
+
+                                <div>
+
+                                    <h4 class="fw-bold mb-1">
+                                        @topPerformer.SalesOfficerName
+                                    </h4>
+
+                                    <small class="text-muted">
+                                        Officer ID:
+                                        @topPerformer.SalesOfficerId
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="text-end">
+
+                                <div class="text-muted small">
+                                    Performance Score
+                                </div>
+
+                                <div class="display-6 fw-bold text-success">
+                                    @topPerformer.PerformanceScore.ToString("0.00")%
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Performance Score Progress -->
+
+                        <div class="mb-4">
+
+                            <div class="d-flex justify-content-between mb-1">
+
+                                <small class="text-muted">
+                                    Overall Performance
+                                </small>
+
+                                <small class="fw-semibold text-success">
+                                    @topPerformer.PerformanceScore.ToString("0.00")%
+                                </small>
+
+                            </div>
+
+                            <div class="progress"
+                                 style="height:8px;">
+
+                                <div class="progress-bar bg-success"
+                                     role="progressbar"
+                                     style="width:@(
+                                     Math.Min(
+                                         Math.Max(
+                                             topPerformer.PerformanceScore,
+                                             0
+                                         ),
+                                         100
+                                     )
+                                                                                                                                     )%;">
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Metrics -->
+
+                        <div class="row g-3">
+
+                            <!-- Completion -->
+
+                            <div class="col-6">
+
+                                <div class="bg-light rounded-3 p-3 h-100">
+
+                                    <div class="d-flex justify-content-between">
+
+                                        <span class="text-muted small">
+                                            Completion
+                                        </span>
+
+                                        <i class="bi bi-check2-circle text-success"></i>
+
+                                    </div>
+
+                                    <div class="fw-bold fs-5 mt-1">
+                                        @topPerformer.CompletionRate.ToString("0.00")%
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- First Feedback -->
+
+                            <div class="col-6">
+
+                                <div class="bg-light rounded-3 p-3 h-100">
+
+                                    <div class="d-flex justify-content-between">
+
+                                        <span class="text-muted small">
+                                            First Feedback SLA
+                                        </span>
+
+                                        <i class="bi bi-stopwatch text-primary"></i>
+
+                                    </div>
+
+                                    <div class="fw-bold fs-5 mt-1">
+                                        @topPerformer.FirstFeedbackSLAComplianceRate.ToString("0.00")%
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- Follow-up -->
+
+                            <div class="col-6">
+
+                                <div class="bg-light rounded-3 p-3 h-100">
+
+                                    <div class="d-flex justify-content-between">
+
+                                        <span class="text-muted small">
+                                            Follow-up
+                                        </span>
+
+                                        <i class="bi bi-calendar-check text-info"></i>
+
+                                    </div>
+
+                                    <div class="fw-bold fs-5 mt-1">
+                                        @topPerformer.FollowUpTimelinessRate.ToString("0.00")%
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- Acceptance SLA -->
+
+                            <div class="col-6">
+
+                                <div class="bg-light rounded-3 p-3 h-100">
+
+                                    <div class="d-flex justify-content-between">
+
+                                        <span class="text-muted small">
+                                            Acceptance SLA
+                                        </span>
+
+                                        <i class="bi bi-lightning-charge text-warning"></i>
+
+                                    </div>
+
+                                    <div class="fw-bold fs-5 mt-1">
+                                        @topPerformer.AcceptanceSLAComplianceRate.ToString("0.00")%
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Footer -->
+
+                        <div class="
+                            d-flex
+                            justify-content-between
+                            align-items-center
+                            border-top
+                            mt-4
+                            pt-3">
+
+                            <small class="text-muted">
+
+                                <i class="bi bi-check-circle me-1"></i>
+
+                                @topPerformer.CompletedLeads completed
+                                of @topPerformer.AcceptedLeads accepted leads
+
+                            </small>
+
+                            <small class="fw-semibold text-success">
+
+                                @topPerformer.TotalFeedbacks feedbacks
+
+                            </small>
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             NEEDS ATTENTION
+             ================================================= -->
+
+        <div class="col-xl-6">
+
+            <div class="card border-0 shadow-sm h-100 overflow-hidden pm-highlight-card pm-highlight-danger">
+
+                <div class="card-header bg-white border-0 py-3">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div class="d-flex align-items-center">
+
+                            <div class="
+                                rounded-circle
+                                bg-danger-subtle
+                                text-danger
+                                d-flex
+                                align-items-center
+                                justify-content-center
+                                me-3"
+                                 style="
+                                width:44px;
+                                height:44px;
+                                ">
+
+                                <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+
+                            </div>
+
+                            <div>
+
+                                <h5 class="fw-bold mb-0">
+                                    Needs Attention
+                                </h5>
+
+                                <small class="text-muted">
+                                    Highest operational risk in @rangeText
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+                        <span class="badge bg-danger-subtle text-danger px-3 py-2">
+                            <i class="bi bi-shield-exclamation me-1"></i>
+                            Attention
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="card-body">
+
+                    @if (needsAttention == null)
+                    {
+                        <div class="text-center py-4">
+
+                            <i class="bi bi-check-circle fs-1 text-success"></i>
+
+                            <h6 class="fw-semibold mt-3">
+                                No Attention Required
+                            </h6>
+
+                            <p class="text-muted small mb-0">
+                                No Sales Officer requires attention
+                                for the selected period.
+                            </p>
+
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="d-flex justify-content-between align-items-start mb-4">
+
+                            <div class="d-flex align-items-center">
+
+                                <div class="
+                                    rounded-circle
+                                    bg-danger
+                                    text-white
+                                    d-flex
+                                    align-items-center
+                                    justify-content-center
+                                    me-3"
+                                     style="
+                                    width:56px;
+                                    height:56px;
+                                    ">
+
+                                    <i class="bi bi-person-fill-exclamation fs-4"></i>
+
+                                </div>
+
+                                <div>
+
+                                    <h4 class="fw-bold mb-1">
+                                        @needsAttention.SalesOfficerName
+                                    </h4>
+
+                                    <small class="text-muted">
+                                        Officer ID:
+                                        @needsAttention.SalesOfficerId
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="text-end">
+
+                                <div class="text-muted small">
+                                    Attention Score
+                                </div>
+
+                                <div class="display-6 fw-bold text-danger">
+                                    @needsAttention.PerformanceScore.ToString("0.00")
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Risk Indicators -->
+
+                        <div class="row g-3">
+
+                            <!-- SLA Missed -->
+
+                            <div class="col-6">
+
+                                <div class="
+                                    border
+                                    border-danger-subtle
+                                    rounded-3
+                                    p-3
+                                    h-100">
+
+                                    <div class="d-flex justify-content-between">
+
+                                        <span class="text-muted small">
+                                            SLA Missed
+                                        </span>
+
+                                        <i class="bi bi-exclamation-circle text-danger"></i>
+
+                                    </div>
+
+                                    <div class="fw-bold fs-5 mt-1 text-danger">
+
+                                        @(
+                                            needsAttention.AcceptanceSLAMissed
+                                            +
+                                            needsAttention.FirstFeedbackSLAMissed
+                                            +
+                                            needsAttention.NextFeedbackSLAMissed
+                                        )
+
+                                    </div>
+
+                                    <small class="text-muted">
+                                        Acceptance + Feedback
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- Overdue -->
+
+                            <div class="col-6">
+
+                                <div class="
+                                    border
+                                    border-danger-subtle
+                                    rounded-3
+                                    p-3
+                                    h-100">
+
+                                    <div class="d-flex justify-content-between">
+
+                                        <span class="text-muted small">
+                                            Overdue Follow-ups
+                                        </span>
+
+                                        <i class="bi bi-clock-history text-danger"></i>
+
+                                    </div>
+
+                                    <div class="fw-bold fs-5 mt-1 text-danger">
+                                        @needsAttention.OverdueFollowUps
+                                    </div>
+
+                                    <small class="text-muted">
+                                        Require attention
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- Completion -->
+
+                            <div class="col-6">
+
+                                <div class="bg-light rounded-3 p-3 h-100">
+
+                                    <div class="d-flex justify-content-between">
+
+                                        <span class="text-muted small">
+                                            Completion
+                                        </span>
+
+                                        <i class="bi bi-check2-circle text-warning"></i>
+
+                                    </div>
+
+                                    <div class="
+                                        fw-bold
+                                        fs-5
+                                        mt-1
+                                        @(needsAttention.CompletionRate < 50
+                                            ? "text-danger"
+                                            : "text-warning-emphasis")">
+
+                                        @needsAttention.CompletionRate.ToString("0.00")%
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- Acceptance -->
+
+                            <div class="col-6">
+
+                                <div class="bg-light rounded-3 p-3 h-100">
+
+                                    <div class="d-flex justify-content-between">
+
+                                        <span class="text-muted small">
+                                            Acceptance Rate
+                                        </span>
+
+                                        <i class="bi bi-person-check text-warning"></i>
+
+                                    </div>
+
+                                    <div class="
+                                        fw-bold
+                                        fs-5
+                                        mt-1
+                                        @(needsAttention.AcceptanceRate < 50
+                                            ? "text-danger"
+                                            : "text-warning-emphasis")">
+
+                                        @needsAttention.AcceptanceRate.ToString("0.00")%
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- SLA Details -->
+
+                        <div class="
+                            border-top
+                            mt-4
+                            pt-3">
+
+                            <div class="row g-2">
+
+                                <div class="col-4">
+
+                                    <div class="text-center">
+
+                                        <div class="small text-muted">
+                                            Acceptance
+                                        </div>
+
+                                        <div class="fw-bold text-danger">
+                                            @needsAttention.AcceptanceSLAMissed
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="col-4">
+
+                                    <div class="text-center">
+
+                                        <div class="small text-muted">
+                                            First Feedback
+                                        </div>
+
+                                        <div class="fw-bold text-danger">
+                                            @needsAttention.FirstFeedbackSLAMissed
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="col-4">
+
+                                    <div class="text-center">
+
+                                        <div class="small text-muted">
+                                            Next Feedback
+                                        </div>
+
+                                        <div class="fw-bold text-danger">
+                                            @needsAttention.NextFeedbackSLAMissed
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         SUMMARY CARDS
+         ===================================================== -->
+
+    <div class="row g-4 mb-4">
+
+        <!-- Officers -->
 
         <div class="col-md-6 col-xl-3">
 
@@ -66,7 +1904,7 @@
 
                 <div class="card-body">
 
-                    <div class="d-flex justify-content-between align-items-start">
+                    <div class="d-flex justify-content-between">
 
                         <div>
 
@@ -81,7 +1919,9 @@
                         </div>
 
                         <div class="text-primary fs-3">
+
                             <i class="bi bi-people-fill"></i>
+
                         </div>
 
                     </div>
@@ -93,7 +1933,7 @@
         </div>
 
 
-        <!-- Total Assigned -->
+        <!-- Assigned -->
 
         <div class="col-md-6 col-xl-3">
 
@@ -101,7 +1941,7 @@
 
                 <div class="card-body">
 
-                    <div class="d-flex justify-content-between align-items-start">
+                    <div class="d-flex justify-content-between">
 
                         <div>
 
@@ -116,7 +1956,9 @@
                         </div>
 
                         <div class="text-info fs-3">
+
                             <i class="bi bi-person-lines-fill"></i>
+
                         </div>
 
                     </div>
@@ -128,7 +1970,7 @@
         </div>
 
 
-        <!-- Total Feedback -->
+        <!-- Feedback -->
 
         <div class="col-md-6 col-xl-3">
 
@@ -136,7 +1978,7 @@
 
                 <div class="card-body">
 
-                    <div class="d-flex justify-content-between align-items-start">
+                    <div class="d-flex justify-content-between">
 
                         <div>
 
@@ -151,7 +1993,9 @@
                         </div>
 
                         <div class="text-success fs-3">
+
                             <i class="bi bi-chat-left-text-fill"></i>
+
                         </div>
 
                     </div>
@@ -163,7 +2007,7 @@
         </div>
 
 
-        <!-- Overdue Follow-ups -->
+        <!-- Overdue -->
 
         <div class="col-md-6 col-xl-3">
 
@@ -171,7 +2015,7 @@
 
                 <div class="card-body">
 
-                    <div class="d-flex justify-content-between align-items-start">
+                    <div class="d-flex justify-content-between">
 
                         <div>
 
@@ -180,7 +2024,9 @@
                             </div>
 
                             <h3 class="fw-bold mt-2 mb-0
-                                @(totalOverdue > 0 ? "text-danger" : "text-success")">
+                                @(totalOverdue > 0
+                                    ? "text-danger"
+                                    : "text-success")">
 
                                 @totalOverdue
 
@@ -188,7 +2034,11 @@
 
                         </div>
 
-                        <div class="@(totalOverdue > 0 ? "text-danger" : "text-success") fs-3">
+                        <div class="
+                            @(totalOverdue > 0
+                                ? "text-danger"
+                                : "text-success")
+                            fs-3">
 
                             <i class="bi bi-clock-history"></i>
 
@@ -205,11 +2055,2146 @@
     </div>
 
 
-    <!-- ==========================================
-         Performance Table
-         ========================================== -->
+    <!-- =====================================================
+         PERFORMANCE OVERVIEW
+         ===================================================== -->
 
-    <div class="card border-0 shadow-sm">
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <div class="row g-4">
+
+                <div class="col-md-3">
+
+                    <div class="text-muted small">
+                        Selected Period
+                    </div>
+
+                    <div class="fw-bold mt-1">
+                        @rangeText
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-3">
+
+                    <div class="text-muted small">
+                        Overall Acceptance Rate
+                    </div>
+
+                    <div class="fw-bold mt-1">
+                        @totalAcceptanceRate.ToString("0.00")%
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-3">
+
+                    <div class="text-muted small">
+                        Completed Leads
+                    </div>
+
+                    <div class="fw-bold mt-1">
+                        @totalCompleted
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-3">
+
+                    <div class="text-muted small">
+                        Team Completion Rate
+                    </div>
+
+                    <div class="fw-bold mt-1">
+                        @totalCompletionRate.ToString("0.00")%
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         PERFORMANCE TREND
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white py-3">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <h5 class="fw-semibold mb-1">
+
+                        <i class="bi bi-graph-up me-2 text-primary"></i>
+
+                        Performance Trend
+
+                    </h5>
+
+                    <small class="text-muted">
+
+                        Daily team performance for the selected date range.
+
+                    </small>
+
+                </div>
+
+
+                <span id="trendRangeLabel"
+                      class="badge bg-primary-subtle text-primary">
+
+                    @rangeText
+
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="card-body">
+
+            <!-- Loading -->
+
+            <div id="trendLoading"
+                 class="text-center py-5">
+
+                <div class="spinner-border text-primary"
+                     role="status">
+
+                    <span class="visually-hidden">
+                        Loading...
+                    </span>
+
+                </div>
+
+                <div class="text-muted mt-2">
+
+                    Loading performance trend...
+
+                </div>
+
+            </div>
+
+
+            <!-- Empty -->
+
+            <div id="trendEmpty"
+                 class="text-center py-5 d-none">
+
+                <i class="bi bi-bar-chart-line fs-1 text-muted"></i>
+
+                <h6 class="fw-semibold mt-3">
+                    No Trend Data
+                </h6>
+
+                <p class="text-muted mb-0">
+
+                    No performance activity was found
+                    for the selected period.
+
+                </p>
+
+            </div>
+
+
+            <!-- Chart -->
+
+            <div id="performanceTrendContainer"
+                 class="pm-chart-wrap pm-chart-tall">
+
+                <canvas id="performanceTrendCanvas"></canvas>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+     OFFICER COMPARISON
+     ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white py-3">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <h5 class="fw-semibold mb-1">
+
+                        <i class="bi bi-bar-chart-steps me-2 text-primary"></i>
+
+                        Officer Comparison
+
+                    </h5>
+
+                    <small class="text-muted">
+
+                        Compare Sales Officers based on their
+                        performance metrics and overall score.
+
+                    </small>
+
+                </div>
+
+
+                <span class="badge bg-primary-subtle text-primary">
+
+                    @Model.Count() Officers
+
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="card-body">
+
+            @if (!Model.Any())
+            {
+                <div class="text-center py-4">
+
+                    <i class="
+                        bi
+                        bi-bar-chart
+                        fs-1
+                        text-muted">
+                    </i>
+
+                    <h6 class="fw-semibold mt-3">
+                        No Comparison Data
+                    </h6>
+
+                    <p class="text-muted mb-0">
+
+                        No Sales Officer performance data
+                        is available for the selected period.
+
+                    </p>
+
+                </div>
+            }
+            else
+            {
+                var rankedOfficers =
+                    Model
+                        .OrderByDescending(
+                            x => x.PerformanceScore)
+                        .ToList();
+
+
+                <div class="table-responsive">
+
+                    <table class="
+                        table
+                        table-hover
+                        align-middle
+                        mb-0">
+
+                        <thead class="table-light">
+
+                            <tr>
+
+                                <th class="text-center">
+                                    Rank
+                                </th>
+
+                                <th>
+                                    Sales Officer
+                                </th>
+
+                                <th class="text-center">
+                                    Assigned
+                                </th>
+
+                                <th class="text-center">
+                                    Accepted
+                                </th>
+
+                                <th class="text-center">
+                                    Acceptance
+                                </th>
+
+                                <th class="text-center">
+                                    Completed
+                                </th>
+
+                                <th class="text-center">
+                                    Completion
+                                </th>
+
+                                <th class="text-center">
+                                    Acceptance SLA
+                                </th>
+
+                                <th class="text-center">
+                                    First Feedback SLA
+                                </th>
+
+                                <th class="text-center">
+                                    Next Feedback SLA
+                                </th>
+
+                                <th class="text-center">
+                                    Follow-up
+                                </th>
+
+                                <th class="text-center">
+                                    Score
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            @{
+                                var rank = 1;
+                            }
+
+
+                            @foreach (
+                                var officer
+                                in rankedOfficers)
+                            {
+                                <tr>
+
+                                    <!-- =================================
+                                     Rank
+                                     ================================= -->
+
+                                    <td class="text-center">
+
+                                        @if (rank == 1)
+                                        {
+                                            <span class="
+                                                badge
+                                                rounded-pill
+                                                bg-warning
+                                                text-dark
+                                                px-3">
+
+                                                <i class="
+                                                    bi
+                                                    bi-trophy-fill
+                                                    me-1">
+                                                </i>
+
+                                                1
+
+                                            </span>
+                                        }
+                                        else if (rank == 2)
+                                        {
+                                            <span class="
+                                                badge
+                                                rounded-pill
+                                                bg-secondary
+                                                px-3">
+
+                                                2
+
+                                            </span>
+                                        }
+                                        else if (rank == 3)
+                                        {
+                                            <span class="
+                                                badge
+                                                rounded-pill
+                                                bg-dark
+                                                px-3">
+
+                                                3
+
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="
+                                                badge
+                                                rounded-pill
+                                                bg-light
+                                                text-dark
+                                                border
+                                                px-3">
+
+                                                @rank
+
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- =================================
+                                     Officer
+                                     ================================= -->
+
+                                    <td>
+
+                                        <div class="
+                                            d-flex
+                                            align-items-center">
+
+                                            <div class="
+                                                rounded-circle
+                                                bg-primary-subtle
+                                                text-primary
+                                                d-flex
+                                                align-items-center
+                                                justify-content-center
+                                                me-2"
+                                                 style="
+                                                width:38px;
+                                                height:38px;
+                                                ">
+
+                                                <i class="
+                                                    bi
+                                                    bi-person-fill">
+                                                </i>
+
+                                            </div>
+
+
+                                            <div>
+
+                                                <div class="fw-semibold">
+
+                                                    @officer.SalesOfficerName
+
+                                                </div>
+
+                                                <small class="text-muted">
+
+                                                    ID:
+                                                    @officer.SalesOfficerId
+
+                                                </small>
+
+                                            </div>
+
+                                        </div>
+
+                                    </td>
+
+
+                                    <!-- =================================
+                                     Assigned
+                                     ================================= -->
+
+                                    <td class="text-center">
+
+                                        @officer.TotalAssignedLeads
+
+                                    </td>
+
+
+                                    <!-- =================================
+                                     Accepted
+                                     ================================= -->
+
+                                    <td class="text-center">
+
+                                        @officer.AcceptedLeads
+
+                                    </td>
+
+
+                                    <!-- =================================
+                                     Acceptance Rate
+                                     ================================= -->
+
+                                    <td class="text-center">
+
+                                        <span class="
+                                            fw-semibold
+                                            @(officer.AcceptanceRate >= 80
+                                                ? "text-success"
+                                                : officer.AcceptanceRate >= 50
+                                                    ? "text-warning-emphasis"
+                                                    : "text-danger")">
+
+                                            @officer.AcceptanceRate.ToString("0.00")%
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- =================================
+                                     Completed
+                                     ================================= -->
+
+                                    <td class="text-center">
+
+                                        @officer.CompletedLeads
+
+                                    </td>
+
+
+                                    <!-- =================================
+                                     Completion Rate
+                                     ================================= -->
+
+                                    <td class="text-center">
+
+                                        <span class="
+                                            fw-semibold
+                                            @(officer.CompletionRate >= 80
+                                                ? "text-success"
+                                                : officer.CompletionRate >= 50
+                                                    ? "text-warning-emphasis"
+                                                    : "text-danger")">
+
+                                            @officer.CompletionRate.ToString("0.00")%
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- =================================
+                                     Acceptance SLA
+                                     ================================= -->
+
+                                    <td class="text-center">
+
+                                        <span class="
+                                            fw-semibold
+                                            @(officer.AcceptanceSLAComplianceRate >= 90
+                                                ? "text-success"
+                                                : officer.AcceptanceSLAComplianceRate >= 70
+                                                    ? "text-warning-emphasis"
+                                                    : "text-danger")">
+
+                                            @officer.AcceptanceSLAComplianceRate.ToString("0.00")%
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- =================================
+                                     First Feedback SLA
+                                     ================================= -->
+
+                                    <td class="text-center">
+
+                                        <span class="
+                                            fw-semibold
+                                            @(officer.FirstFeedbackSLAComplianceRate >= 90
+                                                ? "text-success"
+                                                : officer.FirstFeedbackSLAComplianceRate >= 70
+                                                    ? "text-warning-emphasis"
+                                                    : "text-danger")">
+
+                                            @officer.FirstFeedbackSLAComplianceRate.ToString("0.00")%
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- =================================
+                                     Next Feedback SLA
+                                     ================================= -->
+
+                                    <td class="text-center">
+
+                                        <span class="
+                                            fw-semibold
+                                            @(officer.NextFeedbackSLAComplianceRate >= 90
+                                                ? "text-success"
+                                                : officer.NextFeedbackSLAComplianceRate >= 70
+                                                    ? "text-warning-emphasis"
+                                                    : "text-danger")">
+
+                                            @officer.NextFeedbackSLAComplianceRate.ToString("0.00")%
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- =================================
+                                     Follow-up
+                                     ================================= -->
+
+                                    <td class="text-center">
+
+                                        <span class="
+                                            fw-semibold
+                                            @(officer.FollowUpTimelinessRate >= 90
+                                                ? "text-success"
+                                                : officer.FollowUpTimelinessRate >= 70
+                                                    ? "text-warning-emphasis"
+                                                    : "text-danger")">
+
+                                            @officer.FollowUpTimelinessRate.ToString("0.00")%
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- =================================
+                                     Performance Score
+                                     ================================= -->
+
+                                    <td class="text-center">
+
+                                        <span class="
+                                            badge
+                                            rounded-pill
+                                            fs-6
+                                            @(officer.PerformanceScore >= 80
+                                                ? "bg-success"
+                                                : officer.PerformanceScore >= 60
+                                                    ? "bg-warning text-dark"
+                                                    : "bg-danger")">
+
+                                            @officer.PerformanceScore.ToString("0.00")%
+
+                                        </span>
+
+                                    </td>
+
+                                </tr>
+
+
+                                rank++;
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+     MONTHLY RANKING
+     ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white py-3">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <h5 class="fw-semibold mb-1">
+
+                        <i class="bi bi-trophy me-2 text-warning"></i>
+
+                        Monthly Ranking
+
+                    </h5>
+
+                    <small class="text-muted">
+
+                        Sales Officer ranking based on
+                        weighted performance score.
+
+                    </small>
+
+                </div>
+
+
+                <span class="badge bg-warning-subtle text-warning-emphasis">
+
+                    @rangeText
+
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="card-body">
+
+            @if (!Model.Any())
+            {
+                <div class="text-center py-4">
+
+                    <i class="
+                        bi
+                        bi-trophy
+                        fs-1
+                        text-muted">
+                    </i>
+
+                    <h6 class="fw-semibold mt-3">
+                        No Ranking Data
+                    </h6>
+
+                    <p class="text-muted mb-0">
+
+                        No Sales Officer performance data
+                        is available for the selected period.
+
+                    </p>
+
+                </div>
+            }
+            else
+            {
+                var monthlyRanking =
+                    Model
+                        .OrderByDescending(
+                            x => x.PerformanceScore)
+                        .ToList();
+
+
+                <div class="row g-4">
+
+                    <!-- =========================================
+                     TOP 3 PODIUM
+                     ========================================= -->
+                    @if (monthlyRanking.Count > 0)
+                    {
+                        var first =
+                            monthlyRanking[0];
+
+                        <div class="col-lg-4">
+
+                            <div class="
+                                card
+                                border-0
+                                bg-light
+                                h-100
+                                text-center">
+
+                                <div class="card-body py-4">
+
+                                    <div class="
+                                        rounded-circle
+                                        bg-warning
+                                        text-dark
+                                        d-flex
+                                        align-items-center
+                                        justify-content-center
+                                        mx-auto
+                                        mb-3"
+                                         style="
+                                        width:70px;
+                                        height:70px;
+                                        ">
+
+                                        <i class="
+                                            bi
+                                            bi-trophy-fill
+                                            fs-2">
+                                        </i>
+
+                                    </div>
+
+
+                                    <div class="
+                                        text-muted
+                                        small">
+
+                                        1st Place
+
+                                    </div>
+
+
+                                    <h5 class="
+                                        fw-bold
+                                        mt-1
+                                        mb-1">
+
+                                        @first.SalesOfficerName
+
+                                    </h5>
+
+
+                                    <div class="
+                                        display-6
+                                        fw-bold
+                                        text-warning-emphasis">
+
+                                        @first.PerformanceScore.ToString("0.00")%
+
+                                    </div>
+
+
+                                    <small class="text-muted">
+
+                                        Performance Score
+
+                                    </small>
+
+
+                                    <div class="
+                                        row
+                                        g-2
+                                        mt-3">
+
+                                        <div class="col-4">
+
+                                            <div class="
+                                                bg-white
+                                                rounded-3
+                                                p-2">
+
+                                                <div class="
+                                                    fw-bold">
+
+                                                    @first.TotalAssignedLeads
+
+                                                </div>
+
+                                                <small class="
+                                                    text-muted">
+
+                                                    Assigned
+
+                                                </small>
+
+                                            </div>
+
+                                        </div>
+
+
+                                        <div class="col-4">
+
+                                            <div class="
+                                                bg-white
+                                                rounded-3
+                                                p-2">
+
+                                                <div class="
+                                                    fw-bold">
+
+                                                    @first.CompletedLeads
+
+                                                </div>
+
+                                                <small class="
+                                                    text-muted">
+
+                                                    Completed
+
+                                                </small>
+
+                                            </div>
+
+                                        </div>
+
+
+                                        <div class="col-4">
+
+                                            <div class="
+                                                bg-white
+                                                rounded-3
+                                                p-2">
+
+                                                <div class="
+                                                    fw-bold">
+
+                                                    @first.FollowUpTimelinessRate.ToString("0.00")%
+
+                                                </div>
+
+                                                <small class="
+                                                    text-muted">
+
+                                                    Follow-up
+
+                                                </small>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    }
+
+
+                    <!-- =========================================
+                     SECOND PLACE
+                     ========================================= -->
+                    @if (monthlyRanking.Count > 1)
+                    {
+                        var second =
+                            monthlyRanking[1];
+
+                        <div class="col-lg-4">
+
+                            <div class="
+                                card
+                                border-0
+                                bg-light
+                                h-100
+                                text-center">
+
+                                <div class="card-body py-4">
+
+                                    <div class="
+                                        rounded-circle
+                                        bg-secondary
+                                        text-white
+                                        d-flex
+                                        align-items-center
+                                        justify-content-center
+                                        mx-auto
+                                        mb-3"
+                                         style="
+                                        width:60px;
+                                        height:60px;
+                                        ">
+
+                                        <i class="
+                                            bi
+                                            bi-award-fill
+                                            fs-3">
+                                        </i>
+
+                                    </div>
+
+
+                                    <div class="
+                                        text-muted
+                                        small">
+
+                                        2nd Place
+
+                                    </div>
+
+
+                                    <h5 class="
+                                        fw-bold
+                                        mt-1
+                                        mb-1">
+
+                                        @second.SalesOfficerName
+
+                                    </h5>
+
+
+                                    <div class="
+                                        fs-2
+                                        fw-bold
+                                        text-secondary">
+
+                                        @second.PerformanceScore.ToString("0.00")%
+
+                                    </div>
+
+
+                                    <small class="text-muted">
+
+                                        Performance Score
+
+                                    </small>
+
+
+                                    <div class="
+                                        row
+                                        g-2
+                                        mt-3">
+
+                                        <div class="col-4">
+
+                                            <div class="
+                                                bg-white
+                                                rounded-3
+                                                p-2">
+
+                                                <div class="fw-bold">
+
+                                                    @second.TotalAssignedLeads
+
+                                                </div>
+
+                                                <small class="text-muted">
+
+                                                    Assigned
+
+                                                </small>
+
+                                            </div>
+
+                                        </div>
+
+
+                                        <div class="col-4">
+
+                                            <div class="
+                                                bg-white
+                                                rounded-3
+                                                p-2">
+
+                                                <div class="fw-bold">
+
+                                                    @second.CompletedLeads
+
+                                                </div>
+
+                                                <small class="text-muted">
+
+                                                    Completed
+
+                                                </small>
+
+                                            </div>
+
+                                        </div>
+
+
+                                        <div class="col-4">
+
+                                            <div class="
+                                                bg-white
+                                                rounded-3
+                                                p-2">
+
+                                                <div class="fw-bold">
+
+                                                    @second.FollowUpTimelinessRate.ToString("0.00")%
+
+                                                </div>
+
+                                                <small class="text-muted">
+
+                                                    Follow-up
+
+                                                </small>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    }
+
+
+                    <!-- =========================================
+                     THIRD PLACE
+                     ========================================= -->
+                    @if (monthlyRanking.Count > 2)
+                    {
+                        var third =
+                            monthlyRanking[2];
+
+                        <div class="col-lg-4">
+
+                            <div class="
+                                card
+                                border-0
+                                bg-light
+                                h-100
+                                text-center">
+
+                                <div class="card-body py-4">
+
+                                    <div class="
+                                        rounded-circle
+                                        bg-dark
+                                        text-white
+                                        d-flex
+                                        align-items-center
+                                        justify-content-center
+                                        mx-auto
+                                        mb-3"
+                                         style="
+                                        width:60px;
+                                        height:60px;
+                                        ">
+
+                                        <i class="
+                                            bi
+                                            bi-award
+                                            fs-3">
+                                        </i>
+
+                                    </div>
+
+
+                                    <div class="
+                                        text-muted
+                                        small">
+
+                                        3rd Place
+
+                                    </div>
+
+
+                                    <h5 class="
+                                        fw-bold
+                                        mt-1
+                                        mb-1">
+
+                                        @third.SalesOfficerName
+
+                                    </h5>
+
+
+                                    <div class="
+                                        fs-2
+                                        fw-bold">
+
+                                        @third.PerformanceScore.ToString("0.00")%
+
+                                    </div>
+
+
+                                    <small class="text-muted">
+
+                                        Performance Score
+
+                                    </small>
+
+
+                                    <div class="
+                                        row
+                                        g-2
+                                        mt-3">
+
+                                        <div class="col-4">
+
+                                            <div class="
+                                                bg-white
+                                                rounded-3
+                                                p-2">
+
+                                                <div class="fw-bold">
+
+                                                    @third.TotalAssignedLeads
+
+                                                </div>
+
+                                                <small class="text-muted">
+
+                                                    Assigned
+
+                                                </small>
+
+                                            </div>
+
+                                        </div>
+
+
+                                        <div class="col-4">
+
+                                            <div class="
+                                                bg-white
+                                                rounded-3
+                                                p-2">
+
+                                                <div class="fw-bold">
+
+                                                    @third.CompletedLeads
+
+                                                </div>
+
+                                                <small class="text-muted">
+
+                                                    Completed
+
+                                                </small>
+
+                                            </div>
+
+                                        </div>
+
+
+                                        <div class="col-4">
+
+                                            <div class="
+                                                bg-white
+                                                rounded-3
+                                                p-2">
+
+                                                <div class="fw-bold">
+
+                                                    @third.FollowUpTimelinessRate.ToString("0.00")%
+
+                                                </div>
+
+                                                <small class="text-muted">
+
+                                                    Follow-up
+
+                                                </small>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    }
+
+                </div>
+
+
+                <!-- =============================================
+                 COMPLETE RANKING LIST
+                 ============================================= -->
+
+                <div class="table-responsive mt-4">
+
+                    <table class="
+                        table
+                        table-hover
+                        align-middle
+                        mb-0">
+
+                        <thead class="table-light">
+
+                            <tr>
+
+                                <th class="text-center">
+                                    Rank
+                                </th>
+
+                                <th>
+                                    Sales Officer
+                                </th>
+
+                                <th class="text-center">
+                                    Score
+                                </th>
+
+                                <th class="text-center">
+                                    Completion
+                                </th>
+
+                                <th class="text-center">
+                                    First Feedback SLA
+                                </th>
+
+                                <th class="text-center">
+                                    Follow-up
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            @{
+                                var monthlyRank =
+                                    1;
+                            }
+
+
+                            @foreach (
+                                var officer
+                                in monthlyRanking)
+                            {
+                                <tr>
+
+                                    <td class="text-center">
+
+                                        @if (monthlyRank == 1)
+                                        {
+                                            <span class="
+                                                badge
+                                                bg-warning
+                                                text-dark
+                                                rounded-pill">
+
+                                                🥇 1
+
+                                            </span>
+                                        }
+                                        else if (monthlyRank == 2)
+                                        {
+                                            <span class="
+                                                badge
+                                                bg-secondary
+                                                rounded-pill">
+
+                                                🥈 2
+
+                                            </span>
+                                        }
+                                        else if (monthlyRank == 3)
+                                        {
+                                            <span class="
+                                                badge
+                                                bg-dark
+                                                rounded-pill">
+
+                                                🥉 3
+
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="
+                                                badge
+                                                bg-light
+                                                text-dark
+                                                border
+                                                rounded-pill">
+
+                                                @monthlyRank
+
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <div class="
+                                            d-flex
+                                            align-items-center">
+
+                                            <div class="
+                                                rounded-circle
+                                                bg-primary-subtle
+                                                text-primary
+                                                d-flex
+                                                align-items-center
+                                                justify-content-center
+                                                me-2"
+                                                 style="
+                                                width:36px;
+                                                height:36px;
+                                                ">
+
+                                                <i class="
+                                                    bi
+                                                    bi-person-fill">
+                                                </i>
+
+                                            </div>
+
+
+                                            <div>
+
+                                                <div class="fw-semibold">
+
+                                                    @officer.SalesOfficerName
+
+                                                </div>
+
+                                                <small class="text-muted">
+
+                                                    ID:
+                                                    @officer.SalesOfficerId
+
+                                                </small>
+
+                                            </div>
+
+                                        </div>
+
+                                    </td>
+
+
+                                    <td class="text-center">
+
+                                        <span class="
+                                            badge
+                                            rounded-pill
+                                            @(officer.PerformanceScore >= 80
+                                                ? "bg-success"
+                                                : officer.PerformanceScore >= 60
+                                                    ? "bg-warning text-dark"
+                                                    : "bg-danger")">
+
+                                            @officer.PerformanceScore.ToString("0.00")%
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <td class="text-center">
+
+                                        @officer.CompletionRate.ToString("0.00")%
+
+                                    </td>
+
+
+                                    <td class="text-center">
+
+                                        @officer.FirstFeedbackSLAComplianceRate.ToString("0.00")%
+
+                                    </td>
+
+
+                                    <td class="text-center">
+
+                                        @officer.FollowUpTimelinessRate.ToString("0.00")%
+
+                                    </td>
+
+                                </tr>
+
+
+                                monthlyRank++;
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            }
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         COMPLETION TREND
+         ========================================================= -->
+
+    <div class="card border-0 shadow-sm mb-4 pm-trend-card">
+        <div class="card-header py-3">
+            <div class="pm-chart-toolbar mb-0">
+                <div>
+                    <h5 class="mb-1 fw-bold">
+                        <i class="bi bi-check2-circle text-primary me-2"></i>
+                        Completion Trend
+                    </h5>
+                    <small class="text-muted">
+                        Daily lead completion performance for the selected date range.
+                    </small>
+                </div>
+
+                <span id="completionTrendRange"
+                      class="badge bg-primary-subtle text-primary px-3 py-2">
+                    Loading...
+                </span>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="pm-chart-wrap">
+                <canvas id="completionTrendChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- =========================================================
+         COMPLETION TREND SCRIPT
+         ========================================================= -->
+
+    <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                loadCompletionTrend();
+            });
+
+            async function loadCompletionTrend() {
+                try {
+                    const params = new URLSearchParams(window.location.search);
+
+                    const range = params.get("Range") || "ThisMonth";
+                    const fromDate = params.get("FromDate") || "";
+                    const toDate = params.get("ToDate") || "";
+
+                    const rangeBadge = document.getElementById("completionTrendRange");
+
+                    if (rangeBadge) {
+                        rangeBadge.textContent = formatCompletionRange(range);
+                    }
+
+                    const url =
+                        '@Url.Action("GetCompletionTrend", "SalesManager")'
+                        + '?Range=' + encodeURIComponent(range)
+                        + '&FromDate=' + encodeURIComponent(fromDate)
+                        + '&ToDate=' + encodeURIComponent(toDate);
+
+                    const response = await fetch(url);
+
+                    if (!response.ok) {
+                        throw new Error("Failed to load completion trend.");
+                    }
+
+                    const data = await response.json();
+
+                    renderCompletionTrend(data);
+                }
+                catch (error) {
+                    console.error("Completion Trend Error:", error);
+                    showCompletionTrendError();
+                }
+            }
+
+            function renderCompletionTrend(data) {
+                const canvas = document.getElementById("completionTrendChart");
+
+                if (!canvas) {
+                    return;
+                }
+
+                const existingChart = Chart.getChart(canvas);
+
+                if (existingChart) {
+                    existingChart.destroy();
+                }
+
+                if (!Array.isArray(data) || data.length === 0) {
+                    showCompletionTrendEmpty();
+                    return;
+                }
+
+                const labels = data.map(item =>
+                    formatCompletionTrendDate(item.date)
+                );
+
+                const assignedData = data.map(item =>
+                    Number(item.assignedLeads) || 0
+                );
+
+                const acceptedData = data.map(item =>
+                    Number(item.acceptedLeads) || 0
+                );
+
+                const completedData = data.map(item =>
+                    Number(item.completedLeads) || 0
+                );
+
+                const completionRateData = data.map(item =>
+                    Number(item.completionRate) || 0
+                );
+
+                new Chart(canvas, {
+                    type: "line",
+
+                    data: {
+                        labels: labels,
+
+                        datasets: [
+                            {
+                                label: "Assigned",
+                                data: assignedData,
+                                borderColor: "#6b8fd6",
+                                backgroundColor: "#6b8fd6",
+                                pointBackgroundColor: "#6b8fd6",
+                                pointBorderColor: "#ffffff",
+                                borderWidth: 2.5,
+                                tension: 0.35,
+                                pointRadius: data.length > 20 ? 1.5 : 3,
+                                pointHoverRadius: 5,
+                                fill: false
+                            },
+                            {
+                                label: "Accepted",
+                                data: acceptedData,
+                                borderColor: "#4f9f86",
+                                backgroundColor: "#4f9f86",
+                                pointBackgroundColor: "#4f9f86",
+                                pointBorderColor: "#ffffff",
+                                borderWidth: 2.5,
+                                tension: 0.35,
+                                pointRadius: data.length > 20 ? 1.5 : 3,
+                                pointHoverRadius: 5,
+                                fill: false
+                            },
+                            {
+                                label: "Completed",
+                                data: completedData,
+                                borderColor: "#2f8f6b",
+                                backgroundColor: "#2f8f6b",
+                                pointBackgroundColor: "#2f8f6b",
+                                pointBorderColor: "#ffffff",
+                                borderWidth: 2.5,
+                                tension: 0.35,
+                                pointRadius: data.length > 20 ? 1.5 : 3,
+                                pointHoverRadius: 5,
+                                fill: false
+                            },
+                            {
+                                label: "Completion Rate (%)",
+                                data: completionRateData,
+                                borderColor: "#b58b45",
+                                backgroundColor: "#b58b45",
+                                pointBackgroundColor: "#b58b45",
+                                pointBorderColor: "#ffffff",
+                                borderWidth: 2.5,
+                                borderDash: [6, 4],
+                                tension: 0.35,
+                                pointRadius: data.length > 20 ? 1.5 : 3,
+                                pointHoverRadius: 5,
+                                fill: false
+                            }
+                        ]
+                    },
+
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+
+                        interaction: {
+                            mode: "index",
+                            intersect: false
+                        },
+
+                        animation: {
+                            duration: 500
+                        },
+
+                        plugins: {
+                            legend: {
+                                position: "top",
+                                align: "start",
+                                labels: {
+                                    usePointStyle: true,
+                                    pointStyle: "circle",
+                                    padding: 18,
+                                    boxWidth: 8
+                                }
+                            },
+
+                            tooltip: {
+                                mode: "index",
+                                intersect: false,
+                                padding: 10,
+
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.parsed.y ?? 0;
+
+                                        if (context.dataset.label === "Completion Rate (%)") {
+                                            return context.dataset.label
+                                                + ": "
+                                                + Number(value).toFixed(2)
+                                                + "%";
+                                        }
+
+                                        return context.dataset.label + ": " + value;
+                                    }
+                                }
+                            }
+                        },
+
+                        scales: {
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+
+                                ticks: {
+                                    maxTicksLimit: 12,
+                                    autoSkip: true,
+                                    maxRotation: 0,
+                                    padding: 8
+                                }
+                            },
+
+                            y: {
+                                beginAtZero: true,
+
+                                ticks: {
+                                    precision: 0,
+                                    padding: 8
+                                },
+
+                                grid: {
+                                    color: "rgba(15, 23, 42, 0.08)"
+                                }
+                            }
+                        },
+
+                        elements: {
+                            line: {
+                                capBezierPoints: true
+                            },
+
+                            point: {
+                                hitRadius: 10
+                            }
+                        }
+                    }
+                });
+            }
+
+            function formatCompletionTrendDate(dateValue) {
+                const date = new Date(dateValue);
+
+                if (isNaN(date.getTime())) {
+                    return dateValue;
+                }
+
+                return date.toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric"
+                });
+            }
+
+            function formatCompletionRange(range) {
+                switch (range) {
+                    case "Today":
+                        return "Today";
+
+                    case "ThisWeek":
+                        return "This Week";
+
+                    case "ThisMonth":
+                        return "This Month";
+
+                    case "Custom":
+                        return "Custom Range";
+
+                    default:
+                        return range || "Selected Range";
+                }
+            }
+
+            function showCompletionTrendEmpty() {
+                const canvas = document.getElementById("completionTrendChart");
+
+                if (!canvas) {
+                    return;
+                }
+
+                const parent = canvas.parentElement;
+
+                parent.innerHTML = `
+                                        <div class="d-flex justify-content-center align-items-center h-100">
+                                            <div class="text-center text-muted">
+                                                <div class="pm-empty-icon mx-auto">
+                                                    <i class="bi bi-bar-chart-line"></i>
+                                                </div>
+                                                <h6 class="fw-semibold mt-3 mb-1">No Completion Trend Data</h6>
+                                                <p class="mb-0 small">
+                                                    No completion activity was found for the selected period.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    `;
+            }
+
+            function showCompletionTrendError() {
+                const canvas = document.getElementById("completionTrendChart");
+
+                if (!canvas) {
+                    return;
+                }
+
+                const parent = canvas.parentElement;
+
+                parent.innerHTML = `
+                                        <div class="d-flex justify-content-center align-items-center h-100">
+                                            <div class="text-center text-muted">
+                                                <div class="pm-empty-icon mx-auto">
+                                                    <i class="bi bi-exclamation-triangle"></i>
+                                                </div>
+                                                <h6 class="fw-semibold mt-3 mb-1">
+                                                    Unable to Load Completion Trend
+                                                </h6>
+                                                <p class="mb-0 small">
+                                                    Please refresh the page and try again.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    `;
+            }
+    </script>
+
+
+    <!-- =====================================================
+         SLA TREND
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4 pm-trend-card">
+
+        <div class="card-header py-3">
+            <div class="pm-chart-toolbar mb-0">
+
+                <div>
+                    <h5 class="fw-semibold mb-1">
+                        <i class="bi bi-graph-up-arrow me-2 text-primary"></i>
+                        SLA Trend
+                    </h5>
+
+                    <small class="text-muted">
+                        Daily SLA compliance for Acceptance,
+                        First Feedback and Next Feedback.
+                    </small>
+                </div>
+
+                <span id="slaTrendRange"
+                      class="badge bg-primary-subtle text-primary px-3 py-2">
+                    @rangeText
+                </span>
+
+            </div>
+        </div>
+
+        <div class="card-body">
+
+            <ul class="pm-chart-legend mb-3">
+                <li class="pm-chart-legend-item">
+                    <span class="pm-legend-dot bg-primary"></span>
+                    Acceptance SLA
+                </li>
+
+                <li class="pm-chart-legend-item">
+                    <span class="pm-legend-dot bg-success"></span>
+                    First Feedback SLA
+                </li>
+
+                <li class="pm-chart-legend-item">
+                    <span class="pm-legend-dot bg-warning"></span>
+                    Next Feedback SLA
+                </li>
+            </ul>
+
+            <div class="pm-chart-wrap">
+                <canvas id="slaTrendCanvas"></canvas>
+            </div>
+
+        </div>
+    </div>
+
+
+    <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                loadSLATrend();
+            });
+
+            async function loadSLATrend() {
+                const canvas = document.getElementById("slaTrendCanvas");
+
+                if (!canvas) {
+                    return;
+                }
+
+                try {
+                    const currentUrl = new URL(window.location.href);
+
+                    const range = currentUrl.searchParams.get("Range");
+                    const fromDate = currentUrl.searchParams.get("FromDate");
+                    const toDate = currentUrl.searchParams.get("ToDate");
+
+                    const params = new URLSearchParams();
+
+                    if (range) {
+                        params.append("Range", range);
+                    }
+
+                    if (fromDate) {
+                        params.append("FromDate", fromDate);
+                    }
+
+                    if (toDate) {
+                        params.append("ToDate", toDate);
+                    }
+
+                    const response =
+                        await fetch(`/SalesManager/SLATrend?${params.toString()}`);
+
+                    if (!response.ok) {
+                        throw new Error("Unable to load SLA trend.");
+                    }
+
+                    const data = await response.json();
+
+                    const slaRangeBadge =
+                        document.getElementById("slaTrendRange");
+
+                    if (slaRangeBadge) {
+                        slaRangeBadge.textContent =
+                            formatSLARange(range || "ThisMonth");
+                    }
+
+                    if (!Array.isArray(data) || data.length === 0) {
+                        showSLATrendState(
+                            "No SLA Trend Data",
+                            "There is no SLA data available for the selected period.",
+                            "bi-graph-down"
+                        );
+                        return;
+                    }
+
+                    renderSLATrendChart(canvas, data);
+                }
+                catch (error) {
+                    console.error("SLA Trend Error:", error);
+
+                    showSLATrendState(
+                        "Unable to Load SLA Trend",
+                        "Please refresh the page and try again.",
+                        "bi-exclamation-triangle"
+                    );
+                }
+            }
+
+            function renderSLATrendChart(canvas, data) {
+                const existingChart = Chart.getChart(canvas);
+
+                if (existingChart) {
+                    existingChart.destroy();
+                }
+
+                const labels = data.map(item =>
+                    formatSLATrendDate(item.date)
+                );
+
+                const acceptanceData = data.map(item =>
+                    Number(item.acceptanceSLAComplianceRate) || 0
+                );
+
+                const firstFeedbackData = data.map(item =>
+                    Number(item.firstFeedbackSLAComplianceRate) || 0
+                );
+
+                const nextFeedbackData = data.map(item =>
+                    Number(item.nextFeedbackSLAComplianceRate) || 0
+                );
+
+                new Chart(canvas, {
+                    type: "line",
+
+                    data: {
+                        labels: labels,
+
+                        datasets: [
+                            {
+                                label: "Acceptance SLA",
+                                data: acceptanceData,
+                                borderColor: "#6b8fd6",
+                                backgroundColor: "#6b8fd6",
+                                pointBackgroundColor: "#6b8fd6",
+                                pointBorderColor: "#ffffff",
+                                borderWidth: 2.5,
+                                tension: 0.35,
+                                pointRadius: data.length > 20 ? 1.5 : 3,
+                                pointHoverRadius: 5,
+                                fill: false
+                            },
+                            {
+                                label: "First Feedback SLA",
+                                data: firstFeedbackData,
+                                borderColor: "#4f9f86",
+                                backgroundColor: "#4f9f86",
+                                pointBackgroundColor: "#4f9f86",
+                                pointBorderColor: "#ffffff",
+                                borderWidth: 2.5,
+                                tension: 0.35,
+                                pointRadius: data.length > 20 ? 1.5 : 3,
+                                pointHoverRadius: 5,
+                                fill: false
+                            },
+                            {
+                                label: "Next Feedback SLA",
+                                data: nextFeedbackData,
+                                borderColor: "#b58b45",
+                                backgroundColor: "#b58b45",
+                                pointBackgroundColor: "#b58b45",
+                                pointBorderColor: "#ffffff",
+                                borderWidth: 2.5,
+                                borderDash: [6, 4],
+                                tension: 0.35,
+                                pointRadius: data.length > 20 ? 1.5 : 3,
+                                pointHoverRadius: 5,
+                                fill: false
+                            }
+                        ]
+                    },
+
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+
+                        interaction: {
+                            mode: "index",
+                            intersect: false
+                        },
+
+                        animation: {
+                            duration: 500
+                        },
+
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+
+                            tooltip: {
+                                mode: "index",
+                                intersect: false,
+                                padding: 10,
+
+                                callbacks: {
+                                    label: function(context) {
+                                        const value =
+                                            Number(context.parsed.y ?? 0);
+
+                                        return context.dataset.label
+                                            + ": "
+                                            + value.toFixed(2)
+                                            + "%";
+                                    }
+                                }
+                            }
+                        },
+
+                        scales: {
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+
+                                ticks: {
+                                    maxTicksLimit: 12,
+                                    autoSkip: true,
+                                    maxRotation: 0,
+                                    padding: 8
+                                }
+                            },
+
+                            y: {
+                                min: 0,
+                                max: 100,
+
+                                ticks: {
+                                    stepSize: 20,
+                                    callback: function(value) {
+                                        return value + "%";
+                                    },
+
+                                    padding: 8
+                                },
+
+                                grid: {
+                                    color: "rgba(15, 23, 42, 0.08)"
+                                }
+                            }
+                        },
+
+                        elements: {
+                            line: {
+                                capBezierPoints: true
+                            },
+
+                            point: {
+                                hitRadius: 10
+                            }
+                        }
+                    }
+                });
+            }
+
+            function formatSLARange(range) {
+                switch (range) {
+                    case "Today":
+                        return "Today";
+
+                    case "ThisWeek":
+                        return "This Week";
+
+                    case "ThisMonth":
+                        return "This Month";
+
+                    case "Custom":
+                        return "Custom Range";
+
+                    default:
+                        return range || "Selected Range";
+                }
+            }
+
+            function formatSLATrendDate(dateValue) {
+                const date = new Date(dateValue);
+
+                if (isNaN(date.getTime())) {
+                    return dateValue;
+                }
+
+                return date.toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric"
+                });
+            }
+
+            function showSLATrendState(title, message, icon) {
+                const canvas = document.getElementById("slaTrendCanvas");
+
+                if (!canvas) {
+                    return;
+                }
+
+                const existingChart = Chart.getChart(canvas);
+
+                if (existingChart) {
+                    existingChart.destroy();
+                }
+
+                const parent = canvas.parentElement;
+
+                parent.innerHTML = `
+                                        <div class="d-flex justify-content-center align-items-center h-100">
+                                            <div class="text-center text-muted">
+                                                <div class="pm-empty-icon mx-auto">
+                                                    <i class="bi ${icon}"></i>
+                                                </div>
+                                                <h6 class="fw-semibold mt-3 mb-1">${title}</h6>
+                                                <p class="mb-0 small">${message}</p>
+                                            </div>
+                                        </div>
+                                    `;
+            }
+    </script>
+
+
+    <!-- =====================================================
+         PERFORMANCE TABLE
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm pm-table-card">
 
         <div class="card-header bg-white py-3">
 
@@ -222,14 +4207,17 @@
                     </h5>
 
                     <small class="text-muted">
-                        Current performance overview of active Sales Officers.
+
+                        Performance overview for the selected date range.
+
                     </small>
 
                 </div>
 
+
                 <span class="badge bg-light text-dark border">
 
-                    @Model.Count Officer(s)
+                    @Model.Count() Officer(s)
 
                 </span>
 
@@ -244,14 +4232,19 @@
             {
                 <div class="text-center py-5">
 
-                    <i class="bi bi-bar-chart-line fs-1 text-muted d-block mb-3"></i>
+                    <i class="bi bi-bar-chart-line fs-1
+                        text-muted d-block mb-3">
+                    </i>
 
                     <h5 class="fw-semibold">
                         No Performance Data
                     </h5>
 
                     <p class="text-muted mb-0">
-                        No active Sales Officers are available.
+
+                        No performance data is available
+                        for the selected date range.
+
                     </p>
 
                 </div>
@@ -299,6 +4292,10 @@
                                 </th>
 
                                 <th class="text-center">
+                                    Next Feedback SLA
+                                </th>
+
+                                <th class="text-center">
                                     Overdue
                                 </th>
 
@@ -313,17 +4310,24 @@
                             {
                                 <tr>
 
-                                    <!-- Sales Officer -->
+                                    <!-- Officer -->
 
                                     <td>
 
                                         <div class="d-flex align-items-center">
 
-                                            <div class="rounded-circle bg-primary-subtle
-                                                        text-primary d-flex
-                                                        align-items-center
-                                                        justify-content-center me-3"
-                                                 style="width:42px;height:42px;">
+                                            <div class="
+                                                rounded-circle
+                                                bg-primary-subtle
+                                                text-primary
+                                                d-flex
+                                                align-items-center
+                                                justify-content-center
+                                                me-3"
+                                                 style="
+                                                width:42px;
+                                                height:42px;
+                                                ">
 
                                                 <i class="bi bi-person-fill"></i>
 
@@ -332,11 +4336,15 @@
                                             <div>
 
                                                 <div class="fw-semibold">
+
                                                     @officer.SalesOfficerName
+
                                                 </div>
 
                                                 <small class="text-muted">
+
                                                     ID: @officer.SalesOfficerId
+
                                                 </small>
 
                                             </div>
@@ -350,7 +4358,11 @@
 
                                     <td class="text-center">
 
-                                        <span class="badge bg-primary-subtle text-primary fs-6">
+                                        <span class="
+                                            badge
+                                            bg-primary-subtle
+                                            text-primary
+                                            fs-6">
 
                                             @officer.TotalAssignedLeads
 
@@ -363,7 +4375,11 @@
 
                                     <td class="text-center">
 
-                                        <span class="badge bg-success-subtle text-success fs-6">
+                                        <span class="
+                                            badge
+                                            bg-success-subtle
+                                            text-success
+                                            fs-6">
 
                                             @officer.AcceptedLeads
 
@@ -378,7 +4394,11 @@
 
                                         @if (officer.PendingAcceptance > 0)
                                         {
-                                            <span class="badge bg-warning-subtle text-warning-emphasis fs-6">
+                                            <span class="
+                                                badge
+                                                bg-warning-subtle
+                                                text-warning-emphasis
+                                                fs-6">
 
                                                 @officer.PendingAcceptance
 
@@ -386,7 +4406,12 @@
                                         }
                                         else
                                         {
-                                            <span class="badge bg-light text-muted border fs-6">
+                                            <span class="
+                                                badge
+                                                bg-light
+                                                text-muted
+                                                border
+                                                fs-6">
 
                                                 0
 
@@ -400,7 +4425,11 @@
 
                                     <td class="text-center">
 
-                                        <span class="badge bg-info-subtle text-info-emphasis fs-6">
+                                        <span class="
+                                            badge
+                                            bg-info-subtle
+                                            text-info-emphasis
+                                            fs-6">
 
                                             @officer.CompletedLeads
 
@@ -413,7 +4442,11 @@
 
                                     <td class="text-center">
 
-                                        <span class="badge bg-secondary-subtle text-secondary fs-6">
+                                        <span class="
+                                            badge
+                                            bg-secondary-subtle
+                                            text-secondary
+                                            fs-6">
 
                                             @officer.TotalFeedbacks
 
@@ -428,9 +4461,16 @@
 
                                         @if (officer.AcceptanceSLAMissed > 0)
                                         {
-                                            <span class="badge bg-danger fs-6">
+                                            <span class="
+                                                badge
+                                                bg-danger
+                                                fs-6">
 
-                                                <i class="bi bi-exclamation-circle me-1"></i>
+                                                <i class="
+                                                    bi
+                                                    bi-exclamation-circle
+                                                    me-1">
+                                                </i>
 
                                                 @officer.AcceptanceSLAMissed
 
@@ -438,9 +4478,16 @@
                                         }
                                         else
                                         {
-                                            <span class="badge bg-success fs-6">
+                                            <span class="
+                                                badge
+                                                bg-success
+                                                fs-6">
 
-                                                <i class="bi bi-check-circle me-1"></i>
+                                                <i class="
+                                                    bi
+                                                    bi-check-circle
+                                                    me-1">
+                                                </i>
 
                                                 0
 
@@ -456,9 +4503,16 @@
 
                                         @if (officer.FirstFeedbackSLAMissed > 0)
                                         {
-                                            <span class="badge bg-danger fs-6">
+                                            <span class="
+                                                badge
+                                                bg-danger
+                                                fs-6">
 
-                                                <i class="bi bi-exclamation-circle me-1"></i>
+                                                <i class="
+                                                    bi
+                                                    bi-exclamation-circle
+                                                    me-1">
+                                                </i>
 
                                                 @officer.FirstFeedbackSLAMissed
 
@@ -466,14 +4520,85 @@
                                         }
                                         else
                                         {
-                                            <span class="badge bg-success fs-6">
+                                            <span class="
+                                                badge
+                                                bg-success
+                                                fs-6">
 
-                                                <i class="bi bi-check-circle me-1"></i>
+                                                <i class="
+                                                    bi
+                                                    bi-check-circle
+                                                    me-1">
+                                                </i>
 
                                                 0
 
                                             </span>
                                         }
+
+                                    </td>
+
+
+                                    <!-- Next Feedback SLA -->
+
+                                    <td class="text-center">
+
+                                        <div class="
+                                            d-flex
+                                            flex-column
+                                            align-items-center
+                                            gap-1">
+
+                                            <div>
+
+                                                <span class="
+                                                    badge
+                                                    bg-success-subtle
+                                                    text-success
+                                                    me-1">
+
+                                                    <i class="
+                                                        bi
+                                                        bi-check-circle
+                                                        me-1">
+                                                    </i>
+
+                                                    @officer.NextFeedbackSLAMet
+
+                                                </span>
+
+
+                                                <span class="
+                                                    badge
+                                                    bg-danger-subtle
+                                                    text-danger">
+
+                                                    <i class="
+                                                        bi
+                                                        bi-exclamation-circle
+                                                        me-1">
+                                                    </i>
+
+                                                    @officer.NextFeedbackSLAMissed
+
+                                                </span>
+
+                                            </div>
+
+
+                                            <small class="
+                                                fw-semibold
+                                                @(officer.NextFeedbackSLAComplianceRate >= 90
+                                                    ? "text-success"
+                                                    : officer.NextFeedbackSLAComplianceRate >= 70
+                                                        ? "text-warning-emphasis"
+                                                        : "text-danger")">
+
+                                                @officer.NextFeedbackSLAComplianceRate.ToString("0.00")%
+
+                                            </small>
+
+                                        </div>
 
                                     </td>
 
@@ -484,9 +4609,16 @@
 
                                         @if (officer.OverdueFollowUps > 0)
                                         {
-                                            <span class="badge bg-danger fs-6">
+                                            <span class="
+                                                badge
+                                                bg-danger
+                                                fs-6">
 
-                                                <i class="bi bi-clock-history me-1"></i>
+                                                <i class="
+                                                    bi
+                                                    bi-clock-history
+                                                    me-1">
+                                                </i>
 
                                                 @officer.OverdueFollowUps
 
@@ -494,9 +4626,16 @@
                                         }
                                         else
                                         {
-                                            <span class="badge bg-success fs-6">
+                                            <span class="
+                                                badge
+                                                bg-success
+                                                fs-6">
 
-                                                <i class="bi bi-check-circle me-1"></i>
+                                                <i class="
+                                                    bi
+                                                    bi-check-circle
+                                                    me-1">
+                                                </i>
 
                                                 0
 
@@ -520,3 +4659,445 @@
     </div>
 
 </div>
+
+
+<!-- =========================================================
+     PERFORMANCE TREND JAVASCRIPT
+     ========================================================= -->
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+
+        const rangeSelect =
+            document.getElementById("rangeSelect");
+
+        const customDateFields =
+            document.getElementById("customDateFields");
+
+        const loading =
+            document.getElementById("trendLoading");
+
+        const empty =
+            document.getElementById("trendEmpty");
+
+        const trendContainer =
+            document.getElementById("performanceTrendContainer");
+
+        const trendCanvas =
+            document.getElementById("performanceTrendCanvas");
+
+        const trendRangeLabel =
+            document.getElementById("trendRangeLabel");
+
+        function toggleCustomDates() {
+            if (!rangeSelect || !customDateFields) {
+                return;
+            }
+
+            customDateFields.style.display =
+                rangeSelect.value === "Custom"
+                    ? "block"
+                    : "none";
+        }
+
+        function buildQuery() {
+            const params = new URLSearchParams();
+
+            if (rangeSelect) {
+                params.append("Range", rangeSelect.value);
+            }
+
+            const fromDateInput =
+                document.querySelector('input[name="FromDate"]');
+
+            const toDateInput =
+                document.querySelector('input[name="ToDate"]');
+
+            if (fromDateInput && fromDateInput.value) {
+                params.append("FromDate", fromDateInput.value);
+            }
+
+            if (toDateInput && toDateInput.value) {
+                params.append("ToDate", toDateInput.value);
+            }
+
+            return params.toString();
+        }
+
+        function destroyPerformanceTrendChart() {
+            if (!trendCanvas) {
+                return;
+            }
+
+            const existingChart =
+                Chart.getChart(trendCanvas);
+
+            if (existingChart) {
+                existingChart.destroy();
+            }
+        }
+
+        function drawChart(data) {
+            if (!trendCanvas) {
+                return;
+            }
+
+            destroyPerformanceTrendChart();
+
+            if (!Array.isArray(data) || data.length === 0) {
+                if (trendContainer) {
+                    trendContainer.style.display = "none";
+                }
+
+                if (empty) {
+                    empty.classList.remove("d-none");
+                }
+
+                return;
+            }
+
+            if (trendContainer) {
+                trendContainer.style.display = "block";
+            }
+
+            if (empty) {
+                empty.classList.add("d-none");
+            }
+
+            const labels =
+                data.map(item => formatDate(item.date));
+
+            const assignedData =
+                data.map(item => Number(item.assignedLeads) || 0);
+
+            const acceptedData =
+                data.map(item => Number(item.acceptedLeads) || 0);
+
+            const completedData =
+                data.map(item => Number(item.completedLeads) || 0);
+
+            const feedbackData =
+                data.map(item => Number(item.feedbacks) || 0);
+
+            const overdueData =
+                data.map(item => Number(item.overdueFollowUps) || 0);
+
+            new Chart(trendCanvas, {
+                type: "line",
+
+                data: {
+                    labels: labels,
+
+                    datasets: [
+                        {
+                            label: "Assigned",
+                            data: assignedData,
+                            borderColor: "#6b8fd6",
+                            backgroundColor: "#6b8fd6",
+                            pointBackgroundColor: "#6b8fd6",
+                            pointBorderColor: "#ffffff",
+                            borderWidth: 2.5,
+                            tension: 0.35,
+                            pointRadius: data.length > 20 ? 1.5 : 3,
+                            pointHoverRadius: 5,
+                            fill: false
+                        },
+                        {
+                            label: "Accepted",
+                            data: acceptedData,
+                            borderColor: "#4f9f86",
+                            backgroundColor: "#4f9f86",
+                            pointBackgroundColor: "#4f9f86",
+                            pointBorderColor: "#ffffff",
+                            borderWidth: 2.5,
+                            tension: 0.35,
+                            pointRadius: data.length > 20 ? 1.5 : 3,
+                            pointHoverRadius: 5,
+                            fill: false
+                        },
+                        {
+                            label: "Completed",
+                            data: completedData,
+                            borderColor: "#2f8f6b",
+                            backgroundColor: "#2f8f6b",
+                            pointBackgroundColor: "#2f8f6b",
+                            pointBorderColor: "#ffffff",
+                            borderWidth: 2.5,
+                            tension: 0.35,
+                            pointRadius: data.length > 20 ? 1.5 : 3,
+                            pointHoverRadius: 5,
+                            fill: false
+                        },
+                        {
+                            label: "Feedbacks",
+                            data: feedbackData,
+                            borderColor: "#7b83a8",
+                            backgroundColor: "#7b83a8",
+                            pointBackgroundColor: "#7b83a8",
+                            pointBorderColor: "#ffffff",
+                            borderWidth: 2.5,
+                            tension: 0.35,
+                            pointRadius: data.length > 20 ? 1.5 : 3,
+                            pointHoverRadius: 5,
+                            fill: false
+                        },
+                        {
+                            label: "Overdue",
+                            data: overdueData,
+                            borderColor: "#d87883",
+                            backgroundColor: "#d87883",
+                            pointBackgroundColor: "#d87883",
+                            pointBorderColor: "#ffffff",
+                            borderWidth: 2.5,
+                            borderDash: [6, 4],
+                            tension: 0.35,
+                            pointRadius: data.length > 20 ? 1.5 : 3,
+                            pointHoverRadius: 5,
+                            fill: false
+                        }
+                    ]
+                },
+
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+
+                    interaction: {
+                        mode: "index",
+                        intersect: false
+                    },
+
+                    animation: {
+                        duration: 500
+                    },
+
+                    plugins: {
+                        legend: {
+                            position: "top",
+                            align: "start",
+
+                            labels: {
+                                usePointStyle: true,
+                                pointStyle: "circle",
+                                padding: 18,
+                                boxWidth: 8
+                            }
+                        },
+
+                        tooltip: {
+                            mode: "index",
+                            intersect: false,
+                            padding: 10
+                        }
+                    },
+
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+
+                            ticks: {
+                                maxTicksLimit: 12,
+                                autoSkip: true,
+                                maxRotation: 0,
+                                padding: 8
+                            }
+                        },
+
+                        y: {
+                            beginAtZero: true,
+
+                            ticks: {
+                                precision: 0,
+                                padding: 8
+                            },
+
+                            grid: {
+                                color: "rgba(108, 117, 125, 0.12)"
+                            }
+                        }
+                    },
+
+                    elements: {
+                        line: {
+                            capBezierPoints: true
+                        },
+
+                        point: {
+                            hitRadius: 10
+                        }
+                    }
+                }
+            });
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+
+            if (Number.isNaN(date.getTime())) {
+                return "";
+            }
+
+            return date.toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric"
+            });
+        }
+
+        async function loadPerformanceTrend() {
+            if (!loading || !empty || !trendContainer) {
+                return;
+            }
+
+            loading.classList.remove("d-none");
+            empty.classList.add("d-none");
+            trendContainer.style.display = "none";
+
+            try {
+                const url =
+                    '@Url.Action("PerformanceTrend", "SalesManager")'
+                    + "?"
+                    + buildQuery();
+
+                const response =
+                    await fetch(url, {
+                        method: "GET",
+                        headers: {
+                            "Accept": "application/json"
+                        }
+                    });
+
+                if (!response.ok) {
+                    throw new Error(
+                        "Performance trend request failed. HTTP status: "
+                        + response.status
+                    );
+                }
+
+                const data = await response.json();
+
+                console.log(
+                    "Performance Trend Data:",
+                    data
+                );
+
+                drawChart(data);
+            }
+            catch (error) {
+                console.error(
+                    "Performance Trend Error:",
+                    error
+                );
+
+                destroyPerformanceTrendChart();
+
+                trendContainer.style.display = "none";
+                empty.classList.remove("d-none");
+            }
+            finally {
+                loading.classList.add("d-none");
+            }
+        }
+
+        if (rangeSelect) {
+            rangeSelect.addEventListener(
+                "change",
+                function() {
+                    toggleCustomDates();
+
+                    if (trendRangeLabel) {
+                        const selectedText =
+                            rangeSelect.options[
+                                rangeSelect.selectedIndex
+                            ].text;
+
+                        trendRangeLabel.textContent =
+                            selectedText;
+                    }
+
+                    loadPerformanceTrend();
+                }
+            );
+        }
+
+        toggleCustomDates();
+        loadPerformanceTrend();
+    });
+</script>
+
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+
+        updateExportExcelLink();
+
+    });
+
+
+    // =========================================================
+    // Update Excel Export URL
+    // =========================================================
+
+    function updateExportExcelLink() {
+
+        const exportButton =
+            document.getElementById(
+                "exportExcelButton"
+            );
+
+
+        if (!exportButton) {
+            return;
+        }
+
+
+        // -----------------------------------------------------
+        // Read Current URL Parameters
+        // -----------------------------------------------------
+
+        const params =
+            new URLSearchParams(
+                window.location.search
+            );
+
+
+        const range =
+            params.get("Range") || "ThisMonth";
+
+
+        const fromDate =
+            params.get("FromDate") || "";
+
+
+        const toDate =
+            params.get("ToDate") || "";
+
+
+        // -----------------------------------------------------
+        // Build Export URL
+        // -----------------------------------------------------
+
+        const exportUrl =
+            '@Url.Action(
+                                                                "ExportPerformanceExcel",
+                                                                "SalesManager"
+                )'
+            + '?Range='
+            + encodeURIComponent(range)
+            + '&FromDate='
+            + encodeURIComponent(fromDate)
+            + '&ToDate='
+            + encodeURIComponent(toDate);
+
+
+        // -----------------------------------------------------
+        // Set Button URL
+        // -----------------------------------------------------
+
+        exportButton.href =
+            exportUrl;
+
+    }
+</script>
