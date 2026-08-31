@@ -867,20 +867,34 @@ namespace CRMSystem.Controllers
         // =====================================================
         // Follow-ups
         // =====================================================
+
         [HttpGet]
-        public async Task<IActionResult> FollowUps()
+        public async Task<IActionResult> FollowUps(
+            SalesManagerFollowUpFilterViewModel filter)
         {
-            ViewData["Title"] =
-                "Follow-ups";
+            ViewData["Title"] = "Follow-ups";
+            ViewData["Breadcrumb"] = "Follow-ups";
 
-            ViewData["Breadcrumb"] =
-                "Follow-ups";
+           
+            // Validate Date Range
 
-            var followUps =
+            if (filter.FromDate.HasValue &&
+                filter.ToDate.HasValue &&
+                filter.FromDate.Value.Date >
+                filter.ToDate.Value.Date)
+            {
+                TempData["Error"] =
+                    "From Date cannot be later than To Date.";
+
+                filter.FromDate = null;
+                filter.ToDate = null;
+            }
+
+            var model =
                 await _dashboardService
-                    .GetFollowUpsAsync();
+                    .GetFollowUpsAsync(filter);
 
-            return View(followUps);
+            return View(model);
         }
 
         // =====================================================

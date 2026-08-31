@@ -6,10 +6,12 @@ namespace CRMSystem.Services.Interfaces
     {
         Task<SalesManagerDashboardViewModel> GetDashboardAsync();
 
-        Task<List<SalesManagerFollowUpViewModel>> GetFollowUpsAsync();
+        //Task<List<SalesManagerFollowUpViewModel>> GetFollowUpsAsync();
 
         Task<SalesManagerFollowUpDetailsViewModel?> GetFollowUpDetailsAsync(long leadId);
 
-        
+        Task<SalesManagerFollowUpFilterViewModel>GetFollowUpsAsync(SalesManagerFollowUpFilterViewModel filter);
+
+
     }
 }

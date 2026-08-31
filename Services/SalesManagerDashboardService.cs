@@ -53,10 +53,16 @@ namespace CRMSystem.Services
         // Sales Manager Follow-ups
         // =====================================================
 
-        public async Task<List<SalesManagerFollowUpViewModel>>
-            GetFollowUpsAsync()
+        public async Task<SalesManagerFollowUpFilterViewModel> GetFollowUpsAsync(
+    SalesManagerFollowUpFilterViewModel filter)
         {
+            filter ??= new SalesManagerFollowUpFilterViewModel();
+
             var now = DateTime.UtcNow;
+
+            // =====================================================
+            // Load Feedbacks
+            // =====================================================
 
             var feedbacks = await _context.Feedbacks
 
@@ -72,25 +78,47 @@ namespace CRMSystem.Services
 
                 .AsNoTracking()
 
-                .OrderBy(f => f.NextFollowUpDate)
-
                 .ToListAsync();
 
 
-            // =================================================
-            // Only Latest Follow-up Per Lead
-            // =================================================
+            // =====================================================
+            // Create Latest Follow-up Per Lead
+            // =====================================================
 
             var followUps = feedbacks
+
                 .GroupBy(f => f.LeadAssignment!.LeadId)
-                .Select(g =>
+
+                .Select(group =>
                 {
-                    var f = g
-                        .OrderByDescending(x => x.NextFollowUpDate)
-                        .First();
+                    // =================================================
+                    // Sort all feedbacks chronologically
+                    // =================================================
+
+                    var orderedFeedbacks = group
+                        .OrderBy(f => f.SubmittedAt)
+                        .ToList();
+
+
+                    // =================================================
+                    // Get latest feedback
+                    // =================================================
+
+                    var latestFeedback =
+                        orderedFeedbacks.Last();
+
+
+                    // =================================================
+                    // Current follow-up date
+                    // =================================================
 
                     var followUpDate =
-                        f.NextFollowUpDate!.Value;
+                        latestFeedback.NextFollowUpDate!.Value;
+
+
+                    // =================================================
+                    // Follow-up Status
+                    // =================================================
 
                     var isOverdue =
                         followUpDate < now;
@@ -98,58 +126,336 @@ namespace CRMSystem.Services
                     var isDueToday =
                         followUpDate.Date == now.Date;
 
-                    string followUpStatus;
+                    var followUpStatus =
+                        isOverdue
+                            ? "Overdue"
+                            : isDueToday
+                                ? "Due Today"
+                                : "Upcoming";
 
-                    if (isOverdue)
+
+                    // =================================================
+                    // Timeliness
+                    // =================================================
+
+                    string timelinessStatus;
+
+
+                    // =================================================
+                    // Find previous feedback
+                    // =================================================
+
+                    var latestFeedbackIndex =
+                        orderedFeedbacks.Count - 1;
+
+
+                    var previousFeedback =
+                        latestFeedbackIndex > 0
+                            ? orderedFeedbacks[latestFeedbackIndex - 1]
+                            : null;
+
+
+                    // =================================================
+                    // Case 1:
+                    // This is NOT the first feedback
+                    // =================================================
+
+                    if (previousFeedback != null &&
+                        previousFeedback.NextFollowUpDate.HasValue)
                     {
-                        followUpStatus = "Overdue";
+                        var expectedFeedbackDate =
+                            previousFeedback.NextFollowUpDate.Value;
+
+
+                        // ---------------------------------------------
+                        // Latest feedback submitted on/before deadline
+                        // ---------------------------------------------
+
+                        if (latestFeedback.SubmittedAt <=
+                            expectedFeedbackDate)
+                        {
+                            timelinessStatus = "On Time";
+                        }
+
+                        // ---------------------------------------------
+                        // Latest feedback submitted after deadline
+                        // ---------------------------------------------
+
+                        else
+                        {
+                            timelinessStatus = "Late";
+                        }
                     }
-                    else if (isDueToday)
-                    {
-                        followUpStatus = "Due Today";
-                    }
+
+                    // =================================================
+                    // Case 2:
+                    // This is the first feedback
+                    // =================================================
+
                     else
                     {
-                        followUpStatus = "Upcoming";
+                        // First feedback does not have a previous
+                        // follow-up deadline.
+                        //
+                        // First-feedback SLA is handled separately
+                        // by the existing assignment SLA logic.
+
+                        if (followUpDate < now)
+                        {
+                            timelinessStatus = "Overdue";
+                        }
+                        else
+                        {
+                            timelinessStatus = "Pending";
+                        }
                     }
+
+
+                    // =================================================
+                    // Create ViewModel
+                    // =================================================
 
                     return new SalesManagerFollowUpViewModel
                     {
-                        FeedbackId = f.FeedbackId,
+                        FeedbackId =
+                            latestFeedback.FeedbackId,
 
-                        AssignmentId = f.AssignmentId,
+                        AssignmentId =
+                            latestFeedback.AssignmentId,
 
-                        LeadId = f.LeadAssignment!.LeadId,
+                        LeadId =
+                            latestFeedback.LeadAssignment!.LeadId,
 
                         LeadName =
-                            f.LeadAssignment.Lead?.LeadName
+                            latestFeedback.LeadAssignment.Lead?.LeadName
                             ?? "Unknown Lead",
 
                         SalesOfficerName =
-                            f.LeadAssignment.SalesOfficer?.FullName
+                            latestFeedback.LeadAssignment.SalesOfficer?.FullName
                             ?? "Unknown Sales Officer",
 
-                        Summary = f.Summary,
+                        Summary =
+                            latestFeedback.Summary,
 
                         FeedbackStatus =
-                            f.Status.ToString(),
+                            latestFeedback.Status.ToString(),
 
-                        SubmittedAt = f.SubmittedAt,
+                        SubmittedAt =
+                            latestFeedback.SubmittedAt,
 
-                        FollowUpDate = followUpDate,
+                        FollowUpDate =
+                            followUpDate,
 
-                        IsOverdue = isOverdue,
+                        IsOverdue =
+                            isOverdue,
 
-                        IsDueToday = isDueToday,
+                        IsDueToday =
+                            isDueToday,
 
-                        FollowUpStatus = followUpStatus
+                        FollowUpStatus =
+                            followUpStatus,
+
+                        TimelinessStatus =
+                            timelinessStatus
                     };
                 })
-                .OrderBy(f => f.FollowUpDate)
+
                 .ToList();
 
-            return followUps;
+
+            // =====================================================
+            // Summary Counts
+            // =====================================================
+
+            filter.TotalFollowUps =
+                followUps.Count;
+
+            filter.OverdueCount =
+                followUps.Count(f => f.IsOverdue);
+
+            filter.DueTodayCount =
+                followUps.Count(f => f.IsDueToday);
+
+            filter.UpcomingCount =
+                followUps.Count(f =>
+                    !f.IsOverdue &&
+                    !f.IsDueToday);
+
+
+            // =====================================================
+            // Date Range Filter
+            // =====================================================
+
+            if (filter.FromDate.HasValue)
+            {
+                var fromDate =
+                    filter.FromDate.Value.Date;
+
+                followUps =
+                    followUps
+                        .Where(f =>
+                            f.FollowUpDate.Date >= fromDate)
+                        .ToList();
+            }
+
+
+            if (filter.ToDate.HasValue)
+            {
+                var toDate =
+                    filter.ToDate.Value.Date;
+
+                followUps =
+                    followUps
+                        .Where(f =>
+                            f.FollowUpDate.Date <= toDate)
+                        .ToList();
+            }
+
+
+            // =====================================================
+            // Search
+            // =====================================================
+
+            if (!string.IsNullOrWhiteSpace(filter.Search))
+            {
+                var search =
+                    filter.Search.Trim();
+
+                followUps =
+                    followUps
+                        .Where(f =>
+                            f.LeadName.Contains(
+                                search,
+                                StringComparison.OrdinalIgnoreCase)
+
+                            ||
+
+                            f.SalesOfficerName.Contains(
+                                search,
+                                StringComparison.OrdinalIgnoreCase))
+                        .ToList();
+            }
+
+
+            // =====================================================
+            // Follow-up Status Filter
+            // =====================================================
+
+            if (!string.IsNullOrWhiteSpace(
+                filter.FollowUpStatus))
+            {
+                followUps =
+                    followUps
+                        .Where(f =>
+                            string.Equals(
+                                f.FollowUpStatus,
+                                filter.FollowUpStatus,
+                                StringComparison.OrdinalIgnoreCase))
+                        .ToList();
+            }
+
+
+            // =====================================================
+            // Feedback Status Filter
+            // =====================================================
+
+            if (!string.IsNullOrWhiteSpace(
+                filter.FeedbackStatus))
+            {
+                followUps =
+                    followUps
+                        .Where(f =>
+                            string.Equals(
+                                f.FeedbackStatus,
+                                filter.FeedbackStatus,
+                                StringComparison.OrdinalIgnoreCase))
+                        .ToList();
+            }
+
+
+            // =====================================================
+            // Sorting
+            // =====================================================
+
+            filter.Sort ??= "nearest";
+
+            followUps =
+                filter.Sort.ToLowerInvariant() switch
+                {
+                    "latest" =>
+                        followUps
+                            .OrderByDescending(
+                                f => f.SubmittedAt)
+                            .ToList(),
+
+                    "oldest" =>
+                        followUps
+                            .OrderBy(
+                                f => f.SubmittedAt)
+                            .ToList(),
+
+                    "overdue" =>
+                        followUps
+                            .OrderByDescending(
+                                f => f.IsOverdue)
+                            .ThenBy(
+                                f => f.FollowUpDate)
+                            .ToList(),
+
+                    "lead" =>
+                        followUps
+                            .OrderBy(
+                                f => f.LeadName)
+                            .ToList(),
+
+                    _ =>
+                        followUps
+                            .OrderBy(
+                                f => f.FollowUpDate)
+                            .ToList()
+                };
+
+
+            // =====================================================
+            // Pagination Count
+            // =====================================================
+
+            filter.TotalItems =
+                followUps.Count;
+
+
+            // =====================================================
+            // Validate Page
+            // =====================================================
+
+            if (filter.Page < 1)
+            {
+                filter.Page = 1;
+            }
+
+            if (filter.Page > filter.TotalPages)
+            {
+                filter.Page = filter.TotalPages;
+            }
+
+
+            // =====================================================
+            // Pagination
+            // =====================================================
+
+            filter.FollowUps =
+                followUps
+                    .Skip(
+                        (filter.Page - 1)
+                        * filter.PageSize)
+                    .Take(filter.PageSize)
+                    .ToList();
+
+
+            return filter;
         }
+
+        
 
 
         // =====================================================
@@ -214,16 +520,73 @@ namespace CRMSystem.Services
                 };
 
 
-            model.FeedbackHistory =
+            // =====================================================
+            // Prepare Feedback History For Timing Calculation
+            // =====================================================
+
+            var chronologicalFeedbacks =
                 feedbacks
-                    .Select(feedback =>
+                    .OrderBy(f => f.SubmittedAt)
+                    .ToList();
+
+
+            // =====================================================
+            // Create Feedback History
+            // =====================================================
+
+            model.FeedbackHistory =
+                chronologicalFeedbacks
+                    .Select((feedback, index) =>
                     {
                         var nextFollowUpDate =
                             feedback.NextFollowUpDate;
 
+
                         var isNextFollowUpOverdue =
                             nextFollowUpDate.HasValue &&
                             nextFollowUpDate.Value < now;
+
+
+                        // ==========================================
+                        // Determine Last Feedback Timing
+                        // ==========================================
+
+                        string lastFeedbackTiming;
+
+
+                        // First feedback
+                        if (index == 0)
+                        {
+                            var firstFeedbackDeadline =
+                                assignment.AssignedAt.AddHours(3);
+
+
+                            lastFeedbackTiming =
+                                feedback.SubmittedAt <= firstFeedbackDeadline
+                                    ? "On Time"
+                                    : "Late";
+                        }
+
+                        // Subsequent feedback
+                        else
+                        {
+                            var previousFeedback =
+                                chronologicalFeedbacks[index - 1];
+
+
+                            if (previousFeedback.NextFollowUpDate.HasValue)
+                            {
+                                lastFeedbackTiming =
+                                    feedback.SubmittedAt <=
+                                    previousFeedback.NextFollowUpDate.Value
+                                        ? "On Time"
+                                        : "Late";
+                            }
+                            else
+                            {
+                                lastFeedbackTiming = "N/A";
+                            }
+                        }
 
 
                         return new SalesManagerFeedbackHistoryViewModel
@@ -256,16 +619,17 @@ namespace CRMSystem.Services
                                 feedback.Notes,
 
                             IsNextFollowUpOverdue =
-                                isNextFollowUpOverdue
+                                isNextFollowUpOverdue,
+
+                            LastFeedbackTiming =
+                                lastFeedbackTiming
                         };
                     })
+                    .OrderByDescending(f => f.SubmittedAt)
                     .ToList();
 
             return model;
         }
-
-
-
 
 
 

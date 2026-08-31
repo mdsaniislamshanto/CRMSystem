@@ -27,5 +27,9 @@
         public bool IsDueToday { get; set; }
 
         public string FollowUpStatus { get; set; } = string.Empty;
+
+ 
+        // Timeliness Tracking
+        public string TimelinessStatus { get; set; } = string.Empty;
     }
 }

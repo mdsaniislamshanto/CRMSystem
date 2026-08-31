@@ -21,5 +21,7 @@
         public string? Notes { get; set; }
 
         public bool IsNextFollowUpOverdue { get; set; }
+
+        public string LastFeedbackTiming { get; set; } = string.Empty;
     }
 }

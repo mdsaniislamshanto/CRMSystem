@@ -1,249 +1,1422 @@
-﻿@model List<CRMSystem.Models.ViewModels.SalesManagerFollowUpViewModel>
+﻿@model CRMSystem.Models.ViewModels.SalesManagerFollowUpFilterViewModel
 
 @{
     ViewData["Title"] = "Follow-ups";
     ViewData["Breadcrumb"] = "Follow-ups";
     Layout = "_SalesManagerLayout";
+
+    var currentPage = Model.Page;
+    var totalPages = Model.TotalPages;
 }
 
-<div class="container-fluid py-4">
+<style>
 
-    <!-- ==============================
-         Page Header
-         ============================== -->
+    .followup-page {
+        padding: 2rem 1.5rem 3rem;
+        background: #f7f9fc;
+        min-height: calc(100vh - 70px);
+    }
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    .followup-header {
+        margin-bottom: 1.75rem;
+    }
 
-        <div>
-            <h2 class="fw-bold mb-1">
-                Follow-ups
-            </h2>
+        .followup-header h2 {
+            font-size: 1.65rem;
+            font-weight: 700;
+            color: #172033;
+            margin-bottom: .35rem;
+        }
 
-            <p class="text-muted mb-0">
-                Monitor follow-ups submitted by Sales Officers.
-            </p>
+        .followup-header p {
+            color: #6b7280;
+            margin-bottom: 0;
+        }
+
+
+    /* =========================
+               Summary
+           ========================= */
+
+    .followup-summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.75rem;
+    }
+
+    .followup-summary-card {
+        background: #fff;
+        border: 1px solid #e8edf4;
+        border-radius: 12px;
+        padding: 1.15rem 1.2rem;
+        box-shadow: 0 3px 12px rgba(25,42,70,.04);
+        transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+        .followup-summary-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(25,42,70,.07);
+        }
+
+    .summary-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .summary-label {
+        color: #7a8496;
+        font-size: .82rem;
+        margin-bottom: .35rem;
+        font-weight: 500;
+    }
+
+    .summary-value {
+        color: #172033;
+        font-size: 1.55rem;
+        font-weight: 700;
+        line-height: 1.1;
+    }
+
+    .summary-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .summary-blue {
+        background: #edf4ff;
+        color: #2563eb;
+    }
+
+    .summary-green {
+        background: #edf9f3;
+        color: #16855b;
+    }
+
+    .summary-orange {
+        background: #fff7e8;
+        color: #b77900;
+    }
+
+    .summary-red {
+        background: #fff0f1;
+        color: #dc3545;
+    }
+
+
+    /* =========================
+               Filter
+           ========================= */
+
+    .followup-filter {
+        background: #fff;
+        border: 1px solid #e8edf4;
+        border-radius: 12px;
+        padding: 1.2rem;
+        margin-bottom: 1.75rem;
+        box-shadow: 0 3px 12px rgba(25,42,70,.04);
+    }
+
+    .filter-title {
+        font-size: .95rem;
+        font-weight: 700;
+        color: #172033;
+        margin-bottom: 1rem;
+    }
+
+    .filter-label {
+        font-size: .75rem;
+        font-weight: 600;
+        color: #687386;
+        margin-bottom: .4rem;
+        display: block;
+    }
+
+    .followup-filter .form-control,
+    .followup-filter .form-select {
+        min-height: 42px;
+        border-radius: 8px;
+        border-color: #dfe5ed;
+        font-size: .84rem;
+    }
+
+        .followup-filter .form-control:focus,
+        .followup-filter .form-select:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 .18rem rgba(13,110,253,.08);
+        }
+
+    .date-input-wrapper {
+        position: relative;
+    }
+
+        .date-input-wrapper .date-icon {
+            position: absolute;
+            left: .75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #7a8496;
+            font-size: .9rem;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .date-input-wrapper input {
+            padding-left: 2.25rem;
+        }
+
+    .filter-row + .filter-row {
+        margin-top: 1rem;
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: .5rem;
+        align-items: end;
+        height: 100%;
+    }
+
+        .filter-actions .btn {
+            min-height: 42px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+    .reset-filter-btn {
+        min-width: 44px;
+    }
+
+
+    /* =========================
+               Table
+           ========================= */
+
+    .followup-table-card {
+        background: #fff;
+        border: 1px solid #e8edf4;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 3px 12px rgba(25,42,70,.04);
+    }
+
+    .followup-table-header {
+        padding: 1.15rem 1.2rem;
+        border-bottom: 1px solid #edf0f4;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .followup-title {
+        display: flex;
+        align-items: center;
+        gap: .7rem;
+    }
+
+    .followup-title-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 9px;
+        background: #edf4ff;
+        color: #2563eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .followup-title h5 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #172033;
+    }
+
+    .followup-title p {
+        margin: .15rem 0 0;
+        font-size: .76rem;
+        color: #7a8496;
+    }
+
+    .count-badge {
+        background: #edf4ff;
+        color: #2563eb;
+        border: 1px solid #dce9ff;
+        padding: .4rem .7rem;
+        border-radius: 20px;
+        font-size: .75rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .followup-table {
+        min-width: 1050px;
+        margin-bottom: 0;
+    }
+
+        .followup-table thead th {
+            background: #f8fafc;
+            color: #667085;
+            font-size: .68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .03em;
+            padding: .9rem .85rem;
+            border-bottom: 1px solid #e8edf4;
+            white-space: nowrap;
+        }
+
+        .followup-table tbody td {
+            padding: .9rem .85rem;
+            border-color: #edf0f4;
+            font-size: .82rem;
+            vertical-align: middle;
+        }
+
+        .followup-table tbody tr {
+            transition: background .15s ease;
+        }
+
+            .followup-table tbody tr:hover {
+                background: #fbfcfe;
+            }
+
+    .lead-name {
+        font-weight: 700;
+        color: #172033;
+    }
+
+    .lead-id {
+        color: #98a2b3;
+        font-size: .7rem;
+    }
+
+    .officer-name {
+        font-weight: 600;
+        color: #344054;
+    }
+
+    .date-main {
+        font-weight: 600;
+        color: #344054;
+        white-space: nowrap;
+    }
+
+    .date-time {
+        font-size: .7rem;
+        color: #98a2b3;
+    }
+
+    .summary-text {
+        max-width: 250px;
+        color: #475467;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+
+    /* =========================
+               Status
+           ========================= */
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        border-radius: 20px;
+        padding: .34rem .6rem;
+        font-size: .67rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .status-overdue {
+        color: #c62828;
+        background: #fff0f1;
+        border: 1px solid #ffd5d8;
+    }
+
+    .status-today {
+        color: #9a6700;
+        background: #fff7e8;
+        border: 1px solid #ffe4ad;
+    }
+
+    .status-upcoming {
+        color: #18794e;
+        background: #edf9f3;
+        border: 1px solid #d4f0e1;
+    }
+
+    .feedback-status {
+        color: #667085;
+        background: #f2f4f7;
+        border: 1px solid #e4e7ec;
+    }
+
+
+    /* =========================
+           Timeliness
+       ========================= */
+
+    .timeliness-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        border-radius: 20px;
+        padding: .34rem .6rem;
+        font-size: .67rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .timeliness-on-time {
+        color: #18794e;
+        background: #edf9f3;
+        border: 1px solid #d4f0e1;
+    }
+
+    .timeliness-pending {
+        color: #9a6700;
+        background: #fff7e8;
+        border: 1px solid #ffe4ad;
+    }
+
+    .timeliness-late {
+        color: #c62828;
+        background: #fff0f1;
+        border: 1px solid #ffd5d8;
+    }
+
+    .timeliness-neutral {
+        color: #667085;
+        background: #f2f4f7;
+        border: 1px solid #e4e7ec;
+    }
+
+    /* =========================
+               Action
+           ========================= */
+
+    .history-btn {
+        border-radius: 7px;
+        font-size: .74rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+
+    /* =========================
+               Empty
+           ========================= */
+
+    .empty-state {
+        padding: 4rem 1.5rem;
+        text-align: center;
+    }
+
+    .empty-icon {
+        width: 58px;
+        height: 58px;
+        border-radius: 50%;
+        background: #f2f5f9;
+        color: #98a2b3;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 1.4rem;
+    }
+
+    .empty-state h6 {
+        font-weight: 700;
+        color: #344054;
+    }
+
+    .empty-state p {
+        color: #98a2b3;
+        font-size: .82rem;
+        margin-bottom: 0;
+    }
+
+
+    /* =========================
+               Pagination
+           ========================= */
+
+    .followup-pagination {
+        padding: 1rem 1.2rem;
+        border-top: 1px solid #edf0f4;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .pagination-info {
+        color: #7a8496;
+        font-size: .76rem;
+    }
+
+        .pagination-info strong {
+            color: #344054;
+        }
+
+    .pagination .page-link {
+        border: 1px solid #e4e7ec;
+        color: #475467;
+        font-size: .78rem;
+        min-width: 34px;
+        text-align: center;
+        border-radius: 7px;
+        margin: 0 .12rem;
+    }
+
+    .pagination .page-item.active .page-link {
+        background: #2563eb;
+        border-color: #2563eb;
+        color: #fff;
+    }
+
+    .pagination .page-item.disabled .page-link {
+        color: #b0b7c3;
+        background: #f8fafc;
+    }
+
+
+    /* =========================
+               Responsive
+           ========================= */
+
+    @@media (max-width: 1100px) {
+
+        .followup-summary-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 767.98px) {
+
+        .followup-page {
+            padding: 1.25rem .85rem 2rem;
+        }
+
+        .followup-summary-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .followup-header,
+        .followup-table-header,
+        .followup-pagination {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .filter-actions {
+            margin-top: .5rem;
+        }
+
+            .filter-actions .btn {
+                flex: 1;
+            }
+
+        .followup-filter {
+            padding: 1rem;
+        }
+    }
+
+</style>
+
+
+<div class="followup-page">
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+
+    <div class="followup-header">
+
+        <h2>
+            Follow-ups
+        </h2>
+
+        <p>
+            Monitor Sales Officer follow-ups, upcoming activities
+            and overdue actions.
+        </p>
+
+    </div>
+
+
+    <!-- =====================================================
+         SUMMARY
+         ===================================================== -->
+
+    <div class="followup-summary-grid">
+
+        <!-- Total -->
+
+        <div class="followup-summary-card">
+
+            <div class="summary-top">
+
+                <div>
+
+                    <div class="summary-label">
+                        Total Follow-ups
+                    </div>
+
+                    <div class="summary-value">
+                        @Model.TotalFollowUps
+                    </div>
+
+                </div>
+
+                <div class="summary-icon summary-blue">
+
+                    <i class="bi bi-calendar-check"></i>
+
+                </div>
+
+            </div>
+
         </div>
 
-        <div>
-            <span class="badge bg-primary fs-6 px-3 py-2">
-                @Model.Count Follow-up(s)
-            </span>
+
+        <!-- Due Today -->
+
+        <div class="followup-summary-card">
+
+            <div class="summary-top">
+
+                <div>
+
+                    <div class="summary-label">
+                        Due Today
+                    </div>
+
+                    <div class="summary-value">
+                        @Model.DueTodayCount
+                    </div>
+
+                </div>
+
+                <div class="summary-icon summary-orange">
+
+                    <i class="bi bi-clock"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Upcoming -->
+
+        <div class="followup-summary-card">
+
+            <div class="summary-top">
+
+                <div>
+
+                    <div class="summary-label">
+                        Upcoming
+                    </div>
+
+                    <div class="summary-value">
+                        @Model.UpcomingCount
+                    </div>
+
+                </div>
+
+                <div class="summary-icon summary-green">
+
+                    <i class="bi bi-calendar-plus"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Overdue -->
+
+        <div class="followup-summary-card">
+
+            <div class="summary-top">
+
+                <div>
+
+                    <div class="summary-label">
+                        Overdue
+                    </div>
+
+                    <div class="summary-value text-danger">
+                        @Model.OverdueCount
+                    </div>
+
+                </div>
+
+                <div class="summary-icon summary-red">
+
+                    <i class="bi bi-exclamation-triangle"></i>
+
+                </div>
+
+            </div>
+
         </div>
 
     </div>
 
 
-    <!-- ==============================
-         Follow-up Card
-         ============================== -->
+    <!-- =====================================================
+         SEARCH & FILTER
+         ===================================================== -->
 
-    <div class="card border-0 shadow-sm">
+    <div class="followup-filter">
 
-        <div class="card-body p-0">
+        <div class="filter-title">
 
-            @if (!Model.Any())
-            {
-                <div class="text-center py-5">
+            <i class="bi bi-funnel me-1"></i>
 
-                    <i class="bi bi-calendar-x fs-1 text-muted d-block mb-3"></i>
+            Search & Filter Follow-ups
 
-                    <h5 class="fw-semibold">
-                        No Follow-ups Found
+        </div>
+
+
+        <form asp-controller="SalesManager"
+              asp-action="FollowUps"
+              method="get">
+
+
+            <!-- =========================
+                 FILTER ROW 1
+                 ========================= -->
+
+            <div class="row g-3 filter-row">
+
+                <!-- Search -->
+
+                <div class="col-lg-4 col-md-6">
+
+                    <label class="filter-label">
+                        Search
+                    </label>
+
+                    <input type="text"
+                           name="Search"
+                           value="@Model.Search"
+                           class="form-control"
+                           placeholder="Lead name or Sales Officer..." />
+
+                </div>
+
+
+                <!-- Follow-up Status -->
+
+                <div class="col-lg-4 col-md-6">
+
+                    <label class="filter-label">
+                        Follow-up Status
+                    </label>
+
+                    <select name="FollowUpStatus"
+                            class="form-select">
+
+                        <option value="">
+                            All Status
+                        </option>
+
+                        <option value="Overdue"
+                                selected="@(Model.FollowUpStatus == "Overdue")">
+
+                            Overdue
+
+                        </option>
+
+                        <option value="Due Today"
+                                selected="@(Model.FollowUpStatus == "Due Today")">
+
+                            Due Today
+
+                        </option>
+
+                        <option value="Upcoming"
+                                selected="@(Model.FollowUpStatus == "Upcoming")">
+
+                            Upcoming
+
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- Feedback Status -->
+
+                <div class="col-lg-4 col-md-6">
+
+                    <label class="filter-label">
+                        Feedback Status
+                    </label>
+
+                    <select name="FeedbackStatus"
+                            class="form-select">
+
+                        <option value="">
+                            All Feedback Status
+                        </option>
+
+                        @foreach (var status in
+                            Enum.GetValues<CRMSystem.Enums.FeedbackStatus>())
+                        {
+                            <option value="@status"
+                                    selected="@(Model.FeedbackStatus == status.ToString())">
+
+                                @status
+
+                            </option>
+                        }
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================
+                 FILTER ROW 2
+                 ========================= -->
+
+            <div class="row g-3 filter-row align-items-end">
+
+                <!-- From Date -->
+
+                <div class="col-lg-3 col-md-6">
+
+                    <label class="filter-label">
+                        From Date
+                    </label>
+
+                    <div class="date-input-wrapper">
+
+                        <i class="bi bi-calendar3 date-icon"></i>
+
+                        <input type="date"
+                               name="FromDate"
+                               value="@(Model.FromDate?.ToString("yyyy-MM-dd"))"
+                               class="form-control" />
+
+                    </div>
+
+                </div>
+
+
+                <!-- To Date -->
+
+                <div class="col-lg-3 col-md-6">
+
+                    <label class="filter-label">
+                        To Date
+                    </label>
+
+                    <div class="date-input-wrapper">
+
+                        <i class="bi bi-calendar3 date-icon"></i>
+
+                        <input type="date"
+                               name="ToDate"
+                               value="@(Model.ToDate?.ToString("yyyy-MM-dd"))"
+                               class="form-control" />
+
+                    </div>
+
+                </div>
+
+
+                <!-- Sort -->
+
+                <div class="col-lg-3 col-md-6">
+
+                    <label class="filter-label">
+                        Sort By
+                    </label>
+
+                    <select name="Sort"
+                            class="form-select">
+
+                        <option value="nearest"
+                                selected="@(Model.Sort == "nearest")">
+
+                            Nearest Follow-up
+
+                        </option>
+
+                        <option value="latest"
+                                selected="@(Model.Sort == "latest")">
+
+                            Latest Feedback
+
+                        </option>
+
+                        <option value="oldest"
+                                selected="@(Model.Sort == "oldest")">
+
+                            Oldest Feedback
+
+                        </option>
+
+                        <option value="overdue"
+                                selected="@(Model.Sort == "overdue")">
+
+                            Most Overdue
+
+                        </option>
+
+                        <option value="lead"
+                                selected="@(Model.Sort == "lead")">
+
+                            Lead Name A-Z
+
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- Actions -->
+
+                <div class="col-lg-3 col-md-6">
+
+                    <div class="filter-actions">
+
+                        <button type="submit"
+                                class="btn btn-primary flex-grow-1">
+
+                            <i class="bi bi-funnel-fill me-1"></i>
+
+                            Apply
+
+                        </button>
+
+
+                        <a asp-controller="SalesManager"
+                           asp-action="FollowUps"
+                           class="btn btn-light border reset-filter-btn"
+                           title="Reset Filters">
+
+                            <i class="bi bi-arrow-counterclockwise"></i>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- =====================================================
+         TABLE
+         ===================================================== -->
+
+    <div class="followup-table-card">
+
+        <div class="followup-table-header">
+
+            <div class="followup-title">
+
+                <div class="followup-title-icon">
+
+                    <i class="bi bi-calendar2-check"></i>
+
+                </div>
+
+                <div>
+
+                    <h5>
+                        Follow-up Monitor
                     </h5>
 
-                    <p class="text-muted mb-0">
-                        No Sales Officer follow-ups are available at the moment.
+                    <p>
+                        Latest follow-up activity for each lead.
                     </p>
 
                 </div>
-            }
-            else
-            {
-                <div class="table-responsive">
 
-                    <table class="table table-hover align-middle mb-0">
+            </div>
 
-                        <thead class="table-light">
 
-                            <tr>
+            <span class="count-badge">
 
-                                <th>
-                                    Lead
-                                </th>
+                <i class="bi bi-database me-1"></i>
 
-                                <th>
-                                    Sales Officer
-                                </th>
+                @Model.TotalItems
 
-                                <th>
-                                    Feedback Submitted
-                                </th>
+                @(Model.TotalItems == 1
+                    ? "Follow-up"
+                    : "Follow-ups")
 
-                                <th>
-                                    Next Follow-up
-                                </th>
-
-                                <th>
-                                    Summary
-                                </th>
-
-                                <th>
-                                    Feedback Status
-                                </th>
-
-                                <th>
-                                    Follow-up Status
-                                </th>
-
-                            </tr>
-
-                        </thead>
-
-
-                        <tbody>
-
-                            @foreach (var followUp in Model)
-                            {
-                                <tr>
-
-                                    <!-- Lead -->
-                                    <td>
-
-                                        <div class="fw-semibold">
-                                            @followUp.LeadName
-                                        </div>
-
-                                        <small class="text-muted d-block mb-2">
-                                            Lead ID: @followUp.LeadId
-                                        </small>
-
-                                        <a asp-controller="SalesManager"
-                                           asp-action="FollowUpDetails"
-                                           asp-route-id="@followUp.LeadId"
-                                           class="btn btn-sm btn-outline-primary">
-
-                                            <i class="bi bi-clock-history me-1"></i>
-
-                                            View History
-
-                                        </a>
-
-                                    </td>
-
-
-                                    <!-- Sales Officer -->
-
-                                    <td>
-
-                                        <div class="fw-semibold">
-                                            @followUp.SalesOfficerName
-                                        </div>
-
-                                    </td>
-
-
-                                    <!-- Feedback Submitted Time -->
-
-                                    <td>
-
-                                        <div class="fw-semibold">
-                                            @(followUp.SubmittedAt.ToLocalTime().ToString("dd MMM yyyy"))
-                                        </div>
-
-                                        <small class="text-muted">
-                                            @(followUp.SubmittedAt.ToLocalTime().ToString("hh:mm tt"))
-                                        </small>
-
-                                    </td>
-
-
-                                    <!-- Next Follow-up -->
-
-                                    <td>
-
-                                        <div class="fw-semibold">
-                                            @(followUp.FollowUpDate.ToLocalTime().ToString("dd MMM yyyy"))
-                                        </div>
-
-                                        <small class="text-muted">
-                                            @(followUp.FollowUpDate.ToLocalTime().ToString("hh:mm tt"))
-                                        </small>
-
-                                    </td>
-
-
-                                    <!-- Summary -->
-
-                                    <td style="min-width: 220px;">
-
-                                        <div>
-                                            @followUp.Summary
-                                        </div>
-
-                                    </td>
-
-
-                                    <!-- Feedback Status -->
-
-                                    <td>
-
-                                        <span class="badge bg-secondary">
-
-                                            @followUp.FeedbackStatus
-
-                                        </span>
-
-                                    </td>
-
-
-                                    <!-- Follow-up Status -->
-
-                                    <td>
-
-                                        @if (followUp.IsOverdue)
-                                        {
-                                            <span class="badge bg-danger">
-
-                                                <i class="bi bi-exclamation-circle me-1"></i>
-
-                                                Overdue
-
-                                            </span>
-                                        }
-                                        else if (followUp.IsDueToday)
-                                        {
-                                            <span class="badge bg-warning text-dark">
-
-                                                <i class="bi bi-clock me-1"></i>
-
-                                                Due Today
-
-                                            </span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-success">
-
-                                                <i class="bi bi-calendar-check me-1"></i>
-
-                                                Upcoming
-
-                                            </span>
-                                        }
-
-                                    </td>
-
-                                </tr>
-                            }
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-            }
+            </span>
 
         </div>
+
+
+        <div class="table-responsive">
+
+            <table class="table followup-table align-middle">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Lead
+                        </th>
+
+                        <th>
+                            Sales Officer
+                        </th>
+
+                        <th>
+                            Last Feedback
+                        </th>
+
+                        <th>
+                            Next Follow-up
+                        </th>
+
+                        <th>
+                            Summary
+                        </th>
+
+                        <th>
+                            Feedback Status
+                        </th>
+
+                        <th>
+                            Last Follow-up Timing
+                        </th>
+
+                        <th>
+                            Current Follow-up Status
+                        </th>
+
+                        <th class="text-center">
+                            Action
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    @if (!Model.FollowUps.Any())
+                    {
+                        <tr>
+
+                            <td colspan="8">
+
+                                <div class="empty-state">
+
+                                    <div class="empty-icon">
+
+                                        <i class="bi bi-calendar-x"></i>
+
+                                    </div>
+
+                                    <h6>
+                                        No Follow-ups Found
+                                    </h6>
+
+                                    <p>
+                                        Try changing your search or filter criteria.
+                                    </p>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var followUp in Model.FollowUps)
+                        {
+                            <tr>
+
+                                <!-- Lead -->
+
+                                <td>
+
+                                    <div class="lead-name">
+                                        @followUp.LeadName
+                                    </div>
+
+                                    <div class="lead-id">
+                                        Lead ID: @followUp.LeadId
+                                    </div>
+
+                                </td>
+
+
+                                <!-- Sales Officer -->
+
+                                <td>
+
+                                    <div class="officer-name">
+
+                                        <i class="bi bi-person me-1"></i>
+
+                                        @followUp.SalesOfficerName
+
+                                    </div>
+
+                                </td>
+
+
+                                <!-- Last Feedback -->
+
+                                <td>
+
+                                    <div class="date-main">
+
+                                        @followUp.SubmittedAt.ToLocalTime().ToString("dd MMM yyyy")
+
+                                    </div>
+
+                                    <div class="date-time">
+
+                                        @followUp.SubmittedAt.ToLocalTime().ToString("hh:mm tt")
+
+                                    </div>
+
+                                </td>
+
+
+                                <!-- Next Follow-up -->
+
+                                <td>
+
+                                    <div class="date-main">
+
+                                        @followUp.FollowUpDate.ToLocalTime().ToString("dd MMM yyyy")
+
+                                    </div>
+
+                                    <div class="date-time">
+
+                                        @followUp.FollowUpDate.ToLocalTime().ToString("hh:mm tt")
+
+                                    </div>
+
+                                </td>
+
+
+                                <!-- Summary -->
+
+                                <td>
+
+                                    <div class="summary-text"
+                                         title="@followUp.Summary">
+
+                                        @followUp.Summary
+
+                                    </div>
+
+                                </td>
+
+
+                                <!-- Feedback Status -->
+
+                                <td>
+
+                                    <span class="status-badge feedback-status">
+
+                                        <i class="bi bi-chat-left-text"></i>
+
+                                        @followUp.FeedbackStatus
+
+                                    </span>
+
+                                </td>
+
+
+                                <!-- Timeliness -->
+
+                                <td>
+
+                                    @if (followUp.TimelinessStatus == "On Time")
+                                    {
+                                        <span class="timeliness-badge timeliness-on-time">
+
+                                            <i class="bi bi-check-circle-fill"></i>
+
+                                            On Time
+
+                                        </span>
+                                    }
+                                    else if (followUp.TimelinessStatus == "Late")
+                                    {
+                                        <span class="timeliness-badge timeliness-late">
+
+                                            <i class="bi bi-exclamation-triangle-fill"></i>
+
+                                            Late
+
+                                        </span>
+                                    }
+                                    else if (followUp.TimelinessStatus == "Pending")
+                                    {
+                                        <span class="timeliness-badge timeliness-pending">
+
+                                            <i class="bi bi-clock-fill"></i>
+
+                                            Pending
+
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="timeliness-badge timeliness-neutral">
+
+                                            <i class="bi bi-dash-circle"></i>
+
+                                            @followUp.TimelinessStatus
+
+                                        </span>
+                                    }
+
+                                </td>
+
+
+                                <!-- Follow-up Status -->
+
+                                <td>
+
+                                    @if (followUp.IsOverdue)
+                                    {
+                                        <span class="status-badge status-overdue">
+
+                                            <i class="bi bi-exclamation-circle-fill"></i>
+
+                                            Overdue
+
+                                        </span>
+                                    }
+                                    else if (followUp.IsDueToday)
+                                    {
+                                        <span class="status-badge status-today">
+
+                                            <i class="bi bi-clock-fill"></i>
+
+                                            Due Today
+
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="status-badge status-upcoming">
+
+                                            <i class="bi bi-calendar-check-fill"></i>
+
+                                            Upcoming
+
+                                        </span>
+                                    }
+
+                                </td>
+
+
+                                <!-- Action -->
+
+                                <td class="text-center">
+
+                                    <a asp-controller="SalesManager"
+                                       asp-action="FollowUpDetails"
+                                       asp-route-id="@followUp.LeadId"
+                                       class="btn btn-sm btn-outline-primary history-btn">
+
+                                        <i class="bi bi-clock-history me-1"></i>
+
+                                        History
+
+                                    </a>
+
+                                </td>
+
+                            </tr>
+                        }
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <!-- =================================================
+             PAGINATION
+             ================================================= -->
+        @if (Model.TotalItems > 0)
+        {
+            <div class="followup-pagination">
+
+                <div class="pagination-info">
+
+                    Showing
+
+                    <strong>
+                        @(((currentPage - 1) * Model.PageSize) + 1)
+                    </strong>
+
+                    to
+
+                    <strong>
+                        @Math.Min(
+                            currentPage * Model.PageSize,
+                            Model.TotalItems)
+                    </strong>
+
+                    of
+
+                    <strong>
+                        @Model.TotalItems
+                    </strong>
+
+                    follow-ups
+
+                </div>
+
+
+                <nav aria-label="Follow-up pagination">
+
+                    <ul class="pagination mb-0">
+
+                        <!-- Previous -->
+
+                        <li class="page-item
+                            @(currentPage <= 1 ? "disabled" : "")">
+
+                            @if (currentPage > 1)
+                            {
+                                <a class="page-link"
+                                   asp-controller="SalesManager"
+                                   asp-action="FollowUps"
+                                   asp-route-page="@(currentPage - 1)"
+                                   asp-route-search="@Model.Search"
+                                   asp-route-followUpStatus="@Model.FollowUpStatus"
+                                   asp-route-feedbackStatus="@Model.FeedbackStatus"
+                                   asp-route-fromDate="@Model.FromDate?.ToString("yyyy-MM-dd")"
+                                   asp-route-toDate="@Model.ToDate?.ToString("yyyy-MM-dd")"
+                                   asp-route-sort="@Model.Sort">
+
+                                    <i class="bi bi-chevron-left"></i>
+
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="page-link">
+
+                                    <i class="bi bi-chevron-left"></i>
+
+                                </span>
+                            }
+
+                        </li>
+
+
+                        <!-- Page Numbers -->
+                        @for (
+                                                    var pageNumber = 1;
+                                                    pageNumber <= totalPages;
+                                                    pageNumber++)
+                        {
+                            <li class="page-item
+                                @(pageNumber == currentPage
+                                    ? "active"
+                                    : "")">
+
+                                <a class="page-link"
+                                   asp-controller="SalesManager"
+                                   asp-action="FollowUps"
+                                   asp-route-page="@pageNumber"
+                                   asp-route-search="@Model.Search"
+                                   asp-route-followUpStatus="@Model.FollowUpStatus"
+                                   asp-route-feedbackStatus="@Model.FeedbackStatus"
+                                   asp-route-fromDate="@Model.FromDate?.ToString("yyyy-MM-dd")"
+                                   asp-route-toDate="@Model.ToDate?.ToString("yyyy-MM-dd")"
+                                   asp-route-sort="@Model.Sort">
+
+                                    @pageNumber
+
+                                </a>
+
+                            </li>
+                        }
+
+
+                        <!-- Next -->
+
+                        <li class="page-item
+                            @(currentPage >= totalPages
+                                ? "disabled"
+                                : "")">
+
+                            @if (currentPage < totalPages)
+                            {
+                                <a class="page-link"
+                                   asp-controller="SalesManager"
+                                   asp-action="FollowUps"
+                                   asp-route-page="@(currentPage + 1)"
+                                   asp-route-search="@Model.Search"
+                                   asp-route-followUpStatus="@Model.FollowUpStatus"
+                                   asp-route-feedbackStatus="@Model.FeedbackStatus"
+                                   asp-route-fromDate="@Model.FromDate?.ToString("yyyy-MM-dd")"
+                                   asp-route-toDate="@Model.ToDate?.ToString("yyyy-MM-dd")"
+                                   asp-route-sort="@Model.Sort">
+
+                                    <i class="bi bi-chevron-right"></i>
+
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="page-link">
+
+                                    <i class="bi bi-chevron-right"></i>
+
+                                </span>
+                            }
+
+                        </li>
+
+                    </ul>
+
+                </nav>
+
+            </div>
+        }
 
     </div>
 
