@@ -926,7 +926,7 @@ namespace CRMSystem.Controllers
         // Unassigned Leads
         // =====================================================
         [HttpGet]
-        public async Task<IActionResult> UnassignedLeads()
+        public async Task<IActionResult> UnassignedLeads(UnassignedLeadFilterViewModel filter)
         {
             ViewData["Title"] =
                 "Assign Leads";
@@ -934,11 +934,35 @@ namespace CRMSystem.Controllers
             ViewData["Breadcrumb"] =
                 "Assign Leads";
 
-            var leads =
-                await _leadService
-                    .GetUnassignedLeadsAsync();
+            // =====================================================
+            // Validate Date Range
+            // =====================================================
 
-            return View(leads);
+            if (filter.FromDate.HasValue &&
+                filter.ToDate.HasValue &&
+                filter.FromDate.Value.Date >
+                filter.ToDate.Value.Date)
+            {
+                TempData["Error"] =
+                    "From Date cannot be later than To Date.";
+
+                filter.FromDate = null;
+                filter.ToDate = null;
+            }
+
+            // =====================================================
+            // Get Filtered Leads
+            // =====================================================
+
+            filter.Leads =
+                await _leadService.GetUnassignedLeadsAsync(
+                    filter.Search,
+                    filter.Source,
+                    filter.Priority,
+                    filter.FromDate,
+                    filter.ToDate);
+
+            return View(filter);
         }
 
         // =====================================================

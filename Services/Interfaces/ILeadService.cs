@@ -41,9 +41,15 @@ namespace CRMSystem.Services.Interfaces
 
         Task ReassignLeadAsync(ReassignLeadViewModel model, long salesManagerId);
 
-        Task<List<UnassignedLeadViewModel>> GetUnassignedLeadsAsync();
+        Task<List<UnassignedLeadViewModel>> GetUnassignedLeadsAsync(
+            string? search = null,
+            LeadSource? source = null,
+            LeadPriority? priority = null,
+            DateTime? fromDate = null,
+            DateTime? toDate = null
+            );
 
-    
+
 
 
 

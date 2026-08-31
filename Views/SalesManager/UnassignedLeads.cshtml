@@ -1,22 +1,402 @@
-﻿@model IEnumerable<CRMSystem.Models.ViewModels.UnassignedLeadViewModel>
+﻿@model CRMSystem.Models.ViewModels.UnassignedLeadFilterViewModel
 
 @{
     ViewData["Title"] = "Assign Leads";
     Layout = "_SalesManagerLayout";
 }
 
-<div class="container mt-4">
+<style>
 
-    <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    .assign-page {
+        padding: 1.5rem 0;
+    }
+
+    .page-header h2 {
+        color: #172033;
+        font-weight: 700;
+    }
+
+    .page-header p {
+        color: #6b7280;
+    }
+
+    .lead-count {
+        background: #edf4ff;
+        color: #2563eb;
+        border: 1px solid #dce9ff;
+        padding: .5rem .85rem;
+        border-radius: 20px;
+        font-size: .8rem;
+        font-weight: 600;
+    }
+
+    /* =========================
+           Filter Card
+           ========================= */
+
+    .filter-card {
+        background: #fff;
+        border: 1px solid #e8edf4;
+        border-radius: 12px;
+        padding: 1.2rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 3px 12px rgba(25, 42, 70, .04);
+    }
+
+    .filter-title {
+        font-size: .95rem;
+        font-weight: 700;
+        color: #172033;
+        margin-bottom: 1rem;
+    }
+
+    .filter-label {
+        font-size: .75rem;
+        font-weight: 600;
+        color: #687386;
+        margin-bottom: .4rem;
+    }
+
+    .filter-card .form-control,
+    .filter-card .form-select {
+        min-height: 42px;
+        border-radius: 8px;
+        border-color: #dfe5ed;
+        font-size: .84rem;
+    }
+
+        .filter-card .form-control:focus,
+        .filter-card .form-select:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 .18rem rgba(13, 110, 253, .08);
+        }
+
+    .filter-actions {
+        display: flex;
+        gap: .5rem;
+    }
+
+        .filter-actions .btn {
+            min-height: 42px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+    /* =========================
+           Table
+           ========================= */
+
+    .lead-table-card {
+        background: #fff;
+        border: 1px solid #e8edf4;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 3px 12px rgba(25, 42, 70, .04);
+    }
+
+    .lead-table-header {
+        padding: 1.1rem 1.2rem;
+        border-bottom: 1px solid #edf0f4;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .table-title {
+        display: flex;
+        align-items: center;
+        gap: .7rem;
+    }
+
+    .table-title-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 9px;
+        background: #edf4ff;
+        color: #2563eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .table-title h5 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #172033;
+    }
+
+    .table-title p {
+        margin: .15rem 0 0;
+        font-size: .76rem;
+        color: #7a8496;
+    }
+
+    .lead-table {
+        min-width: 1000px;
+        margin-bottom: 0;
+    }
+
+        .lead-table thead th {
+            background: #f8fafc;
+            color: #667085;
+            font-size: .68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .03em;
+            padding: .9rem .85rem;
+            border-bottom: 1px solid #e8edf4;
+            white-space: nowrap;
+        }
+
+        .lead-table tbody td {
+            padding: .9rem .85rem;
+            border-color: #edf0f4;
+            font-size: .82rem;
+            vertical-align: middle;
+        }
+
+        .lead-table tbody tr:hover {
+            background: #fbfcfe;
+        }
+
+    .lead-code {
+        font-weight: 700;
+        color: #2563eb;
+    }
+
+    .lead-name {
+        font-weight: 600;
+        color: #172033;
+    }
+
+    .company-name {
+        color: #475467;
+    }
+
+    .phone-number {
+        color: #475467;
+        white-space: nowrap;
+    }
+
+    .created-date {
+        color: #475467;
+        white-space: nowrap;
+        font-size: .78rem;
+    }
+
+    /* =========================
+       Source Badges
+       ========================= */
+
+    .source-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        padding: .34rem .65rem;
+        border-radius: 20px;
+        font-size: .68rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    /* Website */
+    .source-website {
+        color: #0891b2;
+        background: #ecfeff;
+        border: 1px solid #c9f5f8;
+    }
+
+    /* Facebook */
+    .source-facebook {
+        color: #1877f2;
+        background: #eef5ff;
+        border: 1px solid #d8e7ff;
+    }
+
+    /* LinkedIn */
+    .source-linkedin {
+        color: #6941c6;
+        background: #f4efff;
+        border: 1px solid #e5d9ff;
+    }
+
+    /* Email */
+    .source-email {
+        color: #d97706;
+        background: #fff7e8;
+        border: 1px solid #ffe4ad;
+    }
+
+    /* Referral */
+    .source-referral {
+        color: #2563eb;
+        background: #edf4ff;
+        border: 1px solid #d7e6ff;
+    }
+
+    /* Walk In */
+    .source-walkin {
+        color: #7c3aed;
+        background: #f5f3ff;
+        border: 1px solid #e4ddff;
+    }
+
+    /* Manual Entry */
+    .source-manualentry {
+        color: #475467;
+        background: #f2f4f7;
+        border: 1px solid #e4e7ec;
+    }
+
+    /* Google Form */
+    .source-googleform {
+        color: #16855b;
+        background: #edf9f3;
+        border: 1px solid #ccebdc;
+    }
+
+    /* Other */
+    .source-other {
+        color: #667085;
+        background: #f2f4f7;
+        border: 1px solid #e4e7ec;
+    }
+
+    /* =========================
+           Priority Badge
+           ========================= */
+
+    .priority-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        padding: .34rem .6rem;
+        border-radius: 20px;
+        font-size: .68rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .priority-high {
+        color: #c62828;
+        background: #fff0f1;
+        border: 1px solid #ffd5d8;
+    }
+
+    .priority-medium {
+        color: #9a6700;
+        background: #fff7e8;
+        border: 1px solid #ffe4ad;
+    }
+
+    .priority-low {
+        color: #18794e;
+        background: #edf9f3;
+        border: 1px solid #d4f0e1;
+    }
+
+    .priority-default {
+        color: #667085;
+        background: #f2f4f7;
+        border: 1px solid #e4e7ec;
+    }
+
+    /* =========================
+           Assign Button
+           ========================= */
+
+    .assign-btn {
+        border-radius: 7px;
+        font-size: .74rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    /* =========================
+           Empty State
+           ========================= */
+
+    .empty-state {
+        padding: 4rem 1.5rem;
+        text-align: center;
+    }
+
+    .empty-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #edf9f3;
+        color: #16855b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 1.5rem;
+    }
+
+    .empty-state h5 {
+        font-weight: 700;
+        color: #344054;
+    }
+
+    .empty-state p {
+        color: #98a2b3;
+        font-size: .82rem;
+    }
+
+    /* =========================
+           Responsive
+           ========================= */
+
+    @@media (max-width: 991.98px) {
+
+        .filter-actions {
+            margin-top: .25rem;
+        }
+
+            .filter-actions .btn {
+                flex: 1;
+            }
+    }
+
+    @@media (max-width: 767.98px) {
+
+        .assign-page {
+            padding: 1rem .5rem 2rem;
+        }
+
+        .page-header {
+            align-items: flex-start !important;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .lead-table-header {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: .75rem;
+        }
+    }
+
+</style>
+
+
+<div class="container-fluid assign-page">
+
+    <!-- =====================================================
+         PAGE HEADER
+         ===================================================== -->
+
+    <div class="page-header d-flex justify-content-between align-items-center mb-4">
 
         <div>
 
-            <h2 class="fw-bold mb-1">
+            <h2 class="mb-1">
                 Assign Leads
             </h2>
 
-            <p class="text-muted mb-0">
+            <p class="mb-0">
                 Leads waiting for Sales Officer assignment.
             </p>
 
@@ -24,8 +404,15 @@
 
         <div>
 
-            <span class="badge bg-primary fs-6">
-                @Model.Count() Unassigned Lead(s)
+            <span class="lead-count">
+
+                <i class="bi bi-database me-1"></i>
+
+                @Model.Leads.Count
+                @(Model.Leads.Count == 1
+                    ? "Unassigned Lead"
+                    : "Unassigned Leads")
+
             </span>
 
         </div>
@@ -33,155 +420,561 @@
     </div>
 
 
-    <!-- Leads Table -->
+    <!-- =====================================================
+         SEARCH & FILTER
+         ===================================================== -->
 
-    <div class="card shadow-sm">
+    <div class="filter-card">
 
-        <div class="card-body">
+        <div class="filter-title">
 
-            @if (!Model.Any())
-            {
-                <div class="text-center py-5">
+            <i class="bi bi-funnel me-1"></i>
 
-                    <i class="bi bi-check-circle-fill text-success"
-                       style="font-size: 50px;">
-                    </i>
+            Search & Filter Leads
 
-                    <h5 class="mt-3">
-                        No Unassigned Leads
+        </div>
+
+
+        <form asp-controller="SalesManager"
+              asp-action="UnassignedLeads"
+              method="get">
+
+            <div class="row g-3 align-items-end">
+
+                <!-- Search -->
+
+                <div class="col-xl-4 col-lg-4 col-md-6">
+
+                    <label class="filter-label">
+                        Search
+                    </label>
+
+                    <input type="text"
+                           name="Search"
+                           value="@Model.Search"
+                           class="form-control"
+                           placeholder="Lead code, name, company or phone..." />
+
+                </div>
+
+
+                <!-- Source -->
+
+                <div class="col-xl-2 col-lg-2 col-md-6">
+
+                    <label class="filter-label">
+                        Source
+                    </label>
+
+                    <select name="Source"
+                            class="form-select">
+
+                        <option value="">
+                            All Sources
+                        </option>
+
+                        @foreach (var source in
+                            Enum.GetValues<CRMSystem.Enums.LeadSource>())
+                        {
+                            <option value="@source"
+                                    selected="@(Model.Source == source)">
+
+                                @source
+
+                            </option>
+                        }
+
+                    </select>
+
+                </div>
+
+
+                <!-- Priority -->
+
+                <div class="col-xl-2 col-lg-2 col-md-6">
+
+                    <label class="filter-label">
+                        Priority
+                    </label>
+
+                    <select name="Priority"
+                            class="form-select">
+
+                        <option value="">
+                            All Priorities
+                        </option>
+
+                        @foreach (var priority in
+                            Enum.GetValues<CRMSystem.Enums.LeadPriority>())
+                        {
+                            <option value="@priority"
+                                    selected="@(Model.Priority == priority)">
+
+                                @priority
+
+                            </option>
+                        }
+
+                    </select>
+
+                </div>
+
+
+                <!-- From Date -->
+
+                <div class="col-xl-2 col-lg-2 col-md-6">
+
+                    <label class="filter-label">
+                        From Date
+                    </label>
+
+                    <input type="date"
+                           name="FromDate"
+                           value="@(Model.FromDate?.ToString("yyyy-MM-dd"))"
+                           class="form-control" />
+
+                </div>
+
+
+                <!-- To Date -->
+
+                <div class="col-xl-2 col-lg-2 col-md-6">
+
+                    <label class="filter-label">
+                        To Date
+                    </label>
+
+                    <input type="date"
+                           name="ToDate"
+                           value="@(Model.ToDate?.ToString("yyyy-MM-dd"))"
+                           class="form-control" />
+
+                </div>
+
+
+                <!-- Buttons -->
+
+                <div class="col-12">
+
+                    <div class="filter-actions justify-content-end">
+
+                        <a asp-controller="SalesManager"
+                           asp-action="UnassignedLeads"
+                           class="btn btn-light border">
+
+                            <i class="bi bi-arrow-counterclockwise me-1"></i>
+
+                            Reset
+
+                        </a>
+
+
+                        <button type="submit"
+                                class="btn btn-primary">
+
+                            <i class="bi bi-funnel-fill me-1"></i>
+
+                            Apply Filters
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- =====================================================
+         LEADS TABLE
+         ===================================================== -->
+
+    <div class="lead-table-card">
+
+        <div class="lead-table-header">
+
+            <div class="table-title">
+
+                <div class="table-title-icon">
+
+                    <i class="bi bi-person-check"></i>
+
+                </div>
+
+                <div>
+
+                    <h5>
+                        Unassigned Leads
                     </h5>
 
-                    <p class="text-muted">
-                        All available leads have already been assigned.
+                    <p>
+                        Leads currently waiting for Sales Officer assignment.
                     </p>
 
                 </div>
-            }
-            else
-            {
-                <div class="table-responsive">
 
-                    <table class="table table-hover align-middle">
+            </div>
 
-                        <thead class="table-dark">
 
+            <span class="lead-count">
+
+                <i class="bi bi-list-ul me-1"></i>
+
+                @Model.Leads.Count
+
+                @(Model.Leads.Count == 1
+                    ? "Lead"
+                    : "Leads")
+
+            </span>
+
+        </div>
+
+
+        <div class="table-responsive">
+
+            <table class="table lead-table align-middle">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Lead Code
+                        </th>
+
+                        <th>
+                            Lead Name
+                        </th>
+
+                        <th>
+                            Company
+                        </th>
+
+                        <th>
+                            Phone
+                        </th>
+
+                        <th>
+                            Source
+                        </th>
+
+                        <th>
+                            Priority
+                        </th>
+
+                        <th>
+                            Created
+                        </th>
+
+                        <th class="text-center">
+                            Action
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    @if (!Model.Leads.Any())
+                    {
+                        <tr>
+
+                            <td colspan="8">
+
+                                <div class="empty-state">
+
+                                    <div class="empty-icon">
+
+                                        <i class="bi bi-check-circle-fill"></i>
+
+                                    </div>
+
+                                    <h5>
+                                        No Unassigned Leads
+                                    </h5>
+
+                                    <p class="mb-0">
+
+                                        No leads match your current
+                                        search or filter criteria.
+
+                                    </p>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var lead in Model.Leads)
+                        {
                             <tr>
 
-                                <th>Lead Code</th>
+                                <!-- Lead Code -->
 
-                                <th>Lead Name</th>
+                                <td>
 
-                                <th>Company</th>
+                                    <div class="lead-code">
 
-                                <th>Phone</th>
+                                        @lead.LeadCode
 
-                                <th>Source</th>
+                                    </div>
 
-                                <th>Priority</th>
+                                </td>
 
-                                <th>Created</th>
 
-                                <th>Action</th>
+                                <!-- Lead Name -->
+
+                                <td>
+
+                                    <div class="lead-name">
+
+                                        @lead.LeadName
+
+                                    </div>
+
+                                </td>
+
+
+                                <!-- Company -->
+
+                                <td>
+
+                                    <div class="company-name">
+
+                                        @(lead.CompanyName ?? "-")
+
+                                    </div>
+
+                                </td>
+
+
+                                <!-- Phone -->
+
+                                <td>
+
+                                    <div class="phone-number">
+
+                                        <i class="bi bi-telephone me-1"></i>
+
+                                        @lead.Phone
+
+                                    </div>
+
+                                </td>
+
+
+                                <!-- Source -->
+
+                                <td>
+
+                                    @switch (lead.Source)
+                                    {
+                                        case CRMSystem.Enums.LeadSource.Website:
+
+                                            <span class="source-badge source-website">
+                                                <i class="bi bi-globe2"></i>
+                                                Website
+                                            </span>
+
+                                            break;
+
+
+                                        case CRMSystem.Enums.LeadSource.Facebook:
+
+                                            <span class="source-badge source-facebook">
+                                                <i class="bi bi-facebook"></i>
+                                                Facebook
+                                            </span>
+
+                                            break;
+
+
+                                        case CRMSystem.Enums.LeadSource.LinkedIn:
+
+                                            <span class="source-badge source-linkedin">
+                                                <i class="bi bi-linkedin"></i>
+                                                LinkedIn
+                                            </span>
+
+                                            break;
+
+
+                                        case CRMSystem.Enums.LeadSource.Email:
+
+                                            <span class="source-badge source-email">
+                                                <i class="bi bi-envelope-fill"></i>
+                                                Email
+                                            </span>
+
+                                            break;
+
+
+                                        case CRMSystem.Enums.LeadSource.Referral:
+
+                                            <span class="source-badge source-referral">
+                                                <i class="bi bi-people-fill"></i>
+                                                Referral
+                                            </span>
+
+                                            break;
+
+
+                                        case CRMSystem.Enums.LeadSource.WalkIn:
+
+                                            <span class="source-badge source-walkin">
+                                                <i class="bi bi-person-walking"></i>
+                                                Walk In
+                                            </span>
+
+                                            break;
+
+
+                                        case CRMSystem.Enums.LeadSource.ManualEntry:
+
+                                            <span class="source-badge source-manualentry">
+                                                <i class="bi bi-pencil-square"></i>
+                                                Manual Entry
+                                            </span>
+
+                                            break;
+
+
+                                        case CRMSystem.Enums.LeadSource.GoogleForm:
+
+                                            <span class="source-badge source-googleform">
+                                                <i class="bi bi-file-earmark-text-fill"></i>
+                                                Google Form
+                                            </span>
+
+                                            break;
+
+
+                                        case CRMSystem.Enums.LeadSource.Other:
+
+                                            <span class="source-badge source-other">
+                                                <i class="bi bi-diagram-3"></i>
+                                                Other
+                                            </span>
+
+                                            break;
+
+
+                                        default:
+
+                                            <span class="source-badge source-other">
+                                                <i class="bi bi-diagram-3"></i>
+                                                @lead.Source
+                                            </span>
+
+                                            break;
+                                    }
+
+                                </td>
+
+
+                                <!-- Priority -->
+
+                                <td>
+
+                                    @switch (lead.Priority)
+                                    {
+                                        case CRMSystem.Enums.LeadPriority.High:
+
+                                            <span class="priority-badge priority-high">
+
+                                                <i class="bi bi-arrow-up-circle-fill"></i>
+
+                                                High
+
+                                            </span>
+
+                                            break;
+
+                                        case CRMSystem.Enums.LeadPriority.Medium:
+
+                                            <span class="priority-badge priority-medium">
+
+                                                <i class="bi bi-dash-circle-fill"></i>
+
+                                                Medium
+
+                                            </span>
+
+                                            break;
+
+                                        case CRMSystem.Enums.LeadPriority.Low:
+
+                                            <span class="priority-badge priority-low">
+
+                                                <i class="bi bi-arrow-down-circle-fill"></i>
+
+                                                Low
+
+                                            </span>
+
+                                            break;
+
+                                        default:
+
+                                            <span class="priority-badge priority-default">
+
+                                                @lead.Priority
+
+                                            </span>
+
+                                            break;
+                                    }
+
+                                </td>
+
+
+                                <!-- Created -->
+
+                                <td>
+
+                                    <div class="created-date">
+
+                                        @lead.CreatedAt.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")
+
+                                    </div>
+
+                                </td>
+
+
+                                <!-- Action -->
+
+                                <td class="text-center">
+
+                                    <a asp-controller="SalesManager"
+                                       asp-action="AssignLead"
+                                       asp-route-id="@lead.LeadId"
+                                       class="btn btn-sm btn-primary assign-btn">
+
+                                        <i class="bi bi-person-check-fill me-1"></i>
+
+                                        Assign
+
+                                    </a>
+
+                                </td>
 
                             </tr>
+                        }
+                    }
 
-                        </thead>
+                </tbody>
 
-                        <tbody>
-
-                            @foreach (var lead in Model)
-                            {
-                                <tr>
-
-                                    <td>
-                                        <strong>
-                                            @lead.LeadCode
-                                        </strong>
-                                    </td>
-
-                                    <td>
-                                        @lead.LeadName
-                                    </td>
-
-                                    <td>
-                                        @(lead.CompanyName ?? "-")
-                                    </td>
-
-                                    <td>
-                                        @lead.Phone
-                                    </td>
-
-                                    <td>
-                                        @lead.Source
-                                    </td>
-
-                                    <td>
-
-                                        @switch (lead.Priority)
-                                        {
-                                            case CRMSystem.Enums.LeadPriority.High:
-
-                                                <span class="badge bg-danger">
-                                                    High
-                                                </span>
-
-                                                break;
-
-                                            case CRMSystem.Enums.LeadPriority.Medium:
-
-                                                <span class="badge bg-warning text-dark">
-                                                    Medium
-                                                </span>
-
-                                                break;
-
-                                            case CRMSystem.Enums.LeadPriority.Low:
-
-                                                <span class="badge bg-success">
-                                                    Low
-                                                </span>
-
-                                                break;
-
-                                            default:
-
-                                                <span class="badge bg-secondary">
-                                                    @lead.Priority
-                                                </span>
-
-                                                break;
-                                        }
-
-                                    </td>
-
-                                    <td>
-                                        @lead.CreatedAt.ToString("dd MMM yyyy, hh:mm tt")
-                                    </td>
-
-                                    <td>
-
-                                        <a asp-controller="SalesManager"
-                                           asp-action="AssignLead"
-                                           asp-route-id="@lead.LeadId"
-                                           class="btn btn-sm btn-primary">
-
-                                            <i class="bi bi-person-check-fill me-1"></i>
-
-                                            Assign
-
-                                        </a>
-
-                                    </td>
-
-                                </tr>
-                            }
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-            }
+            </table>
 
         </div>
 

@@ -1363,16 +1363,87 @@ namespace CRMSystem.Services
         // =========================================================
 
         public async Task<List<UnassignedLeadViewModel>>
-            GetUnassignedLeadsAsync()
+    GetUnassignedLeadsAsync(
+        string? search = null,
+        LeadSource? source = null,
+        LeadPriority? priority = null,
+        DateTime? fromDate = null,
+        DateTime? toDate = null)
         {
-            return await _context.Leads
+            var query = _context.Leads
                 .Where(l =>
-                    l.Status ==
-                        LeadStatus.New &&
+                    l.Status == LeadStatus.New &&
                     !l.IsDeleted &&
                     l.IsActive)
-                .OrderByDescending(l =>
-                    l.CreatedAt)
+                .AsQueryable();
+
+            // =====================================================
+            // Search
+            // =====================================================
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.Trim();
+
+                query = query.Where(l =>
+                    l.LeadCode.Contains(search) ||
+                    l.LeadName.Contains(search) ||
+                    (l.CompanyName != null &&
+                     l.CompanyName.Contains(search)) ||
+                    l.Phone.Contains(search));
+            }
+
+            // =====================================================
+            // Source Filter
+            // =====================================================
+
+            if (source.HasValue)
+            {
+                query = query.Where(l =>
+                    l.Source == source.Value);
+            }
+
+            // =====================================================
+            // Priority Filter
+            // =====================================================
+
+            if (priority.HasValue)
+            {
+                query = query.Where(l =>
+                    l.Priority == priority.Value);
+            }
+
+            // =====================================================
+            // From Date
+            // =====================================================
+
+            if (fromDate.HasValue)
+            {
+                var startDate = fromDate.Value.Date;
+
+                query = query.Where(l =>
+                    l.CreatedAt >= startDate);
+            }
+
+            // =====================================================
+            // To Date
+            // =====================================================
+
+            if (toDate.HasValue)
+            {
+                var endDate =
+                    toDate.Value.Date.AddDays(1);
+
+                query = query.Where(l =>
+                    l.CreatedAt < endDate);
+            }
+
+            // =====================================================
+            // Projection
+            // =====================================================
+
+            return await query
+                .OrderByDescending(l => l.CreatedAt)
                 .Select(l =>
                     new UnassignedLeadViewModel
                     {
@@ -1400,6 +1471,7 @@ namespace CRMSystem.Services
                         CreatedAt =
                             l.CreatedAt
                     })
+                .AsNoTracking()
                 .ToListAsync();
         }
 
