@@ -23,10 +23,12 @@ namespace CRMSystem.Services.Interfaces
 
         Task<LeadViewModel?> GetLeadByIdAsync(long id);
 
+        Task<LeadViewModel?> GetArchivedLeadByIdAsync(long id);
+
         Task<EditLeadViewModel?> GetLeadForEditAsync(long id);
 
         Task UpdateLeadAsync(EditLeadViewModel model);
-        Task ArchiveLeadAsync(long id);
+        Task ArchiveLeadAsync(long id, long archivedBy);
 
         Task<List<LeadViewModel>> GetArchivedLeadsAsync();
         Task RestoreLeadAsync(long id);

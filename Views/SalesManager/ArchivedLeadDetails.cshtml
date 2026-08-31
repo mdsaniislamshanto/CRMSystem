@@ -1,0 +1,990 @@
+﻿@model CRMSystem.Models.ViewModels.LeadViewModel
+
+@{
+    ViewData["Title"] = "Archived Lead Details";
+    ViewData["Breadcrumb"] = "Archived Lead Details";
+    Layout = "_SalesManagerLayout";
+}
+
+<style>
+    .archived-details-page {
+        padding: 2rem 1.5rem 3rem;
+        background: #f7f9fc;
+        min-height: calc(100vh - 70px);
+    }
+
+    .details-header {
+        margin-bottom: 1.5rem;
+    }
+
+        .details-header h2 {
+            font-size: 1.65rem;
+            font-weight: 700;
+            color: #172033;
+            margin-bottom: .35rem;
+        }
+
+        .details-header p {
+            color: #6b7280;
+            margin-bottom: 0;
+        }
+
+    .header-actions {
+        display: flex;
+        gap: .5rem;
+    }
+
+        .header-actions .btn {
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+    /* ==========================
+           Archive Banner
+           ========================== */
+
+    .archive-banner {
+        background: #fff;
+        border: 1px solid #e8edf4;
+        border-left: 4px solid #667085;
+        border-radius: 12px;
+        padding: 1rem 1.15rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 3px 12px rgba(25, 42, 70, .04);
+    }
+
+    .archive-banner-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .archive-banner-left {
+        display: flex;
+        align-items: center;
+        gap: .8rem;
+    }
+
+    .archive-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        background: #f2f4f7;
+        color: #667085;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .archive-banner-title {
+        font-weight: 700;
+        color: #172033;
+        font-size: .9rem;
+    }
+
+    .archive-banner-text {
+        color: #7a8496;
+        font-size: .76rem;
+        margin-top: .15rem;
+    }
+
+    .archived-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        padding: .4rem .7rem;
+        border-radius: 20px;
+        background: #f2f4f7;
+        color: #667085;
+        border: 1px solid #e4e7ec;
+        font-size: .7rem;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    /* ==========================
+           Main Cards
+           ========================== */
+
+    .details-card {
+        background: #fff;
+        border: 1px solid #e8edf4;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 3px 12px rgba(25, 42, 70, .04);
+        margin-bottom: 1.5rem;
+    }
+
+    .details-card-header {
+        padding: 1rem 1.15rem;
+        border-bottom: 1px solid #edf0f4;
+        display: flex;
+        align-items: center;
+        gap: .7rem;
+    }
+
+    .details-card-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        background: #edf4ff;
+        color: #2563eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .details-card-header h5 {
+        margin: 0;
+        color: #172033;
+        font-size: .95rem;
+        font-weight: 700;
+    }
+
+    .details-card-body {
+        padding: 1.2rem;
+    }
+
+    /* ==========================
+           Information Items
+           ========================== */
+
+    .info-item {
+        margin-bottom: 1rem;
+    }
+
+        .info-item:last-child {
+            margin-bottom: 0;
+        }
+
+    .info-label {
+        color: #7a8496;
+        font-size: .72rem;
+        font-weight: 600;
+        margin-bottom: .3rem;
+    }
+
+    .info-value {
+        color: #344054;
+        font-size: .84rem;
+        font-weight: 600;
+        word-break: break-word;
+    }
+
+        .info-value.muted {
+            color: #98a2b3;
+            font-weight: 400;
+        }
+
+    /* ==========================
+           Status
+           ========================== */
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        padding: .34rem .6rem;
+        border-radius: 20px;
+        font-size: .68rem;
+        font-weight: 600;
+    }
+
+    .previous-status {
+        color: #667085;
+        background: #f2f4f7;
+        border: 1px solid #e4e7ec;
+    }
+
+    .priority-high {
+        color: #c62828;
+        background: #fff0f1;
+        border: 1px solid #ffd5d8;
+    }
+
+    .priority-medium {
+        color: #a86400;
+        background: #fff7e8;
+        border: 1px solid #ffe4ad;
+    }
+
+    .priority-low {
+        color: #18794e;
+        background: #edf9f3;
+        border: 1px solid #d4f0e1;
+    }
+
+    /* ==========================
+           Archive Meta
+           ========================== */
+
+    .archive-meta-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .archive-meta-item {
+        padding: .9rem;
+        border: 1px solid #edf0f4;
+        border-radius: 9px;
+        background: #fafbfc;
+    }
+
+    .archive-meta-label {
+        color: #7a8496;
+        font-size: .7rem;
+        font-weight: 600;
+        margin-bottom: .35rem;
+    }
+
+    .archive-meta-value {
+        color: #344054;
+        font-size: .82rem;
+        font-weight: 600;
+    }
+
+    .archive-meta-time {
+        color: #98a2b3;
+        font-size: .7rem;
+        margin-top: .15rem;
+    }
+
+    /* ==========================
+           Description
+           ========================== */
+
+    .description-box {
+        background: #f8fafc;
+        border: 1px solid #edf0f4;
+        border-radius: 9px;
+        padding: .9rem;
+        color: #475467;
+        font-size: .82rem;
+        line-height: 1.6;
+        min-height: 70px;
+    }
+
+    /* ==========================
+           Bottom Actions
+           ========================== */
+
+    .restore-section {
+        background: #fff;
+        border: 1px solid #e8edf4;
+        border-radius: 12px;
+        padding: 1rem 1.15rem;
+        box-shadow: 0 3px 12px rgba(25, 42, 70, .04);
+    }
+
+    .restore-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .restore-title {
+        color: #344054;
+        font-weight: 700;
+        font-size: .85rem;
+    }
+
+    .restore-text {
+        color: #98a2b3;
+        font-size: .73rem;
+        margin-top: .15rem;
+    }
+
+    .restore-btn {
+        border-radius: 8px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    @@media (max-width: 767.98px) {
+
+        .archived-details-page {
+            padding: 1.25rem .85rem 2rem;
+        }
+
+        .details-header {
+            align-items: flex-start !important;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .header-actions {
+            width: 100%;
+        }
+
+            .header-actions .btn {
+                flex: 1;
+            }
+
+        .archive-banner-content {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .archive-meta-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .restore-content {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .restore-btn {
+            width: 100%;
+        }
+    }
+</style>
+
+
+<div class="archived-details-page">
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+
+    <div class="details-header d-flex justify-content-between align-items-center">
+
+        <div>
+
+            <h2>
+                Archived Lead Details
+            </h2>
+
+            <p>
+                View complete information and archive history for this lead.
+            </p>
+
+        </div>
+
+        <div class="header-actions">
+
+            <a asp-controller="SalesManager"
+               asp-action="ArchivedLeads"
+               class="btn btn-light border">
+
+                <i class="bi bi-arrow-left me-1"></i>
+
+                Back to Archived Leads
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         ARCHIVE STATUS BANNER
+         ===================================================== -->
+
+    <div class="archive-banner">
+
+        <div class="archive-banner-content">
+
+            <div class="archive-banner-left">
+
+                <div class="archive-icon">
+
+                    <i class="bi bi-archive-fill"></i>
+
+                </div>
+
+                <div>
+
+                    <div class="archive-banner-title">
+                        This lead is archived
+                    </div>
+
+                    <div class="archive-banner-text">
+                        This record is currently excluded from the active lead queue.
+                    </div>
+
+                </div>
+
+            </div>
+
+            <span class="archived-badge">
+
+                <i class="bi bi-archive"></i>
+
+                Archived
+
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         ARCHIVE INFORMATION
+         ===================================================== -->
+
+    <div class="details-card">
+
+        <div class="details-card-header">
+
+            <div class="details-card-icon">
+
+                <i class="bi bi-clock-history"></i>
+
+            </div>
+
+            <h5>
+                Archive Information
+            </h5>
+
+        </div>
+
+        <div class="details-card-body">
+
+            <div class="archive-meta-grid">
+
+                <!-- Archived At -->
+
+                <div class="archive-meta-item">
+
+                    <div class="archive-meta-label">
+                        Archived At
+                    </div>
+
+                    @if (Model.ArchivedAt.HasValue)
+                    {
+                        <div class="archive-meta-value">
+
+                            @Model.ArchivedAt.Value
+                            .ToLocalTime()
+                            .ToString("dd MMM yyyy")
+
+                        </div>
+
+                        <div class="archive-meta-time">
+
+                            @Model.ArchivedAt.Value
+                            .ToLocalTime()
+                            .ToString("hh:mm tt")
+
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="archive-meta-value text-muted">
+                            Not recorded
+                        </div>
+                    }
+
+                </div>
+
+
+                <!-- Archived By -->
+
+                <div class="archive-meta-item">
+
+                    <div class="archive-meta-label">
+                        Archived By
+                    </div>
+
+                    <div class="archive-meta-value">
+
+                        @if (!string.IsNullOrWhiteSpace(Model.ArchivedByName))
+                        {
+                            <i class="bi bi-person-check me-1"></i>
+
+                            @Model.ArchivedByName
+                        }
+                        else
+                        {
+                            <span class="text-muted">
+                                Unknown User
+                            </span>
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         LEAD INFORMATION
+         ===================================================== -->
+
+    <div class="details-card">
+
+        <div class="details-card-header">
+
+            <div class="details-card-icon">
+
+                <i class="bi bi-person-vcard"></i>
+
+            </div>
+
+            <h5>
+                Lead Information
+            </h5>
+
+        </div>
+
+        <div class="details-card-body">
+
+            <div class="row">
+
+                <!-- Lead Code -->
+
+                <div class="col-md-6">
+
+                    <div class="info-item">
+
+                        <div class="info-label">
+                            Lead Code
+                        </div>
+
+                        <div class="info-value">
+                            @Model.LeadCode
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Lead Name -->
+
+                <div class="col-md-6">
+
+                    <div class="info-item">
+
+                        <div class="info-label">
+                            Lead Name
+                        </div>
+
+                        <div class="info-value">
+                            @Model.LeadName
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Company -->
+
+                <div class="col-md-6">
+
+                    <div class="info-item">
+
+                        <div class="info-label">
+                            Company
+                        </div>
+
+                        <div class="info-value
+                            @(string.IsNullOrWhiteSpace(Model.CompanyName)
+                                ? "muted"
+                                : "")">
+
+                            @(string.IsNullOrWhiteSpace(Model.CompanyName)
+                                ? "Not provided"
+                                : Model.CompanyName)
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Profession -->
+
+                <div class="col-md-6">
+
+                    <div class="info-item">
+
+                        <div class="info-label">
+                            Profession
+                        </div>
+
+                        <div class="info-value
+                            @(string.IsNullOrWhiteSpace(Model.Profession)
+                                ? "muted"
+                                : "")">
+
+                            @(string.IsNullOrWhiteSpace(Model.Profession)
+                                ? "Not provided"
+                                : Model.Profession)
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Email -->
+
+                <div class="col-md-6">
+
+                    <div class="info-item">
+
+                        <div class="info-label">
+                            Email
+                        </div>
+
+                        <div class="info-value
+                            @(string.IsNullOrWhiteSpace(Model.Email)
+                                ? "muted"
+                                : "")">
+
+                            @(string.IsNullOrWhiteSpace(Model.Email)
+                                ? "Not provided"
+                                : Model.Email)
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Phone -->
+
+                <div class="col-md-6">
+
+                    <div class="info-item">
+
+                        <div class="info-label">
+                            Phone
+                        </div>
+
+                        <div class="info-value">
+                            @Model.Phone
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Address -->
+
+                <div class="col-md-6">
+
+                    <div class="info-item">
+
+                        <div class="info-label">
+                            Address
+                        </div>
+
+                        <div class="info-value
+                            @(string.IsNullOrWhiteSpace(Model.Address)
+                                ? "muted"
+                                : "")">
+
+                            @(string.IsNullOrWhiteSpace(Model.Address)
+                                ? "Not provided"
+                                : Model.Address)
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Source -->
+
+                <div class="col-md-6">
+
+                    <div class="info-item">
+
+                        <div class="info-label">
+                            Lead Source
+                        </div>
+
+                        <div class="info-value">
+                            @Model.Source
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Priority -->
+
+                <div class="col-md-6">
+
+                    <div class="info-item">
+
+                        <div class="info-label">
+                            Priority
+                        </div>
+
+                        <div>
+
+                            @switch (Model.Priority)
+                            {
+                                case CRMSystem.Enums.LeadPriority.High:
+
+                                    <span class="status-badge priority-high">
+
+                                        <i class="bi bi-exclamation-circle-fill"></i>
+
+                                        High
+
+                                    </span>
+
+                                    break;
+
+                                case CRMSystem.Enums.LeadPriority.Medium:
+
+                                    <span class="status-badge priority-medium">
+
+                                        <i class="bi bi-dash-circle-fill"></i>
+
+                                        Medium
+
+                                    </span>
+
+                                    break;
+
+                                case CRMSystem.Enums.LeadPriority.Low:
+
+                                    <span class="status-badge priority-low">
+
+                                        <i class="bi bi-check-circle-fill"></i>
+
+                                        Low
+
+                                    </span>
+
+                                    break;
+
+                                default:
+
+                                    <span class="status-badge previous-status">
+                                        @Model.Priority
+                                    </span>
+
+                                    break;
+                            }
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Previous Status -->
+
+                <div class="col-md-6">
+
+                    <div class="info-item">
+
+                        <div class="info-label">
+                            Previous Lead Status
+                        </div>
+
+                        <div>
+
+                            <span class="status-badge previous-status">
+
+                                <i class="bi bi-circle-half"></i>
+
+                                @Model.Status
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Follow Up -->
+
+                <div class="col-md-6">
+
+                    <div class="info-item">
+
+                        <div class="info-label">
+                            Follow-up Date
+                        </div>
+
+                        <div class="info-value">
+
+                            @(Model.FollowUpDate.HasValue
+                                ? Model.FollowUpDate.Value
+                                    .ToLocalTime()
+                                    .ToString("dd MMM yyyy, hh:mm tt")
+                                : "Not scheduled")
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Sales Officer -->
+
+                <div class="col-md-6">
+
+                    <div class="info-item">
+
+                        <div class="info-label">
+                            Sales Officer
+                        </div>
+
+                        <div class="info-value
+                            @(string.IsNullOrWhiteSpace(Model.AssignedOfficerName)
+                                ? "muted"
+                                : "")">
+
+                            @if (!string.IsNullOrWhiteSpace(Model.AssignedOfficerName))
+                            {
+                                <i class="bi bi-person me-1"></i>
+
+                                @Model.AssignedOfficerName
+                            }
+                            else
+                            {
+                                @:Not assigned
+                            }
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Assignment Status -->
+
+                <div class="col-md-6">
+
+                    <div class="info-item">
+
+                        <div class="info-label">
+                            Assignment Status
+                        </div>
+
+                        <div class="info-value">
+
+                            @(Model.AssignmentStatus?.ToString() ?? "Not available")
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         DESCRIPTION
+         ===================================================== -->
+
+    <div class="details-card">
+
+        <div class="details-card-header">
+
+            <div class="details-card-icon">
+
+                <i class="bi bi-card-text"></i>
+
+            </div>
+
+            <h5>
+                Description
+            </h5>
+
+        </div>
+
+        <div class="details-card-body">
+
+            <div class="description-box">
+
+                @(string.IsNullOrWhiteSpace(Model.Description)
+                    ? "No description provided for this lead."
+                    : Model.Description)
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         RESTORE
+         ===================================================== -->
+
+    <div class="restore-section">
+
+        <div class="restore-content">
+
+            <div>
+
+                <div class="restore-title">
+
+                    <i class="bi bi-arrow-counterclockwise me-1"></i>
+
+                    Restore this lead
+
+                </div>
+
+                <div class="restore-text">
+
+                    Restoring will return this lead to the active lead queue.
+
+                </div>
+
+            </div>
+
+
+            <form asp-controller="SalesManager"
+                  asp-action="RestoreLead"
+                  asp-route-id="@Model.LeadId"
+                  method="post"
+                  class="d-inline">
+
+                @Html.AntiForgeryToken()
+
+                <button type="submit"
+                        class="btn btn-success restore-btn"
+                        onclick="return confirm('Are you sure you want to restore this lead?');">
+
+                    <i class="bi bi-arrow-counterclockwise me-1"></i>
+
+                    Restore Lead
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>

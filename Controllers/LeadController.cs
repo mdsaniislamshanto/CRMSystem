@@ -3,6 +3,7 @@ using CRMSystem.Enums;
 using CRMSystem.Models.ViewModels;
 using CRMSystem.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace CRMSystem.Controllers
 {
@@ -57,6 +58,24 @@ namespace CRMSystem.Controllers
         }
 
 
+        // GET: Lead/ArchivedDetails/id
+        public async Task<IActionResult> ArchivedDetails(long id)
+        {
+            var lead =
+                await _leadService.GetArchivedLeadByIdAsync(id);
+
+            if (lead == null)
+            {
+                return NotFound();
+            }
+
+            ViewData["Title"] = "Archived Lead Details";
+            ViewData["Breadcrumb"] = "Archived Lead Details";
+
+            return View("ArchivedDetails", lead);
+        }
+
+
         // POST: Lead/Create
         [HttpPost]
         public async Task<IActionResult> Create(CreateLeadViewModel model)
@@ -107,12 +126,28 @@ namespace CRMSystem.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Archive(long id)
         {
-            await _leadService.ArchiveLeadAsync(id);
+            var userIdClaim =
+                User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            TempData["Success"] = "Lead archived successfully.";
+            if (!long.TryParse(userIdClaim, out long archivedBy))
+            {
+                TempData["Error"] =
+                    "Unable to identify the current user.";
+
+                return RedirectToAction(nameof(Index));
+            }
+
+            await _leadService.ArchiveLeadAsync(
+                id,
+                archivedBy);
+
+            TempData["Success"] =
+                "Lead archived successfully.";
 
             return RedirectToAction(nameof(Index));
         }
+
+
 
         // GET: Lead/Archived
         public async Task<IActionResult> Archived()

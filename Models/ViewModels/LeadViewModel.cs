@@ -49,5 +49,15 @@ namespace CRMSystem.Models.ViewModels
         public bool AcceptanceSLAMissed { get; set; }
 
         public string AcceptanceSLAStatus { get; set; } = "Not Assigned";
+
+        // ==========================================
+        // Archive Information
+        // ==========================================
+
+        public bool IsArchived { get; set; }
+
+        public DateTime? ArchivedAt { get; set; }
+
+        public string? ArchivedByName { get; set; }
     }
 }

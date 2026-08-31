@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using CRMSystem.Enums;
-using CRMSystem.Models.Entities;
 
 namespace CRMSystem.Models.Entities
 {
@@ -55,7 +54,22 @@ namespace CRMSystem.Models.Entities
 
         public DateTime? LastContactDate { get; set; }
 
+        // ==========================================
+        // Archive Information
+        // ==========================================
+
         public bool IsArchived { get; set; } = false;
+
+        public DateTime? ArchivedAt { get; set; }
+
+        public long? ArchivedBy { get; set; }
+
+        [ForeignKey(nameof(ArchivedBy))]
+        public User? ArchivedByUser { get; set; }
+
+        // ==========================================
+        // Created By Information
+        // ==========================================
 
         public long CreatedBy { get; set; }
 

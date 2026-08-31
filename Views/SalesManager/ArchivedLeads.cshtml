@@ -2,102 +2,811 @@
 
 @{
     ViewData["Title"] = "Archived Leads";
+    ViewData["Breadcrumb"] = "Archived Leads";
     Layout = "_SalesManagerLayout";
 }
 
-<div class="container mt-4">
+<style>
+    .archived-page {
+        padding: 2rem 1.5rem 3rem;
+        background: #f7f9fc;
+        min-height: calc(100vh - 70px);
+    }
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    .archived-header {
+        margin-bottom: 1.75rem;
+    }
+
+        .archived-header h2 {
+            font-size: 1.65rem;
+            font-weight: 700;
+            color: #172033;
+            margin-bottom: .35rem;
+        }
+
+        .archived-header p {
+            color: #6b7280;
+            margin-bottom: 0;
+        }
+
+    .archived-back-btn {
+        border-radius: 8px;
+        font-weight: 600;
+        padding: .6rem 1rem;
+    }
+
+    /* ==========================
+           Summary Card
+           ========================== */
+
+    .archive-summary-card {
+        background: #ffffff;
+        border: 1px solid #e8edf4;
+        border-radius: 12px;
+        padding: 1.15rem 1.2rem;
+        margin-bottom: 1.75rem;
+        box-shadow: 0 3px 12px rgba(25, 42, 70, .04);
+    }
+
+    .archive-summary-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .summary-label {
+        color: #7a8496;
+        font-size: .82rem;
+        margin-bottom: .35rem;
+    }
+
+    .summary-value {
+        color: #172033;
+        font-size: 1.55rem;
+        font-weight: 700;
+        line-height: 1.1;
+    }
+
+    .summary-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        background: #f2f4f7;
+        color: #667085;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+    }
+
+    /* ==========================
+           Table Card
+           ========================== */
+
+    .archive-table-card {
+        background: #ffffff;
+        border: 1px solid #e8edf4;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 3px 12px rgba(25, 42, 70, .04);
+    }
+
+    .archive-table-header {
+        padding: 1.15rem 1.2rem;
+        border-bottom: 1px solid #edf0f4;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .archive-title {
+        display: flex;
+        align-items: center;
+        gap: .7rem;
+    }
+
+    .archive-title-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 9px;
+        background: #f2f4f7;
+        color: #667085;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .archive-title h5 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #172033;
+    }
+
+    .archive-title p {
+        margin: .15rem 0 0;
+        font-size: .76rem;
+        color: #7a8496;
+    }
+
+    .archive-count-badge {
+        background: #f2f4f7;
+        color: #667085;
+        border: 1px solid #e4e7ec;
+        padding: .4rem .7rem;
+        border-radius: 20px;
+        font-size: .75rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    /* ==========================
+           Table
+           ========================== */
+
+    .archive-table {
+        min-width: 1180px;
+        margin-bottom: 0;
+    }
+
+        .archive-table thead th {
+            background: #f8fafc;
+            border-bottom: 1px solid #e8edf4;
+            color: #667085;
+            font-size: .68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .03em;
+            padding: .9rem .85rem;
+            white-space: nowrap;
+        }
+
+        .archive-table tbody td {
+            padding: .9rem .85rem;
+            border-color: #edf0f4;
+            color: #344054;
+            font-size: .82rem;
+            vertical-align: middle;
+        }
+
+        .archive-table tbody tr {
+            transition: background .15s ease;
+        }
+
+            .archive-table tbody tr:hover {
+                background: #fbfcfe;
+            }
+
+    /* ==========================
+           Lead
+           ========================== */
+
+    .lead-primary {
+        font-weight: 700;
+        color: #172033;
+        margin-bottom: .15rem;
+    }
+
+    .lead-code {
+        display: inline-block;
+        background: #f1f4f8;
+        color: #687386;
+        border-radius: 5px;
+        padding: .18rem .42rem;
+        font-size: .68rem;
+        font-weight: 600;
+    }
+
+    .company-name {
+        color: #475467;
+        font-weight: 500;
+    }
+
+    .officer-name {
+        color: #344054;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .not-available {
+        color: #98a2b3;
+        font-size: .76rem;
+        font-style: italic;
+    }
+
+    /* ==========================
+           Status Badges
+           ========================== */
+
+    .archive-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        border-radius: 20px;
+        padding: .34rem .6rem;
+        font-size: .67rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .archive-status {
+        color: #667085;
+        background: #f2f4f7;
+        border: 1px solid #e4e7ec;
+    }
+
+    .priority-high {
+        color: #c62828;
+        background: #fff0f1;
+        border: 1px solid #ffd5d8;
+    }
+
+    .priority-medium {
+        color: #a86400;
+        background: #fff7e8;
+        border: 1px solid #ffe4ad;
+    }
+
+    .priority-low {
+        color: #18794e;
+        background: #edf9f3;
+        border: 1px solid #d4f0e1;
+    }
+
+    /* ==========================
+           Archive Information
+           ========================== */
+
+    .archive-date {
+        color: #344054;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .archive-time {
+        color: #98a2b3;
+        font-size: .7rem;
+        margin-top: .1rem;
+        white-space: nowrap;
+    }
+
+    .archived-by {
+        color: #344054;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    /* ==========================
+           Actions
+           ========================== */
+
+    .archive-actions {
+        white-space: nowrap;
+        text-align: center;
+    }
+
+    .archive-action-btn {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        border-radius: 7px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 .1rem;
+        border: 1px solid transparent;
+        transition: all .15s ease;
+    }
+
+    .action-view {
+        color: #2563eb;
+        background: #edf4ff;
+        border-color: #dce9ff;
+    }
+
+        .action-view:hover {
+            background: #dce9ff;
+        }
+
+    .action-restore {
+        color: #16855b;
+        background: #edf9f3;
+        border-color: #d4f0e1;
+    }
+
+        .action-restore:hover {
+            background: #d4f0e1;
+        }
+
+    /* ==========================
+           Empty State
+           ========================== */
+
+    .archive-empty {
+        padding: 4rem 1.5rem;
+        text-align: center;
+    }
+
+    .empty-icon {
+        width: 58px;
+        height: 58px;
+        border-radius: 50%;
+        background: #edf9f3;
+        color: #16855b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 1.4rem;
+    }
+
+    .archive-empty h6 {
+        font-weight: 700;
+        color: #344054;
+        margin-bottom: .35rem;
+    }
+
+    .archive-empty p {
+        color: #98a2b3;
+        font-size: .82rem;
+        margin-bottom: 0;
+    }
+
+    /* ==========================
+           Responsive
+           ========================== */
+
+    @@media (max-width: 767.98px) {
+
+        .archived-page {
+            padding: 1.25rem .85rem 2rem;
+        }
+
+        .archived-header {
+            align-items: flex-start !important;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .archived-back-btn {
+            width: 100%;
+        }
+
+        .archive-table-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .archive-count-badge {
+            align-self: flex-start;
+        }
+
+        .archive-table-card {
+            overflow-x: auto;
+        }
+    }
+</style>
+
+
+<div class="archived-page">
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+
+    <div class="archived-header d-flex justify-content-between align-items-center">
 
         <div>
-            <h2 class="fw-bold mb-1">Archived Leads</h2>
 
-            <p class="text-muted mb-0">
-                View all archived leads.
+            <h2>
+                Archived Leads
+            </h2>
+
+            <p>
+                Review archived leads and restore them when necessary.
             </p>
+
         </div>
 
-        <a asp-action="LeadQueue" class="btn btn-secondary">
-            <i class="bi bi-arrow-left"></i>
+        <a asp-action="LeadQueue"
+           class="btn btn-light border archived-back-btn">
+
+            <i class="bi bi-arrow-left me-1"></i>
+
             Back to Leads
+
         </a>
 
     </div>
 
-    <table class="table table-bordered table-hover">
 
-        <thead class="table-dark">
-            <tr>
-                <th>Lead Code</th>
-                <th>Lead Name</th>
-                <th>Company</th>
-                <th>Phone</th>
-                <th>Status</th>
-                <th>Priority</th>
-                <th width="180">Actions</th>
-            </tr>
-        </thead>
+    <!-- =====================================================
+         SUMMARY
+         ===================================================== -->
 
-        <tbody>
+    <div class="archive-summary-card">
 
-            @if (!Model.Any())
-            {
-                <tr>
-                    <td colspan="7" class="text-center">
-                        No archived leads found.
-                    </td>
-                </tr>
-            }
-            else
-            {
-                foreach (var lead in Model)
-                {
+        <div class="archive-summary-content">
+
+            <div>
+
+                <div class="summary-label">
+                    Total Archived Leads
+                </div>
+
+                <div class="summary-value">
+                    @Model.Count()
+                </div>
+
+            </div>
+
+            <div class="summary-icon">
+
+                <i class="bi bi-archive-fill"></i>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         TABLE
+         ===================================================== -->
+
+    <div class="archive-table-card">
+
+        <div class="archive-table-header">
+
+            <div class="archive-title">
+
+                <div class="archive-title-icon">
+
+                    <i class="bi bi-archive"></i>
+
+                </div>
+
+                <div>
+
+                    <h5>
+                        Archived Lead Records
+                    </h5>
+
+                    <p>
+                        Historical lead records currently removed from the active queue.
+                    </p>
+
+                </div>
+
+            </div>
+
+            <span class="archive-count-badge">
+
+                <i class="bi bi-database me-1"></i>
+
+                @Model.Count()
+
+                @(Model.Count() == 1
+                    ? "Lead"
+                    : "Leads")
+
+            </span>
+
+        </div>
+
+
+        <div class="table-responsive">
+
+            <table class="table archive-table align-middle">
+
+                <thead>
+
                     <tr>
 
-                        <td>@lead.LeadCode</td>
-                        <td>@lead.LeadName</td>
-                        <td>@lead.CompanyName</td>
-                        <td>@lead.Phone</td>
+                        <th>
+                            Lead
+                        </th>
 
-                        <td>@lead.Status</td>
+                        <th>
+                            Company
+                        </th>
 
-                        <td>@lead.Priority</td>
+                        <th>
+                            Sales Officer
+                        </th>
 
-                        <td>
+                        <th>
+                            Previous Status
+                        </th>
 
-                            <a asp-action="Details"
-                               asp-route-id="@lead.LeadId"
-                               class="btn btn-sm btn-info text-white">
+                        <th>
+                            Priority
+                        </th>
 
-                                <i class="bi bi-eye"></i>
+                        <th>
+                            Archived At
+                        </th>
 
-                            </a>
+                        <th>
+                            Archived By
+                        </th>
 
-                            <form asp-action="RestoreLead"
-                                  asp-route-id="@lead.LeadId"
-                                  method="post"
-                                  class="d-inline">
-
-                                @Html.AntiForgeryToken()
-
-                                <button type="submit"
-                                        class="btn btn-sm btn-success"
-                                        onclick="return confirm('Are you sure you want to restore this lead?');">
-
-                                    <i class="bi bi-arrow-counterclockwise"></i>
-
-                                </button>
-
-                            </form>
-
-                        </td>
+                        <th class="text-center">
+                            Actions
+                        </th>
 
                     </tr>
-                }
-            }
 
-        </tbody>
+                </thead>
 
-    </table>
+
+                <tbody>
+
+                    @if (!Model.Any())
+                    {
+                        <tr>
+
+                            <td colspan="8">
+
+                                <div class="archive-empty">
+
+                                    <div class="empty-icon">
+
+                                        <i class="bi bi-check-circle-fill"></i>
+
+                                    </div>
+
+                                    <h6>
+                                        No Archived Leads
+                                    </h6>
+
+                                    <p>
+                                        There are currently no archived lead records.
+                                    </p>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var lead in Model)
+                        {
+                            <tr>
+
+                                <!-- Lead -->
+
+                                <td>
+
+                                    <div class="lead-primary">
+                                        @lead.LeadName
+                                    </div>
+
+                                    <span class="lead-code">
+                                        @lead.LeadCode
+                                    </span>
+
+                                </td>
+
+
+                                <!-- Company -->
+
+                                <td>
+
+                                    @if (!string.IsNullOrWhiteSpace(lead.CompanyName))
+                                    {
+                                        <span class="company-name">
+                                            @lead.CompanyName
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="not-available">
+                                            Not provided
+                                        </span>
+                                    }
+
+                                </td>
+
+
+                                <!-- Sales Officer -->
+
+                                <td>
+
+                                    @if (!string.IsNullOrWhiteSpace(lead.AssignedOfficerName))
+                                    {
+                                        <div class="officer-name">
+
+                                            <i class="bi bi-person me-1"></i>
+
+                                            @lead.AssignedOfficerName
+
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="not-available">
+                                            Not assigned
+                                        </span>
+                                    }
+
+                                </td>
+
+
+                                <!-- Previous Status -->
+
+                                <td>
+
+                                    <span class="archive-badge archive-status">
+
+                                        <i class="bi bi-circle-half"></i>
+
+                                        @lead.Status
+
+                                    </span>
+
+                                </td>
+
+
+                                <!-- Priority -->
+
+                                <td>
+
+                                    @switch (lead.Priority)
+                                    {
+                                        case CRMSystem.Enums.LeadPriority.High:
+
+                                            <span class="archive-badge priority-high">
+
+                                                <i class="bi bi-exclamation-circle-fill"></i>
+
+                                                High
+
+                                            </span>
+
+                                            break;
+
+                                        case CRMSystem.Enums.LeadPriority.Medium:
+
+                                            <span class="archive-badge priority-medium">
+
+                                                <i class="bi bi-dash-circle-fill"></i>
+
+                                                Medium
+
+                                            </span>
+
+                                            break;
+
+                                        case CRMSystem.Enums.LeadPriority.Low:
+
+                                            <span class="archive-badge priority-low">
+
+                                                <i class="bi bi-check-circle-fill"></i>
+
+                                                Low
+
+                                            </span>
+
+                                            break;
+
+                                        default:
+
+                                            <span class="archive-badge archive-status">
+                                                @lead.Priority
+                                            </span>
+
+                                            break;
+                                    }
+
+                                </td>
+
+
+                                <!-- Archived At -->
+
+                                <td>
+
+                                    @if (lead.ArchivedAt.HasValue)
+                                    {
+                                        <div class="archive-date">
+
+                                            @lead.ArchivedAt.Value.ToLocalTime().ToString("dd MMM yyyy")
+
+                                        </div>
+
+                                        <div class="archive-time">
+
+                                            @lead.ArchivedAt.Value.ToLocalTime().ToString("hh:mm tt")
+
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="not-available">
+                                            Not recorded
+                                        </span>
+                                    }
+
+                                </td>
+
+
+                                <!-- Archived By -->
+
+                                <td>
+
+                                    @if (!string.IsNullOrWhiteSpace(lead.ArchivedByName))
+                                    {
+                                        <div class="archived-by">
+
+                                            <i class="bi bi-person-check me-1"></i>
+
+                                            @lead.ArchivedByName
+
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="not-available">
+                                            Unknown User
+                                        </span>
+                                    }
+
+                                </td>
+
+
+                                <!-- Actions -->
+
+                                <td class="archive-actions">
+
+                                    <!-- View -->
+
+                                    <a asp-controller="SalesManager"
+                                       asp-action="ArchivedLeadDetails"
+                                       asp-route-id="@lead.LeadId"
+                                       class="btn btn-sm btn-primary"
+                                       title="View Archived Lead">
+
+                                        <i class="bi bi-eye"></i>
+
+                                    </a>
+
+
+                                    <!-- Restore -->
+
+                                    <form asp-action="RestoreLead"
+                                          asp-route-id="@lead.LeadId"
+                                          method="post"
+                                          class="d-inline">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <button type="submit"
+                                                class="archive-action-btn action-restore"
+                                                title="Restore Lead"
+                                                onclick="return confirm('Are you sure you want to restore this lead?');">
+
+                                            <i class="bi bi-arrow-counterclockwise"></i>
+
+                                        </button>
+
+                                    </form>
+
+                                </td>
+
+                            </tr>
+                        }
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
 
 </div>

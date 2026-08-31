@@ -5,6 +5,7 @@ using CRMSystem.Services;
 using CRMSystem.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace CRMSystem.Controllers
 {
@@ -668,17 +669,27 @@ namespace CRMSystem.Controllers
         // ==========================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ArchiveLead(
-            long id)
+        public async Task<IActionResult> Archive(long id)
         {
-            await _leadService
-                .ArchiveLeadAsync(id);
+            var userIdClaim =
+                User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!long.TryParse(userIdClaim, out long archivedBy))
+            {
+                TempData["Error"] =
+                    "Unable to identify the current user.";
+
+                return RedirectToAction(nameof(LeadQueue));
+            }
+
+            await _leadService.ArchiveLeadAsync(
+                id,
+                archivedBy);
 
             TempData["Success"] =
                 "Lead archived successfully.";
 
-            return RedirectToAction(
-                nameof(LeadQueue));
+            return RedirectToAction(nameof(LeadQueue));
         }
 
         // ==========================
@@ -699,6 +710,29 @@ namespace CRMSystem.Controllers
 
             return View(leads);
         }
+
+
+        // =========================================================
+        // ARCHIVED LEAD DETAILS
+        // =========================================================
+
+        [HttpGet]
+        public async Task<IActionResult> ArchivedLeadDetails(long id)
+        {
+            var lead = await _leadService.GetArchivedLeadByIdAsync(id);
+
+            if (lead == null)
+            {
+                return NotFound();
+            }
+
+            ViewData["Title"] = "Archived Lead Details";
+            ViewData["Breadcrumb"] = "Archived Lead Details";
+
+            return View(lead);
+        }
+
+
 
         // ==========================
         // Restore Lead

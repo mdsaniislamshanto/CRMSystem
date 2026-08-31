@@ -13,6 +13,8 @@
 
         public int CompletedToday { get; set; }
 
+        public int NewLeadsToday { get; set; }
+
         // ==========================
         // Action Center
         // ==========================

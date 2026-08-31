@@ -633,6 +633,125 @@ namespace CRMSystem.Services
 
 
         // =========================================================
+        // GET ARCHIVED LEAD DETAILS
+        // =========================================================
+
+        public async Task<LeadViewModel?> GetArchivedLeadByIdAsync(long id)
+        {
+            return await _context.Leads
+                .Where(l =>
+                    l.LeadId == id &&
+                    l.IsArchived &&
+                    !l.IsDeleted)
+                .Select(l => new LeadViewModel
+                {
+                    LeadId = l.LeadId,
+
+                    LeadCode = l.LeadCode,
+
+                    CompanyName = l.CompanyName,
+
+                    LeadName = l.LeadName,
+
+                    Profession = l.Profession,
+
+                    Email = l.Email,
+
+                    Phone = l.Phone,
+
+                    Address = l.Address,
+
+                    Source = l.Source,
+
+                    Priority = l.Priority,
+
+                    Status = l.Status,
+
+                    Description = l.Description,
+
+                    FollowUpDate = l.FollowUpDate,
+
+                    // ==========================================
+                    // Archive Information
+                    // ==========================================
+
+                    IsArchived = l.IsArchived,
+
+                    ArchivedAt = l.ArchivedAt,
+
+                    ArchivedByName = _context.Users
+                        .Where(u => u.UserId == l.ArchivedBy)
+                        .Select(u => u.FullName)
+                        .FirstOrDefault(),
+
+                    // ==========================================
+                    // Assignment Information
+                    // ==========================================
+
+                    AssignedOfficerName =
+                        _context.LeadAssignments
+                            .Where(a =>
+                                a.LeadId == l.LeadId &&
+                                a.IsActive &&
+                                !a.IsDeleted)
+                            .OrderByDescending(a => a.AssignedAt)
+                            .Select(a =>
+                                a.SalesOfficer != null
+                                    ? a.SalesOfficer.FullName
+                                    : null)
+                            .FirstOrDefault(),
+
+                    AssignedAt =
+                        _context.LeadAssignments
+                            .Where(a =>
+                                a.LeadId == l.LeadId &&
+                                a.IsActive &&
+                                !a.IsDeleted)
+                            .OrderByDescending(a => a.AssignedAt)
+                            .Select(a =>
+                                (DateTime?)a.AssignedAt)
+                            .FirstOrDefault(),
+
+                    AcceptedAt =
+                        _context.LeadAssignments
+                            .Where(a =>
+                                a.LeadId == l.LeadId &&
+                                a.IsActive &&
+                                !a.IsDeleted)
+                            .OrderByDescending(a => a.AssignedAt)
+                            .Select(a =>
+                                a.AcceptedAt)
+                            .FirstOrDefault(),
+
+                    AssignmentStatus =
+                        _context.LeadAssignments
+                            .Where(a =>
+                                a.LeadId == l.LeadId &&
+                                a.IsActive &&
+                                !a.IsDeleted)
+                            .OrderByDescending(a => a.AssignedAt)
+                            .Select(a =>
+                                (AssignmentStatus?)
+                                a.AssignmentStatus)
+                            .FirstOrDefault(),
+
+                    AcceptanceSLAMissed =
+                        _context.LeadAssignments
+                            .Where(a =>
+                                a.LeadId == l.LeadId &&
+                                a.IsActive &&
+                                !a.IsDeleted)
+                            .OrderByDescending(a => a.AssignedAt)
+                            .Select(a =>
+                                a.AcceptanceSLAMissed)
+                            .FirstOrDefault()
+                })
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+        }
+
+
+        // =========================================================
         // EDIT
         // =========================================================
 
@@ -717,13 +836,18 @@ namespace CRMSystem.Services
 
 
         // =========================================================
-        // ARCHIVE
+        // ARCHIVE 
         // =========================================================
 
-        public async Task ArchiveLeadAsync(long id)
+        public async Task ArchiveLeadAsync(
+            long id,
+            long archivedBy)
         {
             var lead =
-                await _context.Leads.FindAsync(id);
+                await _context.Leads
+                    .FirstOrDefaultAsync(l =>
+                        l.LeadId == id &&
+                        !l.IsDeleted);
 
             if (lead == null ||
                 lead.IsArchived)
@@ -731,7 +855,21 @@ namespace CRMSystem.Services
                 return;
             }
 
+            // -----------------------------------------------------
+            // Archive Lead
+            // -----------------------------------------------------
+
             lead.IsArchived = true;
+
+            // -----------------------------------------------------
+            // Archive Metadata
+            // -----------------------------------------------------
+
+            lead.ArchivedAt =
+                DateTime.UtcNow;
+
+            lead.ArchivedBy =
+                archivedBy;
 
             await _context.SaveChangesAsync();
         }
@@ -750,31 +888,59 @@ namespace CRMSystem.Services
                 .Select(l => new LeadViewModel
                 {
                     LeadId = l.LeadId,
+
                     LeadCode = l.LeadCode,
+
                     CompanyName = l.CompanyName,
+
                     LeadName = l.LeadName,
+
                     Profession = l.Profession,
+
                     Email = l.Email,
+
                     Phone = l.Phone,
+
                     Address = l.Address,
+
                     Source = l.Source,
+
                     Priority = l.Priority,
+
                     Status = l.Status,
+
                     Description = l.Description,
-                    FollowUpDate = l.FollowUpDate
+
+                    FollowUpDate = l.FollowUpDate,
+
+                    // ==========================================
+                    // Archive Information
+                    // ==========================================
+
+                    IsArchived = l.IsArchived,
+
+                    ArchivedAt = l.ArchivedAt,
+
+                    ArchivedByName = _context.Users
+                        .Where(u => u.UserId == l.ArchivedBy)
+                        .Select(u => u.FullName)
+                        .FirstOrDefault()
                 })
+                .OrderByDescending(l => l.ArchivedAt)
                 .ToListAsync();
         }
 
-
         // =========================================================
-        // RESTORE
+        // RESTORE Leads
         // =========================================================
 
         public async Task RestoreLeadAsync(long id)
         {
             var lead =
-                await _context.Leads.FindAsync(id);
+                await _context.Leads
+                    .FirstOrDefaultAsync(l =>
+                        l.LeadId == id &&
+                        !l.IsDeleted);
 
             if (lead == null ||
                 !lead.IsArchived)
@@ -782,7 +948,19 @@ namespace CRMSystem.Services
                 return;
             }
 
+            // -----------------------------------------------------
+            // Restore Lead
+            // -----------------------------------------------------
+
             lead.IsArchived = false;
+
+            // -----------------------------------------------------
+            // Clear Current Archive Metadata
+            // -----------------------------------------------------
+
+            lead.ArchivedAt = null;
+
+            lead.ArchivedBy = null;
 
             await _context.SaveChangesAsync();
         }
