@@ -29,5 +29,25 @@ namespace CRMSystem.Models.ViewModels
         public string? Description { get; set; }
 
         public DateTime? FollowUpDate { get; set; }
+
+        // ==========================================
+        // Active Assignment Information
+        // ==========================================
+
+        public string? AssignedOfficerName { get; set; }
+
+        public DateTime? AssignedAt { get; set; }
+
+        public DateTime? AcceptedAt { get; set; }
+
+        public AssignmentStatus? AssignmentStatus { get; set; }
+
+        // ==========================================
+        // Acceptance SLA Information
+        // ==========================================
+
+        public bool AcceptanceSLAMissed { get; set; }
+
+        public string AcceptanceSLAStatus { get; set; } = "Not Assigned";
     }
 }

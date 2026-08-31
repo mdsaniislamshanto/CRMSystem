@@ -5,102 +5,1013 @@
     Layout = "_SalesManagerLayout";
 }
 
-<div class="container-fluid">
+<style>
+    /* =========================================================
+           Sales Manager - Lead Details
+           UI Only - No Functional Changes
+           ========================================================= */
 
-    <div class="row justify-content-center">
+    .lead-details-page {
+        padding: 1.5rem 1.25rem 3rem;
+        background: #f7f9fc;
+        min-height: calc(100vh - 70px);
+    }
 
-        <div class="col-lg-10">
+    /* Page Header */
+    .lead-page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
 
-            <div class="card shadow-sm border-0">
+    .lead-page-title {
+        margin: 0;
+        font-size: 1.7rem;
+        font-weight: 700;
+        color: #172033;
+        letter-spacing: -0.02em;
+    }
 
-                <div class="card-header">
+    .lead-page-subtitle {
+        margin: 0.35rem 0 0;
+        color: #718096;
+        font-size: 0.9rem;
+    }
 
-                    <h4 class="mb-0">
-                        Lead Details
-                    </h4>
+    .lead-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        flex-shrink: 0;
+    }
 
-                </div>
+        .lead-header-actions .btn {
+            border-radius: 8px;
+            padding: 0.55rem 0.9rem;
+            font-size: 0.84rem;
+            font-weight: 600;
+        }
 
-                <div class="card-body">
+    /* Main Card */
+    .lead-main-card {
+        background: #ffffff;
+        border: 1px solid #e7ebf2;
+        border-radius: 14px;
+        box-shadow: 0 3px 14px rgba(31, 41, 55, 0.05);
+        overflow: hidden;
+    }
 
-                    <div class="row">
+    /* Hero */
+    .lead-hero {
+        padding: 1.4rem 1.5rem;
+        border-bottom: 1px solid #edf0f5;
+        background: #ffffff;
+    }
 
-                        <div class="col-md-6 mb-3">
-                            <label class="fw-bold">Lead Code</label>
-                            <p>@Model.LeadCode</p>
+    .lead-hero-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1.5rem;
+    }
+
+    .lead-identity {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        min-width: 0;
+    }
+
+    .lead-avatar {
+        width: 52px;
+        height: 52px;
+        min-width: 52px;
+        border-radius: 13px;
+        background: #eaf2ff;
+        color: #1769e0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+    }
+
+    .lead-name {
+        margin: 0;
+        color: #172033;
+        font-size: 1.2rem;
+        font-weight: 700;
+        line-height: 1.3;
+    }
+
+    .lead-code {
+        margin-top: 0.3rem;
+        color: #7a8699;
+        font-size: 0.82rem;
+    }
+
+    .lead-hero-badges {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 0.45rem;
+    }
+
+    /* Badges */
+    .lead-status-badge,
+    .lead-priority-badge,
+    .lead-source-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.42rem 0.7rem;
+        border-radius: 7px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .lead-status-badge {
+        background: #e9f8f0;
+        color: #198754;
+    }
+
+    .lead-priority-badge {
+        background: #fff6df;
+        color: #a46b00;
+    }
+
+    .lead-source-badge {
+        background: #eef3ff;
+        color: #526bc4;
+    }
+
+    /* Section */
+    .lead-section {
+        padding: 1.45rem 1.5rem;
+        border-bottom: 1px solid #edf0f5;
+    }
+
+        .lead-section:last-of-type {
+            border-bottom: 0;
+        }
+
+    .lead-section-header {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        margin-bottom: 1.15rem;
+    }
+
+    .lead-section-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #eef4ff;
+        color: #1769e0;
+        font-size: 0.95rem;
+    }
+
+    .lead-section-title {
+        margin: 0;
+        color: #202938;
+        font-size: 1rem;
+        font-weight: 700;
+    }
+
+    .lead-section-subtitle {
+        margin: 0.15rem 0 0;
+        color: #8993a3;
+        font-size: 0.76rem;
+    }
+
+    /* Information Grid */
+    .lead-info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.85rem;
+    }
+
+    .lead-info-item {
+        padding: 0.95rem 1rem;
+        border: 1px solid #edf0f5;
+        border-radius: 10px;
+        background: #fafbfd;
+        transition: all 0.2s ease;
+    }
+
+        .lead-info-item:hover {
+            border-color: #dce5f2;
+            background: #ffffff;
+            box-shadow: 0 3px 10px rgba(31, 41, 55, 0.04);
+        }
+
+    .lead-info-label {
+        display: block;
+        margin-bottom: 0.35rem;
+        color: #7b8798;
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .lead-info-value {
+        margin: 0;
+        color: #263244;
+        font-size: 0.9rem;
+        font-weight: 600;
+        word-break: break-word;
+    }
+
+        .lead-info-value a {
+            color: #1769e0;
+            text-decoration: none;
+        }
+
+            .lead-info-value a:hover {
+                text-decoration: underline;
+            }
+
+    /* Contact Cards */
+    .lead-contact-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.85rem;
+    }
+
+    .lead-contact-card {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        padding: 1rem;
+        border: 1px solid #edf0f5;
+        border-radius: 10px;
+        background: #ffffff;
+    }
+
+    .lead-contact-icon {
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
+        border-radius: 9px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f0f5ff;
+        color: #1769e0;
+    }
+
+    .lead-contact-label {
+        margin: 0 0 0.18rem;
+        color: #8791a1;
+        font-size: 0.72rem;
+    }
+
+    .lead-contact-value {
+        margin: 0;
+        color: #263244;
+        font-size: 0.88rem;
+        font-weight: 600;
+        word-break: break-word;
+    }
+
+    /* Follow-up Highlight */
+    .lead-followup-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1rem 1.1rem;
+        border: 1px solid #e5eaf2;
+        border-radius: 11px;
+        background: #f9fbff;
+    }
+
+    .lead-followup-left {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+    }
+
+    .lead-followup-icon {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #edf4ff;
+        color: #1769e0;
+    }
+
+    .lead-followup-label {
+        margin: 0 0 0.2rem;
+        color: #7b8798;
+        font-size: 0.73rem;
+    }
+
+    .lead-followup-value {
+        margin: 0;
+        color: #202938;
+        font-size: 0.92rem;
+        font-weight: 700;
+    }
+
+    /* Text Blocks */
+    .lead-text-block {
+        padding: 1rem 1.1rem;
+        border: 1px solid #edf0f5;
+        border-radius: 10px;
+        background: #fafbfd;
+    }
+
+    .lead-text-label {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        margin-bottom: 0.55rem;
+        color: #687487;
+        font-size: 0.74rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .lead-text-content {
+        margin: 0;
+        color: #354052;
+        font-size: 0.9rem;
+        line-height: 1.7;
+        white-space: pre-line;
+        word-break: break-word;
+    }
+
+    .lead-empty-value {
+        color: #9aa3b1;
+        font-weight: 500;
+        font-style: italic;
+    }
+
+    /* Footer Actions */
+    .lead-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1.2rem 1.5rem;
+        background: #fafbfd;
+        border-top: 1px solid #edf0f5;
+    }
+
+    .lead-footer-note {
+        color: #8a94a4;
+        font-size: 0.76rem;
+    }
+
+    .lead-footer-actions {
+        display: flex;
+        gap: 0.6rem;
+    }
+
+        .lead-footer-actions .btn {
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 0.55rem 0.9rem;
+        }
+
+    /* Responsive */
+    @@media (max-width: 991.98px) {
+        .lead-details-page {
+            padding: 1.25rem 1rem 2.5rem;
+        }
+
+        .lead-page-header {
+            align-items: flex-start;
+        }
+
+        .lead-hero-content {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .lead-hero-badges {
+            justify-content: flex-start;
+        }
+    }
+
+    @@media (max-width: 767.98px) {
+        .lead-page-header {
+            flex-direction: column;
+        }
+
+        .lead-header-actions {
+            width: 100%;
+        }
+
+            .lead-header-actions .btn {
+                flex: 1;
+            }
+
+        .lead-info-grid,
+        .lead-contact-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .lead-section,
+        .lead-hero,
+        .lead-footer {
+            padding: 1.15rem;
+        }
+
+        .lead-footer {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .lead-footer-actions {
+            width: 100%;
+        }
+
+            .lead-footer-actions .btn {
+                flex: 1;
+            }
+
+        .lead-followup-card {
+            align-items: flex-start;
+        }
+    }
+
+    @@media (max-width: 575.98px) {
+        .lead-details-page {
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+        }
+
+        .lead-page-title {
+            font-size: 1.45rem;
+        }
+
+        .lead-name {
+            font-size: 1.05rem;
+        }
+
+        .lead-avatar {
+            width: 46px;
+            height: 46px;
+            min-width: 46px;
+        }
+
+        .lead-identity {
+            gap: 0.75rem;
+        }
+
+        .lead-hero-badges {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="lead-details-page">
+
+    <!-- =====================================================
+         Page Header
+         ===================================================== -->
+    <div class="lead-page-header">
+
+        <div>
+            <h1 class="lead-page-title">
+                Lead Details
+            </h1>
+
+            <p class="lead-page-subtitle">
+                View complete information and current details of this lead.
+            </p>
+        </div>
+
+        <div class="lead-header-actions">
+
+            <a asp-action="LeadQueue"
+               class="btn btn-light border">
+
+                <i class="bi bi-arrow-left me-1"></i>
+                Back to Leads
+
+            </a>
+
+            <a asp-action="EditLead"
+               asp-route-id="@Model.LeadId"
+               class="btn btn-primary">
+
+                <i class="bi bi-pencil-square me-1"></i>
+                Edit Lead
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         Main Lead Card
+         ===================================================== -->
+    <div class="lead-main-card">
+
+        <!-- =================================================
+             Lead Hero
+             ================================================= -->
+        <div class="lead-hero">
+
+            <div class="lead-hero-content">
+
+                <div class="lead-identity">
+
+                    <div class="lead-avatar">
+                        <i class="bi bi-person"></i>
+                    </div>
+
+                    <div>
+
+                        <h2 class="lead-name">
+                            @Model.LeadName
+                        </h2>
+
+                        <div class="lead-code">
+                            <i class="bi bi-hash me-1"></i>
+                            @Model.LeadCode
                         </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label class="fw-bold">Lead Name</label>
-                            <p>@Model.LeadName</p>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label class="fw-bold">Company</label>
-                            <p>@Model.CompanyName</p>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label class="fw-bold">Phone</label>
-                            <p>@Model.Phone</p>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label class="fw-bold">Email</label>
-                            <p>@Model.Email</p>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label class="fw-bold">Profession</label>
-                            <p>@Model.Profession</p>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label class="fw-bold">Source</label>
-                            <p>@Model.Source</p>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label class="fw-bold">Priority</label>
-                            <p>@Model.Priority</p>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label class="fw-bold">Status</label>
-                            <p>@Model.Status</p>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label class="fw-bold">Follow-up Date</label>
-                            <p>@Model.FollowUpDate</p>
-                        </div>
-
-                        <div class="col-12 mb-3">
-                            <label class="fw-bold">Address</label>
-                            <p>@Model.Address</p>
-                        </div>
-
-                        <div class="col-12 mb-3">
-                            <label class="fw-bold">Description</label>
-                            <p>@Model.Description</p>
-                        </div>
-
-                       
 
                     </div>
 
-                    <hr />
+                </div>
 
-                    <a asp-action="LeadQueue"
-                       class="btn btn-secondary">
 
-                        <i class="bi bi-arrow-left"></i>
+                <div class="lead-hero-badges">
 
-                        Back to Lead Queue
+                    <span class="lead-status-badge">
+                        <i class="bi bi-circle-fill"></i>
+                        @Model.Status
+                    </span>
 
-                    </a>
+                    <span class="lead-priority-badge">
+                        <i class="bi bi-flag-fill"></i>
+                        @Model.Priority
+                    </span>
+
+                    <span class="lead-source-badge">
+                        <i class="bi bi-broadcast"></i>
+                        @Model.Source
+                    </span>
 
                 </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             Basic Information
+             ================================================= -->
+        <div class="lead-section">
+
+            <div class="lead-section-header">
+
+                <div class="lead-section-icon">
+                    <i class="bi bi-person-vcard"></i>
+                </div>
+
+                <div>
+                    <h3 class="lead-section-title">
+                        Basic Information
+                    </h3>
+
+                    <p class="lead-section-subtitle">
+                        General information about the lead
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="lead-info-grid">
+
+                <div class="lead-info-item">
+
+                    <span class="lead-info-label">
+                        Lead Code
+                    </span>
+
+                    <p class="lead-info-value">
+                        @Model.LeadCode
+                    </p>
+
+                </div>
+
+
+                <div class="lead-info-item">
+
+                    <span class="lead-info-label">
+                        Lead Name
+                    </span>
+
+                    <p class="lead-info-value">
+                        @Model.LeadName
+                    </p>
+
+                </div>
+
+
+                <div class="lead-info-item">
+
+                    <span class="lead-info-label">
+                        Company
+                    </span>
+
+                    <p class="lead-info-value">
+                        @Model.CompanyName
+                    </p>
+
+                </div>
+
+
+                <div class="lead-info-item">
+
+                    <span class="lead-info-label">
+                        Profession
+                    </span>
+
+                    <p class="lead-info-value">
+                        @Model.Profession
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             Contact Information
+             ================================================= -->
+        <div class="lead-section">
+
+            <div class="lead-section-header">
+
+                <div class="lead-section-icon">
+                    <i class="bi bi-telephone"></i>
+                </div>
+
+                <div>
+                    <h3 class="lead-section-title">
+                        Contact Information
+                    </h3>
+
+                    <p class="lead-section-subtitle">
+                        Contact details provided for this lead
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="lead-contact-grid">
+
+                <div class="lead-contact-card">
+
+                    <div class="lead-contact-icon">
+                        <i class="bi bi-telephone"></i>
+                    </div>
+
+                    <div>
+
+                        <p class="lead-contact-label">
+                            Phone Number
+                        </p>
+
+                        <p class="lead-contact-value">
+                            @if (!string.IsNullOrWhiteSpace(Model.Phone))
+                            {
+                                <a href="tel:@Model.Phone">
+                                    @Model.Phone
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="lead-empty-value">
+                                    Not provided
+                                </span>
+                            }
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="lead-contact-card">
+
+                    <div class="lead-contact-icon">
+                        <i class="bi bi-envelope"></i>
+                    </div>
+
+                    <div>
+
+                        <p class="lead-contact-label">
+                            Email Address
+                        </p>
+
+                        <p class="lead-contact-value">
+                            @if (!string.IsNullOrWhiteSpace(Model.Email))
+                            {
+                                <a href="mailto:@Model.Email">
+                                    @Model.Email
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="lead-empty-value">
+                                    Not provided
+                                </span>
+                            }
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             Lead Source & Priority
+             ================================================= -->
+        <div class="lead-section">
+
+            <div class="lead-section-header">
+
+                <div class="lead-section-icon">
+                    <i class="bi bi-bar-chart"></i>
+                </div>
+
+                <div>
+                    <h3 class="lead-section-title">
+                        Lead Classification
+                    </h3>
+
+                    <p class="lead-section-subtitle">
+                        Current source, priority and lead status
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="lead-info-grid">
+
+                <div class="lead-info-item">
+
+                    <span class="lead-info-label">
+                        Source
+                    </span>
+
+                    <p class="lead-info-value">
+                        @Model.Source
+                    </p>
+
+                </div>
+
+
+                <div class="lead-info-item">
+
+                    <span class="lead-info-label">
+                        Priority
+                    </span>
+
+                    <p class="lead-info-value">
+                        @Model.Priority
+                    </p>
+
+                </div>
+
+
+                <div class="lead-info-item">
+
+                    <span class="lead-info-label">
+                        Current Status
+                    </span>
+
+                    <p class="lead-info-value">
+                        @Model.Status
+                    </p>
+
+                </div>
+
+
+                <div class="lead-info-item">
+
+                    <span class="lead-info-label">
+                        Follow-up Date
+                    </span>
+
+                    <p class="lead-info-value">
+                        @Model.FollowUpDate
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             Follow-up
+             ================================================= -->
+        <div class="lead-section">
+
+            <div class="lead-section-header">
+
+                <div class="lead-section-icon">
+                    <i class="bi bi-calendar-check"></i>
+                </div>
+
+                <div>
+                    <h3 class="lead-section-title">
+                        Follow-up
+                    </h3>
+
+                    <p class="lead-section-subtitle">
+                        Current follow-up schedule for this lead
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="lead-followup-card">
+
+                <div class="lead-followup-left">
+
+                    <div class="lead-followup-icon">
+                        <i class="bi bi-calendar-event"></i>
+                    </div>
+
+                    <div>
+
+                        <p class="lead-followup-label">
+                            Scheduled Follow-up
+                        </p>
+
+                        <p class="lead-followup-value">
+                            @Model.FollowUpDate
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             Address
+             ================================================= -->
+        <div class="lead-section">
+
+            <div class="lead-section-header">
+
+                <div class="lead-section-icon">
+                    <i class="bi bi-geo-alt"></i>
+                </div>
+
+                <div>
+                    <h3 class="lead-section-title">
+                        Address
+                    </h3>
+
+                    <p class="lead-section-subtitle">
+                        Lead's location information
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="lead-text-block">
+
+                <div class="lead-text-label">
+                    <i class="bi bi-geo-alt"></i>
+                    Address
+                </div>
+
+                <p class="lead-text-content">
+                    @if (!string.IsNullOrWhiteSpace(Model.Address))
+                    {
+                        @Model.Address
+                    }
+                    else
+                    {
+                        <span class="lead-empty-value">
+                            No address information provided.
+                        </span>
+                    }
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             Description
+             ================================================= -->
+        <div class="lead-section">
+
+            <div class="lead-section-header">
+
+                <div class="lead-section-icon">
+                    <i class="bi bi-card-text"></i>
+                </div>
+
+                <div>
+                    <h3 class="lead-section-title">
+                        Description
+                    </h3>
+
+                    <p class="lead-section-subtitle">
+                        Additional information about this lead
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="lead-text-block">
+
+                <div class="lead-text-label">
+                    <i class="bi bi-file-text"></i>
+                    Lead Description
+                </div>
+
+                <p class="lead-text-content">
+                    @if (!string.IsNullOrWhiteSpace(Model.Description))
+                    {
+                        @Model.Description
+                    }
+                    else
+                    {
+                        <span class="lead-empty-value">
+                            No additional description provided.
+                        </span>
+                    }
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             Footer Actions
+             ================================================= -->
+        <div class="lead-footer">
+
+            <div class="lead-footer-note">
+                <i class="bi bi-info-circle me-1"></i>
+                Review the lead information before taking further action.
+            </div>
+
+            <div class="lead-footer-actions">
+
+                <a asp-action="LeadQueue"
+                   class="btn btn-light border">
+
+                    <i class="bi bi-arrow-left me-1"></i>
+                    Back
+
+                </a>
+
+                <a asp-action="EditLead"
+                   asp-route-id="@Model.LeadId"
+                   class="btn btn-primary">
+
+                    <i class="bi bi-pencil-square me-1"></i>
+                    Edit Lead
+
+                </a>
 
             </div>
 

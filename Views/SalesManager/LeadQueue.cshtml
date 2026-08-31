@@ -3,13 +3,733 @@
 @{
     ViewData["Title"] = "Lead Queue";
     Layout = "_SalesManagerLayout";
+
+    var currentPage = ViewBag.CurrentPage ?? 1;
+    var totalPages = ViewBag.TotalPages ?? 1;
+    var totalFilteredLeads = ViewBag.TotalFilteredLeads ?? 0;
+
+    var search = ViewBag.Search as string;
+    var selectedSort = ViewBag.Sort as string;
+    var selectedSlaStatus = ViewBag.SLAStatus as string;
+
+    CRMSystem.Enums.LeadStatus? selectedStatus = ViewBag.Status;
+    CRMSystem.Enums.LeadPriority? selectedPriority = ViewBag.Priority;
+    CRMSystem.Enums.LeadSource? selectedSource = ViewBag.Source;
+
+    var slaBreachedLeads = ViewBag.SLABreachedLeads ?? 0;
+    var withinSlaLeads = ViewBag.WithinSLALeads ?? 0;
+    var pendingSlaLeads = ViewBag.PendingSLALeads ?? 0;
 }
 
-<div class="container-fluid">
+<style>
 
+    .lead-queue-page {
+        padding: 2rem 1.5rem 3rem;
+        background: #f7f9fc;
+        min-height: calc(100vh - 70px);
+    }
+
+    .lead-page-header {
+        margin-bottom: 1.75rem;
+    }
+
+        .lead-page-header h2 {
+            font-size: 1.65rem;
+            font-weight: 700;
+            color: #172033;
+            margin-bottom: .35rem;
+        }
+
+        .lead-page-header p {
+            color: #6b7280;
+            margin-bottom: 0;
+        }
+
+    .lead-actions {
+        display: flex;
+        gap: .65rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+        .lead-actions .btn {
+            border-radius: 8px;
+            font-weight: 600;
+            padding: .6rem 1rem;
+        }
+
+
+    /* ==========================
+           Summary Cards
+           ========================== */
+
+    .lead-summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.75rem;
+    }
+
+    .lead-summary-card {
+        background: #ffffff;
+        border: 1px solid #e8edf4;
+        border-radius: 12px;
+        padding: 1.15rem 1.2rem;
+        box-shadow: 0 3px 12px rgba(25, 42, 70, .04);
+        transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+        .lead-summary-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(25, 42, 70, .07);
+        }
+
+    .summary-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: .75rem;
+    }
+
+    .summary-label {
+        color: #7a8496;
+        font-size: .82rem;
+        font-weight: 500;
+        margin-bottom: .35rem;
+    }
+
+    .summary-value {
+        color: #172033;
+        font-size: 1.55rem;
+        font-weight: 700;
+        line-height: 1.1;
+    }
+
+    .summary-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+    }
+
+        .summary-icon.blue {
+            background: #edf4ff;
+            color: #2563eb;
+        }
+
+        .summary-icon.green {
+            background: #edf9f3;
+            color: #16855b;
+        }
+
+        .summary-icon.orange {
+            background: #fff7e8;
+            color: #c47a00;
+        }
+
+        .summary-icon.red {
+            background: #fff0f1;
+            color: #dc3545;
+        }
+
+
+    /* ==========================
+           Filter
+           ========================== */
+
+    .lead-filter-card {
+        background: #ffffff;
+        border: 1px solid #e8edf4;
+        border-radius: 12px;
+        padding: 1.2rem;
+        margin-bottom: 1.75rem;
+        box-shadow: 0 3px 12px rgba(25, 42, 70, .04);
+    }
+
+    .filter-title {
+        font-size: .95rem;
+        font-weight: 700;
+        color: #172033;
+        margin-bottom: .9rem;
+    }
+
+    .filter-label {
+        font-size: .76rem;
+        font-weight: 600;
+        color: #687386;
+        margin-bottom: .4rem;
+    }
+
+    .lead-filter-card .form-control,
+    .lead-filter-card .form-select {
+        min-height: 42px;
+        border-radius: 8px;
+        border-color: #dfe5ed;
+        font-size: .86rem;
+    }
+
+        .lead-filter-card .form-control:focus,
+        .lead-filter-card .form-select:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 .18rem rgba(13, 110, 253, .08);
+        }
+
+    .filter-buttons {
+        display: flex;
+        gap: .5rem;
+        align-items: end;
+        height: 100%;
+    }
+
+        .filter-buttons .btn {
+            min-height: 42px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+
+    /* ==========================
+           Table
+           ========================== */
+
+    .lead-table-card {
+        background: #ffffff;
+        border: 1px solid #e8edf4;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 3px 12px rgba(25, 42, 70, .04);
+    }
+
+    .lead-table-header {
+        padding: 1.15rem 1.2rem;
+        border-bottom: 1px solid #edf0f4;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .lead-table-title {
+        display: flex;
+        align-items: center;
+        gap: .7rem;
+    }
+
+    .lead-table-title-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 9px;
+        background: #edf4ff;
+        color: #2563eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .lead-table-title h5 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #172033;
+    }
+
+    .lead-table-title p {
+        margin: .15rem 0 0;
+        font-size: .76rem;
+        color: #7a8496;
+    }
+
+    .lead-count-badge {
+        background: #edf4ff;
+        color: #2563eb;
+        border: 1px solid #dce9ff;
+        padding: .4rem .7rem;
+        border-radius: 20px;
+        font-size: .75rem;
+        font-weight: 600;
+    }
+
+    .lead-table {
+        margin-bottom: 0;
+        min-width: 1250px;
+    }
+
+        .lead-table thead th {
+            background: #f8fafc;
+            border-bottom: 1px solid #e8edf4;
+            color: #667085;
+            font-size: .68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .03em;
+            padding: .9rem .85rem;
+            white-space: nowrap;
+        }
+
+        .lead-table tbody td {
+            padding: .85rem;
+            border-color: #edf0f4;
+            color: #344054;
+            font-size: .82rem;
+            vertical-align: middle;
+        }
+
+        .lead-table tbody tr {
+            transition: background .15s ease, box-shadow .15s ease;
+        }
+
+            .lead-table tbody tr:hover {
+                background: #fbfcfe;
+            }
+
+
+    /* ==========================
+           SLA Breached Row
+           ========================== */
+
+    .sla-breached-row {
+        background: #fffafa;
+    }
+
+        .sla-breached-row:hover {
+            background: #fff5f5 !important;
+        }
+
+        .sla-breached-row td:first-child {
+            border-left: 3px solid #dc3545;
+        }
+
+
+    /* ==========================
+           Lead Information
+           ========================== */
+
+    .lead-primary {
+        font-weight: 700;
+        color: #172033;
+        margin-bottom: .15rem;
+    }
+
+    .lead-code {
+        display: inline-block;
+        background: #f1f4f8;
+        color: #687386;
+        border-radius: 5px;
+        padding: .18rem .42rem;
+        font-size: .68rem;
+        font-weight: 600;
+    }
+
+    .lead-company {
+        color: #475467;
+        font-weight: 500;
+    }
+
+    .lead-phone {
+        color: #475467;
+        white-space: nowrap;
+    }
+
+    .officer-name {
+        font-weight: 600;
+        color: #344054;
+    }
+
+    .not-assigned {
+        color: #98a2b3;
+        font-size: .76rem;
+        font-style: italic;
+    }
+
+    .assignment-time {
+        color: #667085;
+        font-size: .73rem;
+        white-space: nowrap;
+    }
+
+
+    /* ==========================
+           Badges
+           ========================== */
+
+    .lead-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        border-radius: 20px;
+        padding: .34rem .6rem;
+        font-size: .68rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .priority-high {
+        color: #c62828;
+        background: #fff0f1;
+        border: 1px solid #ffd5d8;
+    }
+
+    .priority-medium {
+        color: #a86400;
+        background: #fff7e8;
+        border: 1px solid #ffe4ad;
+    }
+
+    .priority-low {
+        color: #18794e;
+        background: #edf9f3;
+        border: 1px solid #d4f0e1;
+    }
+
+    .status-badge {
+        color: #2563eb;
+        background: #edf4ff;
+        border: 1px solid #dce9ff;
+    }
+
+    .status-completed {
+        color: #18794e;
+        background: #edf9f3;
+        border-color: #d4f0e1;
+    }
+
+    .status-progress {
+        color: #667085;
+        background: #f2f4f7;
+        border-color: #e4e7ec;
+    }
+
+
+    /* ==========================
+           SLA
+           ========================== */
+
+    .sla-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        border-radius: 20px;
+        padding: .34rem .6rem;
+        font-size: .66rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .sla-good {
+        color: #18794e;
+        background: #edf9f3;
+        border: 1px solid #d4f0e1;
+    }
+
+    .sla-pending {
+        color: #9a6700;
+        background: #fff8e6;
+        border: 1px solid #ffe6ad;
+    }
+
+    .sla-breached {
+        color: #c62828;
+        background: #fff0f1;
+        border: 1px solid #ffd5d8;
+    }
+
+    .sla-neutral {
+        color: #667085;
+        background: #f2f4f7;
+        border: 1px solid #e4e7ec;
+    }
+
+
+    /* ==========================
+           Actions
+           ========================== */
+
+    .lead-actions-cell {
+        white-space: nowrap;
+        text-align: center;
+    }
+
+    .lead-action-btn {
+        width: 31px;
+        height: 31px;
+        padding: 0;
+        border-radius: 7px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 .1rem;
+        border: 1px solid transparent;
+        background: transparent;
+        transition: all .15s ease;
+    }
+
+    .action-view {
+        color: #2563eb;
+        background: #edf4ff;
+        border-color: #dce9ff;
+    }
+
+        .action-view:hover {
+            background: #dce9ff;
+        }
+
+    .action-assign {
+        color: #16855b;
+        background: #edf9f3;
+        border-color: #d4f0e1;
+    }
+
+        .action-assign:hover {
+            background: #d4f0e1;
+        }
+
+    .action-edit {
+        color: #a86400;
+        background: #fff7e8;
+        border-color: #ffe4ad;
+    }
+
+        .action-edit:hover {
+            background: #ffeecb;
+        }
+
+    .action-reassign {
+        color: #667085;
+        background: #f2f4f7;
+        border-color: #e4e7ec;
+    }
+
+        .action-reassign:hover {
+            background: #e4e7ec;
+        }
+
+    .action-archive {
+        color: #dc3545;
+        background: #fff0f1;
+        border-color: #ffd5d8;
+    }
+
+        .action-archive:hover {
+            background: #ffdfe2;
+        }
+
+
+    /* ==========================
+           Empty State
+           ========================== */
+
+    .lead-empty-state {
+        padding: 4rem 1.5rem;
+        text-align: center;
+    }
+
+    .empty-icon {
+        width: 54px;
+        height: 54px;
+        margin: 0 auto 1rem;
+        border-radius: 50%;
+        background: #f2f5f9;
+        color: #98a2b3;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+    }
+
+    .lead-empty-state h6 {
+        color: #344054;
+        font-weight: 700;
+        margin-bottom: .35rem;
+    }
+
+    .lead-empty-state p {
+        color: #98a2b3;
+        margin: 0;
+        font-size: .82rem;
+    }
+
+
+    /* ==========================
+           Pagination
+           ========================== */
+
+    .lead-pagination {
+        padding: 1rem 1.2rem;
+        border-top: 1px solid #edf0f4;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .pagination-info {
+        color: #7a8496;
+        font-size: .76rem;
+    }
+
+        .pagination-info strong {
+            color: #344054;
+        }
+
+    .pagination .page-link {
+        border: 1px solid #e4e7ec;
+        color: #475467;
+        font-size: .78rem;
+        min-width: 34px;
+        text-align: center;
+        border-radius: 7px;
+        margin: 0 .12rem;
+    }
+
+    .pagination .page-item.active .page-link {
+        background: #2563eb;
+        border-color: #2563eb;
+        color: #ffffff;
+    }
+
+    .pagination .page-item.disabled .page-link {
+        color: #b0b7c3;
+        background: #f8fafc;
+    }
+
+
+    /* ==========================
+           Responsive
+           ========================== */
+
+    @@media (max-width: 1200px) {
+
+        .lead-summary-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @@media (max-width: 1100px) {
+
+        .lead-summary-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 767.98px) {
+
+        .lead-queue-page {
+            padding: 1.25rem .85rem 2rem;
+        }
+
+        .lead-page-header {
+            margin-bottom: 1.25rem;
+        }
+
+        .lead-page-header,
+        .lead-table-header,
+        .lead-pagination {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .lead-actions {
+            width: 100%;
+        }
+
+            .lead-actions .btn {
+                flex: 1;
+            }
+
+        .lead-summary-grid {
+            grid-template-columns: 1fr;
+            gap: .75rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .lead-filter-card {
+            margin-bottom: 1.25rem;
+        }
+
+        .filter-buttons {
+            margin-top: .5rem;
+        }
+
+            .filter-buttons .btn {
+                flex: 1;
+            }
+
+        .lead-table-card {
+            overflow-x: auto;
+        }
+
+        .lead-pagination {
+            padding: .9rem;
+        }
+    }
+
+</style>
+
+
+<div class="lead-queue-page">
+
+
+    <!-- ==========================
+         Header
+         ========================== -->
+
+    <div class="lead-page-header d-flex justify-content-between">
+
+        <div>
+
+            <h2>Lead Queue</h2>
+
+            <p>
+                Manage active leads, assignments and follow-up workflow.
+            </p>
+
+        </div>
+
+
+        <div class="lead-actions">
+
+            <form asp-action="GenerateDemoLead"
+                  method="post"
+                  class="d-inline">
+
+                @Html.AntiForgeryToken()
+
+                <button type="submit"
+                        class="btn btn-outline-success">
+
+                    <i class="bi bi-lightning-charge-fill me-1"></i>
+
+                    Generate Demo Lead
+
+                </button>
+
+            </form>
+
+
+            <a asp-action="CreateLead"
+               class="btn btn-primary">
+
+                <i class="bi bi-plus-lg me-1"></i>
+
+                Add Lead
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==========================
+         Alerts
+         ========================== -->
     @if (TempData["Success"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show">
+        <div class="alert alert-success alert-dismissible fade show mb-4"
+             role="alert">
 
             <i class="bi bi-check-circle-fill me-2"></i>
 
@@ -23,235 +743,1221 @@
         </div>
     }
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
 
-        <div>
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show mb-4"
+             role="alert">
 
-            <h2 class="fw-bold">
-                Lead Queue
-            </h2>
+            <i class="bi bi-exclamation-circle-fill me-2"></i>
 
-            <p class="text-muted mb-0">
-                Active leads waiting for assignment and follow-up.
-            </p>
+            @TempData["Error"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+
+        </div>
+    }
+
+
+    <!-- ==========================
+         Summary Cards
+         ========================== -->
+
+    <div class="lead-summary-grid">
+
+
+        <!-- Active -->
+
+        <div class="lead-summary-card">
+
+            <div class="summary-top">
+
+                <div>
+
+                    <div class="summary-label">
+                        Active Leads
+                    </div>
+
+                    <div class="summary-value">
+                        @ViewBag.TotalActiveLeads
+                    </div>
+
+                </div>
+
+                <div class="summary-icon blue">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+
+            </div>
 
         </div>
 
-        <div class="d-flex gap-2">
 
-            <form asp-action="GenerateDemoLead"
-                  method="post">
+        <!-- New -->
 
-                @Html.AntiForgeryToken()
+        <div class="lead-summary-card">
 
-                <button type="submit"
-                        class="btn btn-success">
+            <div class="summary-top">
 
-                    <i class="bi bi-lightning-charge-fill me-1"></i>
+                <div>
 
-                    Generate Demo Lead
+                    <div class="summary-label">
+                        New Leads
+                    </div>
 
-                </button>
+                    <div class="summary-value">
+                        @ViewBag.NewLeads
+                    </div>
 
-            </form>
+                </div>
 
-            <a asp-action="CreateLead"
-               class="btn btn-primary">
+                <div class="summary-icon orange">
+                    <i class="bi bi-stars"></i>
+                </div>
 
-                <i class="bi bi-plus-circle me-1"></i>
+            </div>
 
-                Add Lead
+        </div>
 
-            </a>
+
+        <!-- Assigned -->
+
+        <div class="lead-summary-card">
+
+            <div class="summary-top">
+
+                <div>
+
+                    <div class="summary-label">
+                        Assigned Leads
+                    </div>
+
+                    <div class="summary-value">
+                        @ViewBag.AssignedLeads
+                    </div>
+
+                </div>
+
+                <div class="summary-icon blue">
+                    <i class="bi bi-person-check-fill"></i>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Accepted -->
+
+        <div class="lead-summary-card">
+
+            <div class="summary-top">
+
+                <div>
+
+                    <div class="summary-label">
+                        Accepted Leads
+                    </div>
+
+                    <div class="summary-value">
+                        @ViewBag.AcceptedLeads
+                    </div>
+
+                </div>
+
+                <div class="summary-icon green">
+                    <i class="bi bi-check2-circle"></i>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- SLA Breached -->
+
+        <div class="lead-summary-card">
+
+            <div class="summary-top">
+
+                <div>
+
+                    <div class="summary-label">
+                        SLA Breached
+                    </div>
+
+                    <div class="summary-value">
+                        @slaBreachedLeads
+                    </div>
+
+                </div>
+
+                <div class="summary-icon red">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Pending SLA -->
+
+        <div class="lead-summary-card">
+
+            <div class="summary-top">
+
+                <div>
+
+                    <div class="summary-label">
+                        Pending SLA
+                    </div>
+
+                    <div class="summary-value">
+                        @pendingSlaLeads
+                    </div>
+
+                </div>
+
+                <div class="summary-icon orange">
+                    <i class="bi bi-clock-fill"></i>
+                </div>
+
+            </div>
 
         </div>
 
     </div>
 
-    <div class="card shadow-sm border-0">
 
-        <div class="card-body p-0">
+    <!-- ==========================
+         Search & Filters
+         ========================== -->
 
-            <div class="table-responsive">
+    <div class="lead-filter-card">
 
-                <table class="table table-hover align-middle mb-0">
+        <div class="filter-title">
 
-                    <thead class="table-light">
+            <i class="bi bi-funnel me-1"></i>
 
+            Search & Filter Leads
+
+        </div>
+
+
+        <form asp-action="LeadQueue"
+              method="get">
+
+            <div class="row g-3">
+
+
+                <!-- Search -->
+
+                <div class="col-xl-3 col-lg-4 col-md-6">
+
+                    <label class="filter-label">
+                        Search
+                    </label>
+
+                    <input type="text"
+                           name="search"
+                           value="@search"
+                           class="form-control"
+                           placeholder="Lead code, name, company or phone..." />
+
+                </div>
+
+
+                <!-- Status -->
+
+                <div class="col-xl-2 col-lg-2 col-md-6">
+
+                    <label class="filter-label">
+                        Status
+                    </label>
+
+                    <select name="status"
+                            class="form-select">
+
+                        <option value="">
+                            All Status
+                        </option>
+
+                        @foreach (var item in
+                            Enum.GetValues<CRMSystem.Enums.LeadStatus>())
+                        {
+                            if (selectedStatus == item)
+                            {
+                                <option value="@item" selected>
+                                    @item
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="@item">
+                                    @item
+                                </option>
+                            }
+                        }
+
+                    </select>
+
+                </div>
+
+
+                <!-- Priority -->
+
+                <div class="col-xl-2 col-lg-2 col-md-6">
+
+                    <label class="filter-label">
+                        Priority
+                    </label>
+
+                    <select name="priority"
+                            class="form-select">
+
+                        <option value="">
+                            All Priority
+                        </option>
+
+                        @foreach (var item in
+                            Enum.GetValues<CRMSystem.Enums.LeadPriority>())
+                        {
+                            if (selectedPriority == item)
+                            {
+                                <option value="@item" selected>
+                                    @item
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="@item">
+                                    @item
+                                </option>
+                            }
+                        }
+
+                    </select>
+
+                </div>
+
+
+                <!-- Source -->
+
+                <div class="col-xl-2 col-lg-2 col-md-6">
+
+                    <label class="filter-label">
+                        Source
+                    </label>
+
+                    <select name="source"
+                            class="form-select">
+
+                        <option value="">
+                            All Sources
+                        </option>
+
+                        @foreach (var item in
+                            Enum.GetValues<CRMSystem.Enums.LeadSource>())
+                        {
+                            if (selectedSource == item)
+                            {
+                                <option value="@item" selected>
+                                    @item
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="@item">
+                                    @item
+                                </option>
+                            }
+                        }
+
+                    </select>
+
+                </div>
+
+
+                <!-- SLA -->
+
+                <div class="col-xl-2 col-lg-2 col-md-6">
+
+                    <label class="filter-label">
+                        Acceptance SLA
+                    </label>
+
+                    <select name="slaStatus"
+                            class="form-select">
+
+                        <option value="">
+                            All SLA
+                        </option>
+
+                        @if (selectedSlaStatus == "notassigned")
+                        {
+                            <option value="notassigned" selected>
+                                Not Assigned
+                            </option>
+                        }
+                        else
+                        {
+                            <option value="notassigned">
+                                Not Assigned
+                            </option>
+                        }
+
+
+                        @if (selectedSlaStatus == "pending")
+                        {
+                            <option value="pending" selected>
+                                Pending
+                            </option>
+                        }
+                        else
+                        {
+                            <option value="pending">
+                                Pending
+                            </option>
+                        }
+
+
+                        @if (selectedSlaStatus == "withinsla")
+                        {
+                            <option value="withinsla" selected>
+                                Within SLA
+                            </option>
+                        }
+                        else
+                        {
+                            <option value="withinsla">
+                                Within SLA
+                            </option>
+                        }
+
+
+                        @if (selectedSlaStatus == "breached")
+                        {
+                            <option value="breached" selected>
+                                SLA Breached
+                            </option>
+                        }
+                        else
+                        {
+                            <option value="breached">
+                                SLA Breached
+                            </option>
+                        }
+
+                    </select>
+
+                </div>
+
+
+                <!-- Sort -->
+
+                <div class="col-xl-2 col-lg-2 col-md-6">
+
+                    <label class="filter-label">
+                        Sort By
+                    </label>
+
+                    <select name="sort"
+                            class="form-select">
+
+                        @if (string.IsNullOrEmpty(selectedSort))
+                        {
+                            <option value="" selected>
+                                Newest First
+                            </option>
+                        }
+                        else
+                        {
+                            <option value="">
+                                Newest First
+                            </option>
+                        }
+
+
+                        @if (selectedSort == "oldest")
+                        {
+                            <option value="oldest" selected>
+                                Oldest First
+                            </option>
+                        }
+                        else
+                        {
+                            <option value="oldest">
+                                Oldest First
+                            </option>
+                        }
+
+
+                        @if (selectedSort == "name")
+                        {
+                            <option value="name" selected>
+                                Name A-Z
+                            </option>
+                        }
+                        else
+                        {
+                            <option value="name">
+                                Name A-Z
+                            </option>
+                        }
+
+
+                        @if (selectedSort == "name_desc")
+                        {
+                            <option value="name_desc" selected>
+                                Name Z-A
+                            </option>
+                        }
+                        else
+                        {
+                            <option value="name_desc">
+                                Name Z-A
+                            </option>
+                        }
+
+
+                        @if (selectedSort == "priority")
+                        {
+                            <option value="priority" selected>
+                                Highest Priority
+                            </option>
+                        }
+                        else
+                        {
+                            <option value="priority">
+                                Highest Priority
+                            </option>
+                        }
+
+
+                        @if (selectedSort == "priority_low")
+                        {
+                            <option value="priority_low" selected>
+                                Lowest Priority
+                            </option>
+                        }
+                        else
+                        {
+                            <option value="priority_low">
+                                Lowest Priority
+                            </option>
+                        }
+
+
+                        @if (selectedSort == "status")
+                        {
+                            <option value="status" selected>
+                                Status
+                            </option>
+                        }
+                        else
+                        {
+                            <option value="status">
+                                Status
+                            </option>
+                        }
+
+
+                        @if (selectedSort == "sla")
+                        {
+                            <option value="sla" selected>
+                                SLA Breached First
+                            </option>
+                        }
+                        else
+                        {
+                            <option value="sla">
+                                SLA Breached First
+                            </option>
+                        }
+
+                    </select>
+
+                </div>
+
+
+                <!-- Apply -->
+
+                <div class="col-xl-1 col-lg-2 col-md-6">
+
+                    <div class="filter-buttons">
+
+                        <button type="submit"
+                                class="btn btn-primary w-100"
+                                title="Apply Filter">
+
+                            <i class="bi bi-funnel-fill"></i>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Reset -->
+
+            <div class="mt-3">
+
+                <a asp-action="LeadQueue"
+                   class="btn btn-sm btn-light border">
+
+                    <i class="bi bi-arrow-counterclockwise me-1"></i>
+
+                    Reset Filters
+
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- ==========================
+         Lead Table
+         ========================== -->
+
+    <div class="lead-table-card">
+
+
+        <!-- Table Header -->
+
+        <div class="lead-table-header">
+
+            <div class="lead-table-title">
+
+                <div class="lead-table-title-icon">
+
+                    <i class="bi bi-list-ul"></i>
+
+                </div>
+
+                <div>
+
+                    <h5>
+                        Active Lead Queue
+                    </h5>
+
+                    <p>
+                        Leads currently available for management and assignment.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <span class="lead-count-badge">
+
+                <i class="bi bi-database me-1"></i>
+
+                @totalFilteredLeads
+
+                @(totalFilteredLeads == 1
+                    ? "Lead"
+                    : "Leads")
+
+            </span>
+
+        </div>
+
+
+        <!-- Table -->
+
+        <div class="table-responsive">
+
+            <table class="table lead-table align-middle">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Lead
+                        </th>
+
+                        <th>
+                            Company
+                        </th>
+
+                        <th>
+                            Contact
+                        </th>
+
+                        <th>
+                            Priority
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
+
+                        <th>
+                            Assigned Officer
+                        </th>
+
+                        <th>
+                            Assignment
+                        </th>
+
+                        <th>
+                            Acceptance SLA
+                        </th>
+
+                        <th class="text-center">
+                            Actions
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    @if (!Model.Any())
+                    {
                         <tr>
 
-                            <th>Lead Code</th>
+                            <td colspan="9">
 
-                            <th>Lead Name</th>
+                                <div class="lead-empty-state">
 
-                            <th>Company</th>
+                                    <div class="empty-icon">
 
-                            <th>Phone</th>
+                                        <i class="bi bi-search"></i>
 
-                            <th>Priority</th>
+                                    </div>
 
-                            <th>Status</th>
+                                    <h6>
+                                        No leads found
+                                    </h6>
 
-                            <th class="text-center">
-                                Actions
-                            </th>
+                                    <p>
+                                        Try changing your search or filter criteria.
+                                    </p>
+
+                                </div>
+
+                            </td>
 
                         </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        @if (!Model.Any())
+                    }
+                    else
+                    {
+                        foreach (var lead in Model)
                         {
-                            <tr>
+                            var slaStatus =
+                                lead.AcceptanceSLAStatus ??
+                                "Not Assigned";
 
-                                <td colspan="7"
-                                    class="text-center py-4">
+                            var isSlaBreached =
+                                slaStatus == "SLA Breached" ||
+                                lead.AcceptanceSLAMissed;
 
-                                    No active leads found.
+
+                            <tr class="@(isSlaBreached ? "sla-breached-row" : "")">
+
+
+                                <!-- Lead -->
+
+                                <td>
+
+                                    <div class="lead-primary">
+                                        @lead.LeadName
+                                    </div>
+
+                                    <span class="lead-code">
+                                        @lead.LeadCode
+                                    </span>
+
+                                </td>
+
+
+                                <!-- Company -->
+
+                                <td>
+
+                                    <span class="lead-company">
+
+                                        @(string.IsNullOrWhiteSpace(
+                                            lead.CompanyName)
+                                            ? "Not provided"
+                                            : lead.CompanyName)
+
+                                    </span>
+
+                                </td>
+
+
+                                <!-- Contact -->
+
+                                <td>
+
+                                    <span class="lead-phone">
+                                        @lead.Phone
+                                    </span>
+
+                                </td>
+
+
+                                <!-- Priority -->
+
+                                <td>
+
+                                    @switch (lead.Priority)
+                                    {
+                                        case CRMSystem.Enums.LeadPriority.High:
+
+                                            <span class="lead-badge priority-high">
+
+                                                <i class="bi bi-exclamation-circle-fill"></i>
+
+                                                High
+
+                                            </span>
+
+                                            break;
+
+                                        case CRMSystem.Enums.LeadPriority.Medium:
+
+                                            <span class="lead-badge priority-medium">
+
+                                                <i class="bi bi-dash-circle-fill"></i>
+
+                                                Medium
+
+                                            </span>
+
+                                            break;
+
+                                        default:
+
+                                            <span class="lead-badge priority-low">
+
+                                                <i class="bi bi-check-circle-fill"></i>
+
+                                                Low
+
+                                            </span>
+
+                                            break;
+                                    }
+
+                                </td>
+
+
+                                <!-- Status -->
+
+                                <td>
+
+                                    @if (lead.Status ==
+                                        CRMSystem.Enums.LeadStatus.Completed)
+                                    {
+                                        <span class="lead-badge status-badge status-completed">
+
+                                            <i class="bi bi-check-circle-fill"></i>
+
+                                            @lead.Status
+
+                                        </span>
+                                    }
+                                    else if (
+                                        lead.Status ==
+                                        CRMSystem.Enums.LeadStatus.InProgress)
+                                    {
+                                        <span class="lead-badge status-badge status-progress">
+
+                                            <i class="bi bi-circle-fill"
+                                               style="font-size:5px;"></i>
+
+                                            @lead.Status
+
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="lead-badge status-badge">
+
+                                            <i class="bi bi-stars"></i>
+
+                                            @lead.Status
+
+                                        </span>
+                                    }
+
+                                </td>
+
+
+                                <!-- Assigned Officer -->
+
+                                <td>
+
+                                    @if (!string.IsNullOrWhiteSpace(
+                                        lead.AssignedOfficerName))
+                                    {
+                                        <div class="officer-name">
+
+                                            <i class="bi bi-person me-1"></i>
+
+                                            @lead.AssignedOfficerName
+
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="not-assigned">
+                                            Not assigned
+                                        </span>
+                                    }
+
+                                </td>
+
+
+                                <!-- Assignment -->
+
+                                <td>
+
+                                    @if (lead.AssignedAt.HasValue)
+                                    {
+                                        <div class="assignment-time">
+
+                                            <div>
+                                                @lead.AssignedAt.Value.ToLocalTime().ToString("dd MMM yyyy")
+                                            </div>
+
+                                            <div>
+                                                @lead.AssignedAt.Value.ToLocalTime().ToString("hh:mm tt")
+                                            </div>
+
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="not-assigned">
+                                            —
+                                        </span>
+                                    }
+
+                                </td>
+
+
+                                <!-- SLA -->
+
+                                <td>
+
+                                    @if (slaStatus == "Within SLA")
+                                    {
+                                        <span class="sla-badge sla-good">
+
+                                            <i class="bi bi-check-circle-fill"></i>
+
+                                            Within SLA
+
+                                        </span>
+                                    }
+                                    else if (slaStatus == "SLA Breached")
+                                    {
+                                        <span class="sla-badge sla-breached">
+
+                                            <i class="bi bi-exclamation-triangle-fill"></i>
+
+                                            SLA Breached
+
+                                        </span>
+                                    }
+                                    else if (
+                                        slaStatus.StartsWith(
+                                            "Pending",
+                                            StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        <span class="sla-badge sla-pending">
+
+                                            <i class="bi bi-clock-fill"></i>
+
+                                            @slaStatus
+
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="sla-badge sla-neutral">
+
+                                            <i class="bi bi-dash-circle"></i>
+
+                                            @slaStatus
+
+                                        </span>
+                                    }
+
+                                </td>
+
+
+                                <!-- Actions -->
+
+                                <td class="lead-actions-cell">
+
+
+                                    <!-- View -->
+
+                                    <a asp-controller="SalesManager"
+                                       asp-action="LeadDetails"
+                                       asp-route-id="@lead.LeadId"
+                                       class="lead-action-btn action-view"
+                                       title="View Lead">
+
+                                        <i class="bi bi-eye"></i>
+
+                                    </a>
+
+
+                                    @if (lead.Status ==
+                                        CRMSystem.Enums.LeadStatus.New)
+                                    {
+                                        <!-- Assign -->
+
+                                        <a asp-controller="SalesManager"
+                                           asp-action="AssignLead"
+                                           asp-route-id="@lead.LeadId"
+                                           class="lead-action-btn action-assign"
+                                           title="Assign Lead">
+
+                                            <i class="bi bi-person-check"></i>
+
+                                        </a>
+
+
+                                        <!-- Edit -->
+
+                                        <a asp-controller="SalesManager"
+                                           asp-action="EditLead"
+                                           asp-route-id="@lead.LeadId"
+                                           class="lead-action-btn action-edit"
+                                           title="Edit Lead">
+
+                                            <i class="bi bi-pencil-square"></i>
+
+                                        </a>
+                                    }
+                                    else if (
+                                        lead.Status !=
+                                        CRMSystem.Enums.LeadStatus.Completed)
+                                    {
+                                        <!-- Edit -->
+
+                                        <a asp-controller="SalesManager"
+                                           asp-action="EditLead"
+                                           asp-route-id="@lead.LeadId"
+                                           class="lead-action-btn action-edit"
+                                           title="Edit Lead">
+
+                                            <i class="bi bi-pencil-square"></i>
+
+                                        </a>
+
+
+                                        <!-- Reassign -->
+
+                                        <a asp-controller="SalesManager"
+                                           asp-action="ReassignLead"
+                                           asp-route-id="@lead.LeadId"
+                                           class="lead-action-btn action-reassign"
+                                           title="Reassign Lead">
+
+                                            <i class="bi bi-arrow-repeat"></i>
+
+                                        </a>
+                                    }
+
+
+                                    <!-- Archive -->
+
+                                    <form asp-controller="SalesManager"
+                                          asp-action="ArchiveLead"
+                                          asp-route-id="@lead.LeadId"
+                                          method="post"
+                                          class="d-inline">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <button type="submit"
+                                                class="lead-action-btn action-archive"
+                                                title="Archive Lead"
+                                                onclick="return confirm('Are you sure you want to archive this lead?');">
+
+                                            <i class="bi bi-archive"></i>
+
+                                        </button>
+
+                                    </form>
 
                                 </td>
 
                             </tr>
                         }
-                        else
-                        {
-                            @foreach (var lead in Model)
-                            {
-                                <tr>
+                    }
 
-                                    <td>@lead.LeadCode</td>
+                </tbody>
 
-                                    <td>@lead.LeadName</td>
-
-                                    <td>@lead.CompanyName</td>
-
-                                    <td>@lead.Phone</td>
-
-                                    <td>
-
-                                        @switch (lead.Priority)
-                                        {
-                                            case CRMSystem.Enums.LeadPriority.High:
-                                                <span class="badge bg-danger">High</span>
-                                                break;
-
-                                            case CRMSystem.Enums.LeadPriority.Medium:
-                                                <span class="badge bg-warning text-dark">Medium</span>
-                                                break;
-
-                                            default:
-                                                <span class="badge bg-success">Low</span>
-                                                break;
-                                        }
-
-                                    </td>
-
-                                    <td>
-
-                                        <span class="badge bg-primary">
-
-                                            @lead.Status
-
-                                        </span>
-
-                                    </td>
-
-                                    <td class="text-center">
-
-                                        <!-- View -->
-                                        <a asp-controller="SalesManager"
-                                           asp-action="LeadDetails"
-                                           asp-route-id="@lead.LeadId"
-                                           class="btn btn-info btn-sm"
-                                           title="View">
-
-                                            <i class="bi bi-eye"></i>
-
-                                        </a>
-
-                                        @if (lead.Status == CRMSystem.Enums.LeadStatus.New)
-                                        {
-                                            <!-- Assign -->
-                                            <a asp-controller="SalesManager"
-                                               asp-action="AssignLead"
-                                               asp-route-id="@lead.LeadId"
-                                               class="btn btn-primary btn-sm"
-                                               title="Assign">
-
-                                                <i class="bi bi-person-check-fill"></i>
-
-                                            </a>
-
-                                            <!-- Edit -->
-                                            <a asp-controller="SalesManager"
-                                               asp-action="EditLead"
-                                               asp-route-id="@lead.LeadId"
-                                               class="btn btn-warning btn-sm"
-                                               title="Edit">
-
-                                                <i class="bi bi-pencil-square"></i>
-
-                                            </a>
-                                        }
-                                        else if (lead.Status != CRMSystem.Enums.LeadStatus.Completed)
-                                        {
-                                            <!-- Edit -->
-                                            <a asp-controller="SalesManager"
-                                               asp-action="EditLead"
-                                               asp-route-id="@lead.LeadId"
-                                               class="btn btn-warning btn-sm"
-                                               title="Edit">
-
-                                                <i class="bi bi-pencil-square"></i>
-
-                                            </a>
-
-                                            <!-- Reassign -->
-                                            <a asp-controller="SalesManager"
-                                               asp-action="ReassignLead"
-                                               asp-route-id="@lead.LeadId"
-                                               class="btn btn-secondary btn-sm"
-                                               title="Reassign">
-
-                                                <i class="bi bi-arrow-repeat"></i>
-
-                                            </a>
-                                        }
-
-                                        <!-- Archive -->
-                                        <form asp-action="ArchiveLead"
-                                              asp-route-id="@lead.LeadId"
-                                              method="post"
-                                              class="d-inline">
-
-                                            @Html.AntiForgeryToken()
-
-                                            <button type="submit"
-                                                    class="btn btn-sm btn-danger"
-                                                    title="Archive"
-                                                    onclick="return confirm('Are you sure you want to archive this lead?');">
-
-                                                <i class="bi bi-archive-fill"></i>
-
-                                            </button>
-
-                                        </form>
-
-                                    </td>
-
-                                </tr>
-                            }
-                        }
-
-                    </tbody>
-
-                </table>
-
-            </div>
+            </table>
 
         </div>
+
+
+        <!-- ==========================
+             Pagination
+             ========================== -->
+        @if (totalFilteredLeads > 0)
+        {
+            <div class="lead-pagination">
+
+
+                <div class="pagination-info">
+
+                    Showing
+
+                    <strong>
+                        @(((currentPage - 1) * 10) + 1)
+                    </strong>
+
+                    to
+
+                    <strong>
+                        @Math.Min(
+                            currentPage * 10,
+                            totalFilteredLeads)
+                    </strong>
+
+                    of
+
+                    <strong>
+                        @totalFilteredLeads
+                    </strong>
+
+                    leads
+
+                </div>
+
+
+                <nav aria-label="Lead pagination">
+
+                    <ul class="pagination mb-0">
+
+
+                        <!-- Previous -->
+
+                        <li class="page-item
+                            @(currentPage <= 1 ? "disabled" : "")">
+
+                            @if (currentPage > 1)
+                            {
+                                <a class="page-link"
+                                   asp-action="LeadQueue"
+                                   asp-route-page="@(currentPage - 1)"
+                                   asp-route-search="@search"
+                                   asp-route-status="@selectedStatus"
+                                   asp-route-priority="@selectedPriority"
+                                   asp-route-source="@selectedSource"
+                                   asp-route-slaStatus="@selectedSlaStatus"
+                                   asp-route-sort="@selectedSort">
+
+                                    <i class="bi bi-chevron-left"></i>
+
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="page-link">
+
+                                    <i class="bi bi-chevron-left"></i>
+
+                                </span>
+                            }
+
+                        </li>
+
+
+                        <!-- Page Numbers -->
+                        @for (
+                                                    var pageNumber = 1;
+                                                    pageNumber <= totalPages;
+                                                    pageNumber++)
+                        {
+                            <li class="page-item
+                                @(pageNumber == currentPage
+                                    ? "active"
+                                    : "")">
+
+                                <a class="page-link"
+                                   asp-action="LeadQueue"
+                                   asp-route-page="@pageNumber"
+                                   asp-route-search="@search"
+                                   asp-route-status="@selectedStatus"
+                                   asp-route-priority="@selectedPriority"
+                                   asp-route-source="@selectedSource"
+                                   asp-route-slaStatus="@selectedSlaStatus"
+                                   asp-route-sort="@selectedSort">
+
+                                    @pageNumber
+
+                                </a>
+
+                            </li>
+                        }
+
+
+                        <!-- Next -->
+
+                        <li class="page-item
+                            @(currentPage >= totalPages
+                                ? "disabled"
+                                : "")">
+
+                            @if (currentPage < totalPages)
+                            {
+                                <a class="page-link"
+                                   asp-action="LeadQueue"
+                                   asp-route-page="@(currentPage + 1)"
+                                   asp-route-search="@search"
+                                   asp-route-status="@selectedStatus"
+                                   asp-route-priority="@selectedPriority"
+                                   asp-route-source="@selectedSource"
+                                   asp-route-slaStatus="@selectedSlaStatus"
+                                   asp-route-sort="@selectedSort">
+
+                                    <i class="bi bi-chevron-right"></i>
+
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="page-link">
+
+                                    <i class="bi bi-chevron-right"></i>
+
+                                </span>
+                            }
+
+                        </li>
+
+                    </ul>
+
+                </nav>
+
+            </div>
+        }
 
     </div>
 
