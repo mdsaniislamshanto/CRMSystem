@@ -121,7 +121,8 @@ builder.Services.AddScoped<IGoogleFormsService, GoogleFormsService>();
 //Register ReportService for dependency injection
 builder.Services.AddScoped<IReportService, ReportService>();
 
-
+// Register FollowUpService for dependency injection
+builder.Services.AddScoped<IFollowUpService, FollowUpService>();
 
 
 

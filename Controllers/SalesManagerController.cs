@@ -19,6 +19,7 @@ namespace CRMSystem.Controllers
         private readonly ISalesOfficerServiceForSalesManager _salesOfficerServiceForSalesManager;
         private readonly ISalesOfficerPerformanceService _salesOfficerPerformanceService;
         private readonly IPerformanceExportService _performanceExportService;
+        private readonly IFollowUpService _followUpService;
 
         public SalesManagerController(
             ISalesManagerDashboardService dashboardService,
@@ -28,7 +29,8 @@ namespace CRMSystem.Controllers
             IReportService reportService,
             ISalesOfficerServiceForSalesManager salesOfficerServiceForSalesManager,
             ISalesOfficerPerformanceService salesOfficerPerformanceService,
-            IPerformanceExportService performanceExportService)
+            IPerformanceExportService performanceExportService,
+            IFollowUpService followUpService)
         {
             _dashboardService = dashboardService;
             _leadService = leadService;
@@ -41,6 +43,8 @@ namespace CRMSystem.Controllers
                 salesOfficerPerformanceService;
             _performanceExportService =
                 performanceExportService;
+            _followUpService =
+                followUpService;
         }
 
         // ==========================
@@ -711,7 +715,6 @@ namespace CRMSystem.Controllers
             return View(leads);
         }
 
-
         // =========================================================
         // ARCHIVED LEAD DETAILS
         // =========================================================
@@ -719,20 +722,23 @@ namespace CRMSystem.Controllers
         [HttpGet]
         public async Task<IActionResult> ArchivedLeadDetails(long id)
         {
-            var lead = await _leadService.GetArchivedLeadByIdAsync(id);
+            var lead =
+                await _leadService
+                    .GetArchivedLeadByIdAsync(id);
 
             if (lead == null)
             {
                 return NotFound();
             }
 
-            ViewData["Title"] = "Archived Lead Details";
-            ViewData["Breadcrumb"] = "Archived Lead Details";
+            ViewData["Title"] =
+                "Archived Lead Details";
+
+            ViewData["Breadcrumb"] =
+                "Archived Lead Details";
 
             return View(lead);
         }
-
-
 
         // ==========================
         // Restore Lead
@@ -909,8 +915,9 @@ namespace CRMSystem.Controllers
             ViewData["Title"] = "Follow-ups";
             ViewData["Breadcrumb"] = "Follow-ups";
 
-           
+            // -------------------------------------------------
             // Validate Date Range
+            // -------------------------------------------------
 
             if (filter.FromDate.HasValue &&
                 filter.ToDate.HasValue &&
@@ -925,7 +932,7 @@ namespace CRMSystem.Controllers
             }
 
             var model =
-                await _dashboardService
+                await _followUpService
                     .GetFollowUpsAsync(filter);
 
             return View(model);
@@ -939,7 +946,7 @@ namespace CRMSystem.Controllers
             long id)
         {
             var model =
-                await _dashboardService
+                await _followUpService
                     .GetFollowUpDetailsAsync(id);
 
             if (model == null)
@@ -960,7 +967,8 @@ namespace CRMSystem.Controllers
         // Unassigned Leads
         // =====================================================
         [HttpGet]
-        public async Task<IActionResult> UnassignedLeads(UnassignedLeadFilterViewModel filter)
+        public async Task<IActionResult> UnassignedLeads(
+            UnassignedLeadFilterViewModel filter)
         {
             ViewData["Title"] =
                 "Assign Leads";

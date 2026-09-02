@@ -15,16 +15,19 @@
 
     </div>
 
+
     <!-- Navigation -->
     <ul class="sidebar-menu">
 
-        <!-- Dashboard -->
+        <!-- =====================================================
+             Dashboard
+             ===================================================== -->
 
         <li>
 
             <a asp-controller="Admin"
                asp-action="Index"
-               class="@(currentController == "Admin" ? "active" : "")">
+               class="@(currentController == "Admin" && currentAction == "Index" ? "active" : "")">
 
                 <i class="bi bi-house-door-fill"></i>
 
@@ -34,13 +37,17 @@
 
         </li>
 
-        <!-- User Management -->
+
+        <!-- =====================================================
+             User Management
+             ===================================================== -->
 
         <li class="menu-title">
 
             User Management
 
         </li>
+
 
         <li>
 
@@ -56,13 +63,17 @@
 
         </li>
 
-        <!-- Lead Management -->
+
+        <!-- =====================================================
+             Lead Management
+             ===================================================== -->
 
         <li class="menu-title">
 
             Lead Management
 
         </li>
+
 
         <!-- Active Leads -->
 
@@ -80,6 +91,7 @@
 
         </li>
 
+
         <!-- API Leads -->
 
         <li>
@@ -95,6 +107,7 @@
             </a>
 
         </li>
+
 
         <!-- Archived Leads -->
 
@@ -112,6 +125,7 @@
 
         </li>
 
+
         <!-- Assign Lead -->
 
         <li>
@@ -128,7 +142,10 @@
 
         </li>
 
-        <!-- Sales Officers -->
+
+        <!-- =====================================================
+             Sales Officers
+             ===================================================== -->
 
         <li>
 
@@ -144,28 +161,48 @@
 
         </li>
 
-        <!-- Reports -->
+
+        <!-- =====================================================
+             Follow-ups
+             ===================================================== -->
 
         <li>
 
-            <!-- Reports -->
+            <a asp-controller="Admin"
+               asp-action="FollowUps"
+               class="@(currentController == "Admin" && currentAction == "FollowUps" ? "active" : "")">
 
-            <li>
+                <i class="bi bi-calendar-check-fill"></i>
 
-                <a asp-controller="Report"
-                   asp-action="Index"
-                   class="@(currentController == "Report" ? "active" : "")">
+                Follow-ups
 
-                    <i class="bi bi-graph-up-arrow"></i>
+            </a>
 
-                    Reports
-
-                </a>
-
-            </li>
         </li>
 
-        <!-- Settings -->
+
+        <!-- =====================================================
+             Reports
+             ===================================================== -->
+
+        <li>
+
+            <a asp-controller="Report"
+               asp-action="Index"
+               class="@(currentController == "Report" ? "active" : "")">
+
+                <i class="bi bi-graph-up-arrow"></i>
+
+                Reports
+
+            </a>
+
+        </li>
+
+
+        <!-- =====================================================
+             Settings
+             ===================================================== -->
 
         <li>
 
@@ -181,7 +218,10 @@
 
         </li>
 
-        <!-- Logout -->
+
+        <!-- =====================================================
+             Logout
+             ===================================================== -->
 
         <li class="mt-auto">
 

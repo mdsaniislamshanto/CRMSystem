@@ -1,30 +1,43 @@
-﻿using CRMSystem.Data;
+﻿using CRMSystem.Constants;
+using CRMSystem.Data;
 using CRMSystem.Enums;
 using CRMSystem.Models.ViewModels;
 using CRMSystem.Services.Interfaces;
 using CRMSystem.ViewModels;
 
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
 using System.Linq;
 
 namespace CRMSystem.Controllers
 {
+    [Authorize(Roles = RoleKeys.Admin)]
     public class AdminController : Controller
     {
         private readonly IAuthService _authService;
         private readonly ApplicationDbContext _context;
         private readonly IUserService _userService;
+        private readonly IFollowUpService _followUpService;
 
         public AdminController(
             IAuthService authService,
             ApplicationDbContext context,
-            IUserService userService)
+            IUserService userService,
+            IFollowUpService followUpService)
         {
             _authService = authService;
             _context = context;
             _userService = userService;
+            _followUpService = followUpService;
         }
+
+
+        // =====================================================
+        // GET: Admin/Index
+        // Admin Dashboard
+        // =====================================================
 
         public IActionResult Index()
         {
@@ -57,6 +70,7 @@ namespace CRMSystem.Controllers
 
         // =====================================================
         // GET: Admin/SalesOfficers
+        // Sales Officers List
         // =====================================================
 
         [HttpGet]
@@ -75,30 +89,44 @@ namespace CRMSystem.Controllers
             return View(users);
         }
 
-        // GET: Admin/SalesOfficers
-        public async Task<IActionResult> SalesOfficers()
+
+        // =====================================================
+        // GET: Admin/FollowUps
+        // Follow-up List
+        // =====================================================
+
+        [HttpGet]
+        public async Task<IActionResult> FollowUps(
+            SalesManagerFollowUpFilterViewModel filter)
         {
-            ViewData["Title"] = "Sales Officers";
-            ViewData["Breadcrumb"] = "Sales Officers";
+            ViewData["Title"] = "Follow-ups";
+            ViewData["Breadcrumb"] = "Follow-ups";
 
-            var users = await _context.Users
-                .Where(u => u.Role != null &&
-                            u.Role.RoleName == "Sales Officer")
-                .Select(u => new UserViewModel
-                {
-                    UserId = u.UserId,
-                    EmployeeCode = u.EmployeeCode,
-                    FullName = u.FullName,
-                    Email = u.Email,
-                    PhoneNumber = u.PhoneNumber,
-                    RoleName = u.Role.RoleName,
-                    IsEmailVerified = u.IsEmailVerified,
-                    LastLoginAt = u.LastLoginAt,
-                    IsActive = u.IsActive
-                })
-                .ToListAsync();
+            var model = await _followUpService.GetFollowUpsAsync(filter);
 
-            return View(users);
+            return View(model);
+        }
+
+
+        // =====================================================
+        // GET: Admin/FollowUpDetails/{id}
+        // Follow-up Details & Feedback History
+        // =====================================================
+
+        [HttpGet]
+        public async Task<IActionResult> FollowUpDetails(long id)
+        {
+            ViewData["Title"] = "Follow-up Details";
+            ViewData["Breadcrumb"] = "Follow-up Details";
+
+            var model = await _followUpService.GetFollowUpDetailsAsync(id);
+
+            if (model == null)
+            {
+                return NotFound();
+            }
+
+            return View(model);
         }
     }
 }
