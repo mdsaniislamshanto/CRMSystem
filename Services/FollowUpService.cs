@@ -14,8 +14,8 @@ namespace CRMSystem.Services
             _context = context;
         }
 
-        public async Task<SalesManagerFollowUpFilterViewModel> GetFollowUpsAsync(
-            SalesManagerFollowUpFilterViewModel filter)
+        public async Task<FollowUpFilterViewModel> GetFollowUpsAsync(
+            FollowUpFilterViewModel filter)
         {
             var now = DateTime.UtcNow;
 
@@ -37,7 +37,7 @@ namespace CRMSystem.Services
                     .First())
                 .ToList();
 
-            var followUps = new List<SalesManagerFollowUpViewModel>();
+            var followUps = new List<FollowUpViewModel>();
 
             foreach (var feedback in latestFollowUps)
             {
@@ -85,7 +85,7 @@ namespace CRMSystem.Services
                             : "Late";
                 }
 
-                followUps.Add(new SalesManagerFollowUpViewModel
+                followUps.Add(new FollowUpViewModel
                 {
                     FeedbackId = feedback.FeedbackId,
                     AssignmentId = feedback.AssignmentId,

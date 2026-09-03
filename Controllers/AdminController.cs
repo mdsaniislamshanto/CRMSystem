@@ -20,17 +20,23 @@ namespace CRMSystem.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IUserService _userService;
         private readonly IFollowUpService _followUpService;
+        private readonly ISalesOfficerPerformanceService _salesOfficerPerformanceService;
+        private readonly IPerformanceExportService _performanceExportService;
 
         public AdminController(
             IAuthService authService,
             ApplicationDbContext context,
             IUserService userService,
-            IFollowUpService followUpService)
+            IFollowUpService followUpService,
+            ISalesOfficerPerformanceService salesOfficerPerformanceService,
+            IPerformanceExportService performanceExportService)
         {
             _authService = authService;
             _context = context;
             _userService = userService;
             _followUpService = followUpService;
+            _salesOfficerPerformanceService = salesOfficerPerformanceService;
+            _performanceExportService = performanceExportService;
         }
 
 
@@ -97,7 +103,7 @@ namespace CRMSystem.Controllers
 
         [HttpGet]
         public async Task<IActionResult> FollowUps(
-            SalesManagerFollowUpFilterViewModel filter)
+            FollowUpFilterViewModel filter)
         {
             ViewData["Title"] = "Follow-ups";
             ViewData["Breadcrumb"] = "Follow-ups";
@@ -127,6 +133,194 @@ namespace CRMSystem.Controllers
             }
 
             return View(model);
+        }
+
+
+        // =====================================================
+        // GET: Admin/Performance
+        // Sales Officer Performance
+        // =====================================================
+
+        [HttpGet]
+        public async Task<IActionResult> Performance(
+            PerformanceFilterViewModel? filter)
+        {
+            filter ??= new PerformanceFilterViewModel();
+
+            // -------------------------------------------------
+            // Default Performance Range
+            // -------------------------------------------------
+
+            if (string.IsNullOrWhiteSpace(filter.Range))
+            {
+                filter.Range = "ThisMonth";
+            }
+
+
+            // -------------------------------------------------
+            // Custom Date Range Validation
+            // -------------------------------------------------
+
+            if (string.Equals(
+                filter.Range,
+                "Custom",
+                StringComparison.OrdinalIgnoreCase))
+            {
+                if (!filter.FromDate.HasValue ||
+                    !filter.ToDate.HasValue)
+                {
+                    TempData["Error"] =
+                        "Please select both From Date and To Date.";
+
+                    return RedirectToAction(nameof(Performance));
+                }
+
+                if (filter.FromDate.Value.Date >
+                    filter.ToDate.Value.Date)
+                {
+                    TempData["Error"] =
+                        "From Date cannot be later than To Date.";
+
+                    return RedirectToAction(nameof(Performance));
+                }
+            }
+
+
+            // -------------------------------------------------
+            // Get Sales Officer Performance
+            // -------------------------------------------------
+
+            var performance =
+                await _salesOfficerPerformanceService
+                    .GetPerformanceAsync(filter);
+
+
+            // -------------------------------------------------
+            // Get Top Performer
+            // -------------------------------------------------
+
+            var topPerformer =
+                await _salesOfficerPerformanceService
+                    .GetTopPerformerAsync(filter);
+
+
+            // -------------------------------------------------
+            // Get Officer Needing Attention
+            // -------------------------------------------------
+
+            var needsAttention =
+                await _salesOfficerPerformanceService
+                    .GetNeedsAttentionAsync(filter);
+
+
+            // -------------------------------------------------
+            // Send Additional Data to View
+            // -------------------------------------------------
+
+            ViewData["PerformanceFilter"] = filter;
+            ViewData["TopPerformer"] = topPerformer;
+            ViewData["NeedsAttention"] = needsAttention;
+
+            ViewData["Title"] = "Sales Officer Performance";
+            ViewData["Breadcrumb"] = "Performance";
+
+
+            // -------------------------------------------------
+            // Return Performance View
+            // -------------------------------------------------
+
+            return View(performance);
+        }
+
+
+        // =====================================================
+        // GET: Admin/PerformanceTrend
+        // Performance Trend Chart Data
+        // =====================================================
+
+        [HttpGet]
+        public async Task<IActionResult> PerformanceTrend(
+            PerformanceFilterViewModel filter)
+        {
+            var result =
+                await _salesOfficerPerformanceService
+                    .GetPerformanceTrendAsync(filter);
+
+            return Json(result);
+        }
+
+
+        // =====================================================
+        // GET: Admin/SLATrend
+        // SLA Trend Chart Data
+        // =====================================================
+
+        [HttpGet]
+        public async Task<IActionResult> SLATrend(
+            PerformanceFilterViewModel filter)
+        {
+            var result =
+                await _salesOfficerPerformanceService
+                    .GetSLATrendAsync(filter);
+
+            return Json(result);
+        }
+
+
+        // =====================================================
+        // GET: Admin/GetCompletionTrend
+        // Completion Trend Chart Data
+        // =====================================================
+
+        [HttpGet]
+        public async Task<IActionResult> GetCompletionTrend(
+            PerformanceFilterViewModel filter)
+        {
+            var result =
+                await _salesOfficerPerformanceService
+                    .GetCompletionTrendAsync(filter);
+
+            return Json(result);
+        }
+
+
+        // =====================================================
+        // GET: Admin/ExportPerformanceExcel
+        // Export Performance Report to Excel
+        // =====================================================
+
+        [HttpGet]
+        public async Task<IActionResult> ExportPerformanceExcel(
+            PerformanceFilterViewModel filter)
+        {
+            var file =
+                await _performanceExportService
+                    .ExportPerformanceToExcelAsync(filter);
+
+            return File(
+                file,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "SalesOfficerPerformance.xlsx");
+        }
+
+
+        // =====================================================
+        // GET: Admin/ExportPerformancePdf
+        // Export Performance Report to PDF
+        // =====================================================
+
+        [HttpGet]
+        public async Task<IActionResult> ExportPerformancePdf(
+            PerformanceFilterViewModel filter)
+        {
+            var file =
+                await _performanceExportService
+                    .ExportPerformanceToPdfAsync(filter);
+
+            return File(
+                file,
+                "application/pdf",
+                "SalesOfficerPerformance.pdf");
         }
     }
 }

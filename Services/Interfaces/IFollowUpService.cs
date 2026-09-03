@@ -4,8 +4,8 @@ namespace CRMSystem.Services.Interfaces
 {
     public interface IFollowUpService
     {
-        Task<SalesManagerFollowUpFilterViewModel> GetFollowUpsAsync(
-            SalesManagerFollowUpFilterViewModel filter);
+        Task<FollowUpFilterViewModel> GetFollowUpsAsync(
+            FollowUpFilterViewModel filter);
 
         Task<SalesManagerFollowUpDetailsViewModel?>
             GetFollowUpDetailsAsync(long leadId);

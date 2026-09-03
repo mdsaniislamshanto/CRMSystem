@@ -1,6 +1,6 @@
 ﻿namespace CRMSystem.Models.ViewModels
 {
-    public class SalesManagerFollowUpViewModel
+    public class FollowUpViewModel
     {
         public long FeedbackId { get; set; }
 

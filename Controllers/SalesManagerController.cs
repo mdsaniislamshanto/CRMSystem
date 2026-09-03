@@ -910,7 +910,7 @@ namespace CRMSystem.Controllers
 
         [HttpGet]
         public async Task<IActionResult> FollowUps(
-            SalesManagerFollowUpFilterViewModel filter)
+            FollowUpFilterViewModel filter)
         {
             ViewData["Title"] = "Follow-ups";
             ViewData["Breadcrumb"] = "Follow-ups";

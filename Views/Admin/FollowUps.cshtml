@@ -1,4 +1,4 @@
-﻿@model CRMSystem.Models.ViewModels.SalesManagerFollowUpFilterViewModel
+﻿@model CRMSystem.Models.ViewModels.FollowUpFilterViewModel
 
 @{
     ViewData["Title"] = "Follow-ups";
@@ -693,7 +693,7 @@
         </div>
 
 
-        <form asp-controller="SalesManager"
+        <form asp-controller="Admin"
               asp-action="FollowUps"
               method="get">
 
@@ -912,7 +912,7 @@
                         </button>
 
 
-                        <a asp-controller="SalesManager"
+                        <a asp-controller="Admin"
                            asp-action="FollowUps"
                            class="btn btn-light border reset-filter-btn"
                            title="Reset Filters">
@@ -1250,7 +1250,7 @@
 
                                 <td class="text-center">
 
-                                    <a asp-controller="SalesManager"
+                                    <a asp-controller="Admin"
                                        asp-action="FollowUpDetails"
                                        asp-route-id="@followUp.LeadId"
                                        class="btn btn-sm btn-outline-primary history-btn">
@@ -1320,7 +1320,7 @@
                             @if (currentPage > 1)
                             {
                                 <a class="page-link"
-                                   asp-controller="SalesManager"
+                                   asp-controller="Admin"
                                    asp-action="FollowUps"
                                    asp-route-page="@(currentPage - 1)"
                                    asp-route-search="@Model.Search"
@@ -1358,7 +1358,7 @@
                                     : "")">
 
                                 <a class="page-link"
-                                   asp-controller="SalesManager"
+                                   asp-controller="Admin"
                                    asp-action="FollowUps"
                                    asp-route-page="@pageNumber"
                                    asp-route-search="@Model.Search"
@@ -1386,7 +1386,7 @@
                             @if (currentPage < totalPages)
                             {
                                 <a class="page-link"
-                                   asp-controller="SalesManager"
+                                   asp-controller="Admin"
                                    asp-action="FollowUps"
                                    asp-route-page="@(currentPage + 1)"
                                    asp-route-search="@Model.Search"

@@ -26,7 +26,7 @@
          PAGE HEADER
     ====================================================== -->
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="mb-4">
 
         <div>
 
@@ -41,21 +41,6 @@
             <p class="text-muted mb-0">
                 Manage leads captured automatically from external API sources.
             </p>
-
-        </div>
-
-
-        <div>
-
-            <a asp-controller="GoogleForms"
-               asp-action="Import"
-               class="btn btn-primary px-4">
-
-                <i class="bi bi-cloud-arrow-down me-2"></i>
-
-                Import New Leads
-
-            </a>
 
         </div>
 
@@ -690,7 +675,7 @@
 
                                             <!-- Assign/Reassign -->
                                             @if (lead.Status == LeadStatus.New ||
-                                                 lead.Status == LeadStatus.Rejected)
+                                                                                             lead.Status == LeadStatus.Rejected)
                                             {
                                                 <a asp-controller="Lead"
                                                    asp-action="Assign"
@@ -741,19 +726,9 @@
                                             No API Leads Found
                                         </h5>
 
-                                        <p class="mb-3">
+                                        <p class="mb-0">
                                             No leads have been captured from API sources yet.
                                         </p>
-
-                                        <a asp-controller="GoogleForms"
-                                           asp-action="Import"
-                                           class="btn btn-primary">
-
-                                            <i class="bi bi-cloud-arrow-down me-2"></i>
-
-                                            Import New Leads
-
-                                        </a>
 
                                     </div>
 

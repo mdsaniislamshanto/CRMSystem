@@ -29,6 +29,7 @@
   <ItemGroup>
     <Folder Include="Migrations\" />
     <Folder Include="Views\Account\" />
+    <Folder Include="Views\GoogleForms\" />
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,6 @@
 ﻿namespace CRMSystem.Models.ViewModels
 {
-    public class SalesManagerFollowUpFilterViewModel
+    public class FollowUpFilterViewModel
     {
         public string? Search { get; set; }
 
@@ -29,7 +29,7 @@
 
         public int OverdueCount { get; set; }
 
-        public List<SalesManagerFollowUpViewModel> FollowUps { get; set; } = new();
+        public List<FollowUpViewModel> FollowUps { get; set; } = new();
 
         public DateTime? FromDate { get; set; }
 

@@ -368,7 +368,7 @@ namespace CRMSystem.Services
         // =========================================================
 
         public async Task<long> CreateLeadFromCaptureAsync(
-            AutoLeadCreateViewModel model)
+      AutoLeadCreateViewModel model)
         {
             var receivedAt =
                 DateTime.UtcNow;
@@ -380,9 +380,9 @@ namespace CRMSystem.Services
                     "SourceReferenceId is required for automatic lead capture.");
             }
 
-            // =====================================================
-            // Duplicate Check
-            // =====================================================
+            // =========================================================
+            // LEVEL 1 — SourceReferenceId Duplicate Check
+            // =========================================================
 
             var existingLead =
                 await _context.Leads
@@ -429,11 +429,90 @@ namespace CRMSystem.Services
                 return existingLead.LeadId;
             }
 
+            // =========================================================
+            // LEVEL 2 — Phone Number Duplicate Check
+            // =========================================================
+
+            var normalizedIncomingPhone =
+                NormalizePhoneNumber(model.Phone);
+
+            if (string.IsNullOrWhiteSpace(
+                    normalizedIncomingPhone))
+            {
+                throw new InvalidOperationException(
+                    "Phone number is required for automatic lead capture.");
+            }
+
+            // ---------------------------------------------------------
+            // Get active leads only.
+            //
+            // Completed and Rejected leads are intentionally included
+            // here because their phone numbers are allowed to create
+            // a new lead.
+            // ---------------------------------------------------------
+
+            var activePhoneCandidates =
+                await _context.Leads
+                    .Where(l =>
+                        !l.IsDeleted &&
+                        l.Phone != null &&
+                        l.Status != LeadStatus.Completed &&
+                        l.Status != LeadStatus.Rejected)
+                    .Select(l => new
+                    {
+                        l.LeadId,
+                        l.Phone
+                    })
+                    .ToListAsync();
+
+            var phoneDuplicate =
+                activePhoneCandidates
+                    .FirstOrDefault(l =>
+                        NormalizePhoneNumber(l.Phone) ==
+                        normalizedIncomingPhone);
+
+            if (phoneDuplicate != null)
+            {
+                var duplicateLog =
+                    new LeadCaptureLog
+                    {
+                        LeadId =
+                            phoneDuplicate.LeadId,
+
+                        CaptureSource =
+                            LeadCaptureSource.GoogleForm,
+
+                        CaptureStatus =
+                            CaptureStatus.Duplicate,
+
+                        ExternalLeadId =
+                            model.SourceReferenceId,
+
+                        PayloadJson =
+                            model.PayloadJson,
+
+                        ReceivedAt =
+                            receivedAt,
+
+                        ProcessedAt =
+                            DateTime.UtcNow,
+
+                        IsActive = true
+                    };
+
+                await _context.LeadCaptureLogs
+                    .AddAsync(duplicateLog);
+
+                await _context.SaveChangesAsync();
+
+                return phoneDuplicate.LeadId;
+            }
+
             try
             {
-                // =================================================
-                // Create Lead
-                // =================================================
+                // =====================================================
+                // CREATE LEAD
+                // =====================================================
 
                 var lead =
                     CreateLeadEntity(model);
@@ -447,9 +526,9 @@ namespace CRMSystem.Services
 
                 await _context.SaveChangesAsync();
 
-                // =================================================
-                // Capture Log
-                // =================================================
+                // =====================================================
+                // SUCCESS CAPTURE LOG
+                // =====================================================
 
                 var captureLog =
                     new LeadCaptureLog
@@ -483,9 +562,12 @@ namespace CRMSystem.Services
 
                 await _context.SaveChangesAsync();
 
-                // =================================================
-                // Auto Assign
-                // =================================================
+                // =====================================================
+                // AUTO ASSIGNMENT
+                //
+                // AutoAssignmentService itself checks
+                // SystemSettings.AutoAssignmentEnabled.
+                // =====================================================
 
                 await _autoAssignmentService
                     .AutoAssignLeadAsync(
@@ -495,6 +577,10 @@ namespace CRMSystem.Services
             }
             catch (Exception ex)
             {
+                // =====================================================
+                // FAILED CAPTURE LOG
+                // =====================================================
+
                 var captureLog =
                     new LeadCaptureLog
                     {
@@ -532,7 +618,6 @@ namespace CRMSystem.Services
                 throw;
             }
         }
-
 
         // =========================================================
         // GET LEAD DETAILS
@@ -1748,6 +1833,43 @@ namespace CRMSystem.Services
             lead.AcceptanceSLAStatus =
                 lead.AssignmentStatus.Value
                     .ToString();
+        }
+
+
+
+        //========================================================
+        //Helper Method to Normalize Phone Number
+        //========================================================
+        private static string NormalizePhoneNumber(string? phone)
+        {
+            if (string.IsNullOrWhiteSpace(phone))
+            {
+                return string.Empty;
+            }
+
+            var digits =
+                new string(
+                    phone.Where(char.IsDigit).ToArray());
+
+            if (digits.StartsWith("00880"))
+            {
+                digits =
+                    digits.Substring(2);
+            }
+
+            if (digits.StartsWith("880"))
+            {
+                digits =
+                    digits.Substring(3);
+            }
+
+            if (digits.StartsWith("0"))
+            {
+                digits =
+                    digits.Substring(1);
+            }
+
+            return digits;
         }
     }
 }

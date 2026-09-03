@@ -9,53 +9,30 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using QuestPDF.Infrastructure;
 
-//For QuestPDF License
+// For QuestPDF License
 QuestPDF.Settings.License = LicenseType.Community;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//For email 
+// Configure Email Settings
 builder.Services.Configure<EmailSettings>(
     builder.Configuration.GetSection("EmailSettings"));
 
-//For Google Forms API
+// Configure Google Forms API Settings
 builder.Services.Configure<GoogleFormsSettings>(
     builder.Configuration.GetSection("GoogleForms"));
 
-// Add services to the container.
+// Add MVC services
 builder.Services.AddControllersWithViews();
 
-// Register IHttpContextAccessor for dependency injection
+// Register IHttpContextAccessor
 builder.Services.AddHttpContextAccessor();
 
-// Register AuthService for dependency injection
-builder.Services.AddScoped<IAuthService, AuthService>();
 
-// Register UserService for dependency injection
-builder.Services.AddScoped<IUserService, UserService>();
+// =====================================================
+// Authentication & Authorization
+// =====================================================
 
-//Register EmailServices for dependency injection
-builder.Services.AddScoped<IEmailService, EmailService>();
-
-// Register NotificationService for dependency injection
-builder.Services.AddScoped<INotificationService, NotificationService>();
-
-// Register SLAService for dependency injection
-builder.Services.AddScoped<ISLAService, SLAService>();
-
-//Registrer Backgraound SLAService for dependency injection
-builder.Services.AddHostedService<SLABackgroundService>();
-
-// Register SalesOfficerPerformanceService for dependency injection
-builder.Services.AddScoped< ISalesOfficerPerformanceService, SalesOfficerPerformanceService>();
-
-// Register SalesOfficerService for dependency injection
-builder.Services.AddScoped<ISalesOfficerServiceForSalesManager,SalesOfficerServiceForSalesManager>();
-
-// Register PerformanceExportService for dependency injection
-builder.Services.AddScoped<IPerformanceExportService, PerformanceExportService>();
-
-// Add Cookie Authentication
 builder.Services.AddAuthentication(
     CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -66,76 +43,160 @@ builder.Services.AddAuthentication(
         options.SlidingExpiration = true;
     });
 
-// Add Authorization
 builder.Services.AddAuthorization();
 
 
-// Add session services
+// =====================================================
+// Session
+// =====================================================
+
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30); // Set session timeout
-    options.Cookie.HttpOnly = true; // Make the session cookie HTTP-only
-    options.Cookie.IsEssential = true; // Make the session cookie essential
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
 });
 
-// Register LeadService for dependency injection
-builder.Services.AddScoped<ILeadService, LeadService>();
 
+// =====================================================
 // Database
+// =====================================================
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySql(
         builder.Configuration.GetConnectionString("DefaultConnection"),
-        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))
+        ServerVersion.AutoDetect(
+            builder.Configuration.GetConnectionString("DefaultConnection"))
     ));
 
-// Register LeadCaptureService for dependency injection
-builder.Services.AddScoped<ILeadCaptureService, LeadCaptureService>();
 
-// Register SettingsService for dependency injection
-builder.Services.AddScoped<ISettingsService, SettingsService>();
+// =====================================================
+// Core Services
+// =====================================================
 
-// Register Sales Manager Dashboard Service
-builder.Services.AddScoped<ISalesManagerDashboardService, SalesManagerDashboardService>();
+// Authentication
+builder.Services.AddScoped<IAuthService, AuthService>();
 
-// Register LeadService
+// Users
+builder.Services.AddScoped<IUserService, UserService>();
+
+// Email
+builder.Services.AddScoped<IEmailService, EmailService>();
+
+// Notifications
+builder.Services.AddScoped<INotificationService, NotificationService>();
+
+// SLA
+builder.Services.AddScoped<ISLAService, SLAService>();
+
+// Lead
 builder.Services.AddScoped<ILeadService, LeadService>();
 
-// Register AssignmentService
-builder.Services.AddScoped<IAssignmentService, AssignmentService>();
-
-// Register LeadCaptureService
+// Lead Capture
 builder.Services.AddScoped<ILeadCaptureService, LeadCaptureService>();
 
-// Register AutoAssignmentService
+// Assignment
+builder.Services.AddScoped<IAssignmentService, AssignmentService>();
+
+// Auto Assignment
 builder.Services.AddScoped<IAutoAssignmentService, AutoAssignmentService>();
 
-// Register SalesOfficerDashboardService
-builder.Services.AddScoped<ISalesOfficerDashboardService, SalesOfficerDashboardService>();
-
-// Register LeadFeedbackService
+// Lead Feedback
 builder.Services.AddScoped<ILeadFeedbackService, LeadFeedbackService>();
 
-// Register GoogleFormsService
-builder.Services.AddScoped<IGoogleFormsService, GoogleFormsService>();
-
-//Register ReportService for dependency injection
-builder.Services.AddScoped<IReportService, ReportService>();
-
-// Register FollowUpService for dependency injection
+// Follow Up
 builder.Services.AddScoped<IFollowUpService, FollowUpService>();
 
+// Settings
+builder.Services.AddScoped<ISettingsService, SettingsService>();
+
+
+// =====================================================
+// Sales Manager Services
+// =====================================================
+
+// Sales Manager Dashboard
+builder.Services.AddScoped<
+    ISalesManagerDashboardService,
+    SalesManagerDashboardService>();
+
+// Sales Officer Management
+builder.Services.AddScoped<
+    ISalesOfficerServiceForSalesManager,
+    SalesOfficerServiceForSalesManager>();
+
+// Sales Officer Performance
+builder.Services.AddScoped<
+    ISalesOfficerPerformanceService,
+    SalesOfficerPerformanceService>();
+
+// Performance Export
+builder.Services.AddScoped<
+    IPerformanceExportService,
+    PerformanceExportService>();
+
+
+// =====================================================
+// Sales Officer Dashboard
+// =====================================================
+
+builder.Services.AddScoped<
+    ISalesOfficerDashboardService,
+    SalesOfficerDashboardService>();
+
+
+// =====================================================
+// Reports
+// =====================================================
+
+builder.Services.AddScoped<
+    IReportService,
+    ReportService>();
+
+
+// =====================================================
+// Google Forms
+// =====================================================
+
+builder.Services.AddScoped<
+    IGoogleFormsService,
+    GoogleFormsService>();
+
+
+// =====================================================
+// Background Services
+// =====================================================
+
+// SLA monitoring
+builder.Services.AddHostedService<SLABackgroundService>();
+
+// Automatic Google Form Lead Import
+builder.Services.AddHostedService<GoogleLeadPollingService>();
 
 
 var app = builder.Build();
 
+
+// =====================================================
+// Database Migration & Seeder
+// =====================================================
+
 using (var scope = app.Services.CreateScope())
 {
-    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var context =
+        scope.ServiceProvider
+            .GetRequiredService<ApplicationDbContext>();
+
     await context.Database.MigrateAsync();
+
     await DatabaseSeeder.SeedAsync(context);
 }
 
-// Configure the HTTP request pipeline.
+
+// =====================================================
+// HTTP Request Pipeline
+// =====================================================
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -158,7 +219,6 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
-
 
 
 app.Run();
