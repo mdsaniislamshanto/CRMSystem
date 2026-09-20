@@ -5,142 +5,397 @@
     Layout = "_AdminLayout";
 }
 
-<!-- ==============================
-     Row 1 :
-================================ -->
-
 <div class="container-fluid">
 
-    <!-- Dashboard Header -->
+    <!-- =====================================================
+         Dashboard Header
+    ====================================================== -->
+
     <div class="mb-4">
-        <h2 class="fw-bold">Admin Dashboard</h2>
+
+        <h2 class="fw-bold mb-1">
+            Admin Dashboard
+        </h2>
+
         <p class="text-muted mb-0">
             Welcome back, @Context.Session.GetString("FullName")
         </p>
+
     </div>
 
-    <!-- Row 1 : Summary Cards -->
+
+    <!-- =====================================================
+         Row 1 : Workforce KPI
+    ====================================================== -->
+
     <div class="row g-4">
 
         <!-- Total Users -->
+
         <div class="col-xl-3 col-md-6">
-            <div class="card dashboard-card">
+
+            <div class="card dashboard-card h-100">
+
                 <div class="card-body">
 
                     <div class="d-flex justify-content-between align-items-center">
 
                         <div>
-                            <h6 class="text-muted">Total Users</h6>
-                            <h2 class="fw-bold mb-0">25</h2>
+
+                            <h6 class="text-muted mb-2">
+                                Total Users
+                            </h6>
+
+                            <h2 class="fw-bold mb-1">
+                                @Model.TotalUsers
+                            </h2>
+
+                            <small class="text-muted">
+                                Active: @Model.ActiveUsers
+                            </small>
+
                         </div>
 
                         <div class="dashboard-icon bg-primary">
+
                             <i class="bi bi-people-fill"></i>
+
                         </div>
 
                     </div>
 
                 </div>
+
             </div>
+
         </div>
 
-        <!-- Sales Officers -->
+
+        <!-- Sales Managers -->
+
         <div class="col-xl-3 col-md-6">
-            <div class="card dashboard-card">
+
+            <div class="card dashboard-card h-100">
+
                 <div class="card-body">
 
                     <div class="d-flex justify-content-between align-items-center">
 
                         <div>
-                            <h6 class="text-muted">Sales Officers</h6>
-                            <h2 class="fw-bold mb-0">8</h2>
+
+                            <h6 class="text-muted mb-2">
+                                Sales Managers
+                            </h6>
+
+                            <h2 class="fw-bold mb-1">
+                                @Model.SalesManagers
+                            </h2>
+
+                            <small class="text-muted">
+                                Management level
+                            </small>
+
                         </div>
 
                         <div class="dashboard-icon bg-success">
-                            <i class="bi bi-person-workspace"></i>
+
+                            <i class="bi bi-person-badge-fill"></i>
+
                         </div>
 
                     </div>
 
                 </div>
+
             </div>
+
         </div>
 
-        <!-- Total Leads -->
+
+        <!-- Team Leads -->
+
         <div class="col-xl-3 col-md-6">
-            <div class="card dashboard-card">
+
+            <div class="card dashboard-card h-100">
+
                 <div class="card-body">
 
                     <div class="d-flex justify-content-between align-items-center">
 
                         <div>
-                            <h6 class="text-muted">Total Leads</h6>
-                            <h2 class="fw-bold mb-0">150</h2>
+
+                            <h6 class="text-muted mb-2">
+                                Team Leads
+                            </h6>
+
+                            <h2 class="fw-bold mb-1">
+                                @Model.TeamLeads
+                            </h2>
+
+                            <small class="text-muted">
+                                Active team leadership
+                            </small>
+
                         </div>
 
                         <div class="dashboard-icon bg-warning">
-                            <i class="bi bi-list-task"></i>
+
+                            <i class="bi bi-diagram-3-fill"></i>
+
                         </div>
 
                     </div>
 
                 </div>
+
             </div>
+
         </div>
 
-        <!-- Assigned Leads -->
+
+        <!-- Sales Officers -->
+
         <div class="col-xl-3 col-md-6">
-            <div class="card dashboard-card">
+
+            <div class="card dashboard-card h-100">
+
                 <div class="card-body">
 
                     <div class="d-flex justify-content-between align-items-center">
 
                         <div>
-                            <h6 class="text-muted">Assigned Leads</h6>
-                            <h2 class="fw-bold mb-0">18</h2>
+
+                            <h6 class="text-muted mb-2">
+                                Sales Officers
+                            </h6>
+
+                            <h2 class="fw-bold mb-1">
+                                @Model.SalesOfficers
+                            </h2>
+
+                            <small class="text-muted">
+                                Field sales team
+                            </small>
+
                         </div>
 
-                        <div class="dashboard-icon bg-danger">
-                            <i class="bi bi-hourglass-split"></i>
+                        <div class="dashboard-icon bg-info">
+
+                            <i class="bi bi-person-workspace"></i>
+
                         </div>
 
                     </div>
 
                 </div>
+
             </div>
+
         </div>
 
     </div>
 
-</div>
 
-<!-- ==============================
-     Row 2 : Charts
+
+    <!-- ==============================
+     Target Overview
 ================================ -->
 
-<div class="row mt-4">
+    <div class="card dashboard-card mt-4">
 
-    <!-- Lead Status -->
+        <div class="card-header bg-white border-0">
 
-    <div class="col-lg-6">
+            <div class="d-flex justify-content-between align-items-center">
 
-        <div class="card dashboard-card h-100">
+                <div>
 
-            <div class="card-header bg-white">
+                    <h5 class="mb-1">
+                        <i class="bi bi-bullseye me-2"></i>
+                        Overall Target Overview
+                    </h5>
 
-                <h5 class="mb-0">
+                    <small class="text-muted">
+                        Combined target achievement across all Sales Managers
+                    </small>
 
-                    Lead Status
+                </div>
 
-                </h5>
+                <span class="badge bg-primary-subtle text-primary">
+                    Sales Manager Targets
+                </span>
 
             </div>
 
-            <div class="card-body">
+        </div>
 
-                <div style="height:300px; position:relative;">
 
-                    <canvas id="leadStatusChart"></canvas>
+        <div class="card-body pt-2">
+
+            <!-- Target Summary -->
+
+            <div class="row g-3">
+
+                <!-- Total Target -->
+
+                <div class="col-md-4">
+
+                    <div class="border rounded-3 p-3 h-100">
+
+                        <div class="d-flex justify-content-between align-items-center">
+
+                            <div>
+
+                                <small class="text-muted d-block">
+                                    Total Target
+                                </small>
+
+                                <h3 class="fw-bold mb-0 mt-1">
+                                    @Model.TotalTarget
+                                </h3>
+
+                            </div>
+
+                            <div class="dashboard-icon bg-primary">
+
+                                <i class="bi bi-flag-fill"></i>
+
+                            </div>
+
+                        </div>
+
+                        <small class="text-muted">
+                            Combined target assigned to Sales Managers
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Target Fulfilled -->
+
+                <div class="col-md-4">
+
+                    <div class="border rounded-3 p-3 h-100">
+
+                        <div class="d-flex justify-content-between align-items-center">
+
+                            <div>
+
+                                <small class="text-muted d-block">
+                                    Target Fulfilled
+                                </small>
+
+                                <h3 class="fw-bold mb-0 mt-1">
+                                    @Model.TargetFulfilled
+                                </h3>
+
+                            </div>
+
+                            <div class="dashboard-icon bg-success">
+
+                                <i class="bi bi-check-circle-fill"></i>
+
+                            </div>
+
+                        </div>
+
+                        <small class="text-muted">
+                            Completed leads against the target
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Target Progress -->
+
+                <div class="col-md-4">
+
+                    <div class="border rounded-3 p-3 h-100">
+
+                        <div class="d-flex justify-content-between align-items-center">
+
+                            <div>
+
+                                <small class="text-muted d-block">
+                                    Target Progress
+                                </small>
+
+                                <h3 class="fw-bold mb-0 mt-1">
+
+                                    @Model.TargetProgress.ToString("0.##")%
+
+                                </h3>
+
+                            </div>
+
+                            <div class="dashboard-icon bg-info">
+
+                                <i class="bi bi-graph-up-arrow"></i>
+
+                            </div>
+
+                        </div>
+
+                        <small class="text-muted">
+                            Overall achievement percentage
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Overall Achievement -->
+
+            <div class="mt-4">
+
+                <div class="d-flex justify-content-between align-items-center mb-2">
+
+                    <div>
+
+                        <span class="fw-semibold">
+                            Overall Achievement
+                        </span>
+
+                    </div>
+
+                    <div>
+
+                        <small class="text-muted">
+
+                            @Model.TargetFulfilled /
+                            @Model.TotalTarget
+
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                @{
+                    var targetProgressBar =
+                        Math.Min(
+                            (double)Model.TargetProgress,
+                            100);
+                }
+
+
+                <div class="progress"
+                     style="height: 10px;">
+
+                    <div class="progress-bar bg-success"
+                         role="progressbar"
+                         style="width: @targetProgressBar.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)%"
+                         aria-valuenow="@targetProgressBar"
+                         aria-valuemin="0"
+                         aria-valuemax="100">
+                    </div>
 
                 </div>
 
@@ -150,29 +405,671 @@
 
     </div>
 
-    <!-- Monthly Trend -->
 
-    <div class="col-lg-6">
 
-        <div class="card dashboard-card h-100">
+    <!-- =====================================================
+         Row 2 : Lead KPI
+    ====================================================== -->
 
-            <div class="card-header bg-white">
+    <div class="row g-4 mt-1">
 
-                <h5 class="mb-0">
+        <!-- Total Leads -->
 
-                    Monthly Lead Trend
+        <div class="col-xl-3 col-md-6">
 
-                </h5>
+            <div class="card dashboard-card h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <h6 class="text-muted mb-2">
+                                Total Leads
+                            </h6>
+
+                            <h2 class="fw-bold mb-1">
+                                @Model.TotalLeads
+                            </h2>
+
+                            <small class="text-muted">
+                                Active operational leads
+                            </small>
+
+                        </div>
+
+                        <div class="dashboard-icon bg-primary">
+
+                            <i class="bi bi-list-task"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
 
             </div>
 
-            <div class="card-body">
+        </div>
 
-                <div style="height:300px; position:relative;">
 
-                    <canvas id="monthlyTrendChart"></canvas>
+        <!-- New Leads -->
+
+        <div class="col-xl-3 col-md-6">
+
+            <div class="card dashboard-card h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <h6 class="text-muted mb-2">
+                                New Leads
+                            </h6>
+
+                            <h2 class="fw-bold mb-1">
+                                @Model.NewLeads
+                            </h2>
+
+                            <small class="text-muted">
+                                Waiting for processing
+                            </small>
+
+                        </div>
+
+                        <div class="dashboard-icon bg-warning">
+
+                            <i class="bi bi-plus-circle-fill"></i>
+
+                        </div>
+
+                    </div>
 
                 </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Unassigned Leads -->
+
+        <div class="col-xl-3 col-md-6">
+
+            <div class="card dashboard-card h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <h6 class="text-muted mb-2">
+                                Unassigned Leads
+                            </h6>
+
+                            <h2 class="fw-bold mb-1">
+                                @Model.UnassignedLeads
+                            </h2>
+
+                            <small class="text-muted">
+                                Waiting for assignment
+                            </small>
+
+                        </div>
+
+                        <div class="dashboard-icon bg-danger">
+
+                            <i class="bi bi-person-plus-fill"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Completed Leads -->
+
+        <div class="col-xl-3 col-md-6">
+
+            <div class="card dashboard-card h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <h6 class="text-muted mb-2">
+                                Completed Leads
+                            </h6>
+
+                            <h2 class="fw-bold mb-1">
+                                @Model.CompletedLeads
+                            </h2>
+
+                            <small class="text-muted">
+                                Successfully completed
+                            </small>
+
+                        </div>
+
+                        <div class="dashboard-icon bg-success">
+
+                            <i class="bi bi-check-circle-fill"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         Row 3 : Main Analytics Charts
+    ====================================================== -->
+
+    <div class="row g-4 mt-1">
+
+        <!-- =================================================
+             Lead Status Chart
+        ================================================== -->
+
+        <div class="col-lg-6">
+
+            <div class="card dashboard-card h-100">
+
+                <div class="card-header bg-white border-0 pt-4 px-4">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <h5 class="fw-bold mb-1">
+
+                                <i class="bi bi-pie-chart-fill me-2"></i>
+
+                                Lead Status
+
+                            </h5>
+
+                            <small class="text-muted">
+                                Current distribution of active leads
+                            </small>
+
+                        </div>
+
+                        <span class="badge bg-primary-subtle text-primary">
+
+                            @Model.TotalLeads Leads
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="card-body px-4 pb-4">
+
+                    <div style="height:300px; position:relative;">
+
+                        <canvas id="leadStatusChart"></canvas>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             Workforce Distribution
+        ================================================== -->
+
+        <div class="col-lg-6">
+
+            <div class="card dashboard-card h-100">
+
+                <div class="card-header bg-white border-0 pt-4 px-4">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <h5 class="fw-bold mb-1">
+
+                                <i class="bi bi-people-fill me-2"></i>
+
+                                Workforce Distribution
+
+                            </h5>
+
+                            <small class="text-muted">
+                                Users by system role
+                            </small>
+
+                        </div>
+
+                        <span class="badge bg-success-subtle text-success">
+
+                            @Model.TotalUsers Users
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="card-body px-4 pb-4">
+
+                    <div style="height:300px; position:relative;">
+
+                        <canvas id="userDistributionChart"></canvas>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         Lead Pipeline
+    ====================================================== -->
+
+    <div class="card dashboard-card mt-4">
+
+        <div class="card-header bg-white border-0 pt-4 px-4">
+
+            <div>
+
+                <h5 class="fw-bold mb-1">
+
+                    <i class="bi bi-funnel-fill me-2"></i>
+
+                    Lead Pipeline
+
+                </h5>
+
+                <small class="text-muted">
+                    Current lead progression across the CRM
+                </small>
+
+            </div>
+
+        </div>
+
+        <div class="card-body px-4 pb-4">
+
+            <div class="row g-3">
+
+                <!-- New -->
+
+                <div class="col-xl">
+
+                    <div class="border rounded-3 p-3 h-100">
+
+                        <div class="d-flex justify-content-between">
+
+                            <span class="text-muted">
+                                New
+                            </span>
+
+                            <i class="bi bi-plus-circle text-primary"></i>
+
+                        </div>
+
+                        <h3 class="fw-bold mb-1 mt-2">
+                            @Model.NewLeads
+                        </h3>
+
+                        <small class="text-muted">
+                            Newly captured
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Assigned -->
+
+                <div class="col-xl">
+
+                    <div class="border rounded-3 p-3 h-100">
+
+                        <div class="d-flex justify-content-between">
+
+                            <span class="text-muted">
+                                Assigned
+                            </span>
+
+                            <i class="bi bi-person-check text-warning"></i>
+
+                        </div>
+
+                        <h3 class="fw-bold mb-1 mt-2">
+                            @Model.AssignedLeads
+                        </h3>
+
+                        <small class="text-muted">
+                            Assigned to officers
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Accepted -->
+
+                <div class="col-xl">
+
+                    <div class="border rounded-3 p-3 h-100">
+
+                        <div class="d-flex justify-content-between">
+
+                            <span class="text-muted">
+                                Accepted
+                            </span>
+
+                            <i class="bi bi-check-circle text-success"></i>
+
+                        </div>
+
+                        <h3 class="fw-bold mb-1 mt-2">
+                            @Model.AcceptedLeads
+                        </h3>
+
+                        <small class="text-muted">
+                            Accepted by officers
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <!-- In Progress -->
+
+                <div class="col-xl">
+
+                    <div class="border rounded-3 p-3 h-100">
+
+                        <div class="d-flex justify-content-between">
+
+                            <span class="text-muted">
+                                In Progress
+                            </span>
+
+                            <i class="bi bi-arrow-repeat text-info"></i>
+
+                        </div>
+
+                        <h3 class="fw-bold mb-1 mt-2">
+                            @Model.InProgressLeads
+                        </h3>
+
+                        <small class="text-muted">
+                            Currently progressing
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Completed -->
+
+                <div class="col-xl">
+
+                    <div class="border rounded-3 p-3 h-100">
+
+                        <div class="d-flex justify-content-between">
+
+                            <span class="text-muted">
+                                Completed
+                            </span>
+
+                            <i class="bi bi-trophy-fill text-success"></i>
+
+                        </div>
+
+                        <h3 class="fw-bold mb-1 mt-2">
+                            @Model.CompletedLeads
+                        </h3>
+
+                        <small class="text-muted">
+                            Successfully completed
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         User Activity + Archived Leads
+    ====================================================== -->
+
+    <div class="row g-4 mt-1">
+
+        <!-- User Activity -->
+
+        <div class="col-lg-6">
+
+            <div class="card dashboard-card h-100">
+
+                <div class="card-header bg-white border-0 pt-4 px-4">
+
+                    <h5 class="fw-bold mb-1">
+
+                        <i class="bi bi-person-lines-fill me-2"></i>
+
+                        User Activity
+
+                    </h5>
+
+                    <small class="text-muted">
+                        Active and inactive user accounts
+                    </small>
+
+                </div>
+
+                <div class="card-body px-4 pb-4">
+
+                    <!-- Active Users -->
+
+                    <div class="d-flex justify-content-between mb-2">
+
+                        <span>
+                            Active Users
+                        </span>
+
+                        <strong>
+                            @Model.ActiveUsers
+                        </strong>
+
+                    </div>
+
+                    <div class="progress mb-4"
+                         style="height:7px;">
+
+                        @{
+                            var activePercentage =
+                                Model.TotalUsers > 0
+                                    ? (double)Model.ActiveUsers / Model.TotalUsers * 100
+                                    : 0;
+                        }
+
+                        <div class="progress-bar bg-success"
+                             role="progressbar"
+                             style="width:@activePercentage.ToString("0.##")%">
+                        </div>
+
+                    </div>
+
+
+                    <!-- Inactive Users -->
+
+                    <div class="d-flex justify-content-between mb-2">
+
+                        <span>
+                            Inactive Users
+                        </span>
+
+                        <strong>
+                            @Model.InactiveUsers
+                        </strong>
+
+                    </div>
+
+                    <div class="progress"
+                         style="height:7px;">
+
+                        @{
+                            var inactivePercentage =
+                                Model.TotalUsers > 0
+                                    ? (double)Model.InactiveUsers / Model.TotalUsers * 100
+                                    : 0;
+                        }
+
+                        <div class="progress-bar bg-secondary"
+                             role="progressbar"
+                             style="width:@inactivePercentage.ToString("0.##")%">
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Archived Leads -->
+
+        <div class="col-lg-6">
+
+            <div class="card dashboard-card h-100">
+
+                <div class="card-header bg-white border-0 pt-4 px-4">
+
+                    <h5 class="fw-bold mb-1">
+
+                        <i class="bi bi-archive-fill me-2"></i>
+
+                        Archived Leads
+
+                    </h5>
+
+                    <small class="text-muted">
+                        Leads removed from active operations
+                    </small>
+
+                </div>
+
+                <div class="card-body px-4 pb-4">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <h2 class="fw-bold mb-1">
+                                @Model.ArchivedLeads
+                            </h2>
+
+                            <p class="text-muted mb-0">
+                                Archived lead(s)
+                            </p>
+
+                        </div>
+
+                        <div class="dashboard-icon bg-secondary">
+
+                            <i class="bi bi-archive-fill"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         Monthly Lead Trend
+    ====================================================== -->
+
+    <div class="card dashboard-card mt-4">
+
+        <div class="card-header bg-white border-0 pt-4 px-4">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+
+                    <h5 class="fw-bold mb-1">
+
+                        <i class="bi bi-graph-up-arrow me-2"></i>
+
+                        Monthly Lead Trend
+
+                    </h5>
+
+                    <small class="text-muted">
+                        Lead creation trend over the last 6 months
+                    </small>
+
+                </div>
+
+                <span class="badge bg-primary-subtle text-primary">
+
+                    Last 6 Months
+
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="card-body px-4 pb-4">
+
+            <div style="height:320px; position:relative;">
+
+                <canvas id="monthlyTrendChart"></canvas>
 
             </div>
 
@@ -181,10 +1078,17 @@
     </div>
 
 </div>
+
 
 @section Scripts
 {
+
     <script>
+
+        // =====================================================
+        // Lead Status Data
+        // =====================================================
+
         const leadStatusData = {
 
             newLeads: @Model.NewLeads,
@@ -200,5 +1104,332 @@
             rejectedLeads: @Model.RejectedLeads
 
                 };
+
+
+        // =====================================================
+        // Workforce Distribution Data
+        // =====================================================
+
+        const userDistributionData = {
+
+            adminUsers: @Model.AdminUsers,
+
+            salesManagers: @Model.SalesManagers,
+
+            teamLeads: @Model.TeamLeads,
+
+            salesOfficers: @Model.SalesOfficers,
+
+            accountUsers: @Model.AccountUsers,
+
+            hrUsers: @Model.HRUsers
+
+                };
+
+
+        // =====================================================
+        // Monthly Lead Trend Data
+        // =====================================================
+
+        const monthlyLeadTrendData = {
+
+            labels: [
+
+                        @foreach (var item in Model.MonthlyLeadTrend)
+                {
+                    @: "@item.Month",
+                }
+
+                    ],
+
+            values: [
+
+                        @foreach (var item in Model.MonthlyLeadTrend)
+                {
+                    @: @item.LeadCount,
+                }
+
+                    ]
+
+        };
+
+
+        // =====================================================
+        // Chart Initialization
+        // =====================================================
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+
+                // =================================================
+                // Workforce Distribution Chart
+                // =================================================
+
+                const workforceCanvas =
+                    document.getElementById(
+                        "userDistributionChart"
+                    );
+
+
+                if (
+                    workforceCanvas &&
+                    typeof Chart !== "undefined"
+                ) {
+
+                    new Chart(
+                        workforceCanvas,
+                        {
+
+                            type: "doughnut",
+
+                            data: {
+
+                                labels: [
+
+                                    "Admin",
+
+                                    "Sales Managers",
+
+                                    "Team Leads",
+
+                                    "Sales Officers",
+
+                                    "Account",
+
+                                    "HR"
+
+                                ],
+
+                                datasets: [
+
+                                    {
+
+                                        data: [
+
+                                            userDistributionData.adminUsers,
+
+                                            userDistributionData.salesManagers,
+
+                                            userDistributionData.teamLeads,
+
+                                            userDistributionData.salesOfficers,
+
+                                            userDistributionData.accountUsers,
+
+                                            userDistributionData.hrUsers
+
+                                        ],
+
+                                        borderWidth: 2
+
+                                    }
+
+                                ]
+
+                            },
+
+                            options: {
+
+                                responsive: true,
+
+                                maintainAspectRatio: false,
+
+                                cutout: "65%",
+
+                                plugins: {
+
+                                    legend: {
+
+                                        position: "bottom"
+
+                                    },
+
+                                    tooltip: {
+
+                                        callbacks: {
+
+                                            label: function (context) {
+
+                                                const value =
+                                                    context.raw;
+
+                                                const total =
+                                                    context.dataset.data
+                                                        .reduce(
+                                                            (sum, item) =>
+                                                                sum + item,
+                                                            0
+                                                        );
+
+                                                const percentage =
+                                                    total > 0
+                                                        ? (
+                                                            value /
+                                                            total *
+                                                            100
+                                                        ).toFixed(1)
+                                                        : 0;
+
+                                                return `${context.label}: ${value} (${percentage}%)`;
+
+                                            }
+
+                                        }
+
+                                    }
+
+                                }
+
+                            }
+
+                        }
+                    );
+
+                }
+
+
+                // =================================================
+                // Monthly Lead Trend Chart
+                // =================================================
+
+                const monthlyTrendCanvas =
+                    document.getElementById(
+                        "monthlyTrendChart"
+                    );
+
+
+                if (
+                    monthlyTrendCanvas &&
+                    typeof Chart !== "undefined"
+                ) {
+
+                    new Chart(
+                        monthlyTrendCanvas,
+                        {
+
+                            type: "line",
+
+                            data: {
+
+                                labels:
+                                    monthlyLeadTrendData.labels,
+
+                                datasets: [
+
+                                    {
+
+                                        label:
+                                            "Leads Created",
+
+                                        data:
+                                            monthlyLeadTrendData.values,
+
+                                        tension: 0.35,
+
+                                        fill: true,
+
+                                        borderWidth: 2,
+
+                                        pointRadius: 4,
+
+                                        pointHoverRadius: 6
+
+                                    }
+
+                                ]
+
+                            },
+
+                            options: {
+
+                                responsive: true,
+
+                                maintainAspectRatio: false,
+
+                                interaction: {
+
+                                    intersect: false,
+
+                                    mode: "index"
+
+                                },
+
+                                scales: {
+
+                                    y: {
+
+                                        beginAtZero: true,
+
+                                        ticks: {
+
+                                            precision: 0
+
+                                        },
+
+                                        title: {
+
+                                            display: true,
+
+                                            text:
+                                                "Number of Leads"
+
+                                        }
+
+                                    },
+
+                                    x: {
+
+                                        title: {
+
+                                            display: true,
+
+                                            text:
+                                                "Month"
+
+                                        }
+
+                                    }
+
+                                },
+
+                                plugins: {
+
+                                    legend: {
+
+                                        display: true,
+
+                                        position: "top"
+
+                                    },
+
+                                    tooltip: {
+
+                                        callbacks: {
+
+                                            label:
+                                                function (context) {
+
+                                                    return `Leads Created: ${context.raw}`;
+
+                                                }
+
+                                        }
+
+                                    }
+
+                                }
+
+                            }
+
+                        }
+                    );
+
+                }
+
+            }
+        );
+
     </script>
 }

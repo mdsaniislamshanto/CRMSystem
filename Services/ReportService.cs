@@ -189,49 +189,68 @@ namespace CRMSystem.Services
         // =====================================================
 
         public async Task<SalesManagerReportViewModel>
-            GetSalesManagerReportAsync()
+            GetSalesManagerReportAsync(
+                long salesManagerId)
         {
             // =====================================================
-            // 1. Get Active Sales Officers
+            // 1. Get Sales Officers Under This Sales Manager
             // =====================================================
 
             var salesOfficers = await _context.Users
+                .AsNoTracking()
+                .Include(u => u.TeamLead)
                 .Where(u =>
                     u.IsActive &&
+                    !u.IsDeleted &&
                     u.Role != null &&
-                    u.Role.RoleKey == "SALES_OFFICER")
+                    u.Role.RoleKey == "SALES_OFFICER" &&
+                    u.TeamLead != null &&
+                    u.TeamLead.SalesManagerId == salesManagerId)
                 .ToListAsync();
 
 
             // =====================================================
-            // 2. Get Assignments
+            // 2. Get Officer IDs
             // =====================================================
 
-            var assignments = await _context.LeadAssignments
-                .Where(a =>
-                    salesOfficers
-                        .Select(u => u.UserId)
-                        .Contains(a.SalesOfficerId))
-                .ToListAsync();
+            var salesOfficerIds =
+                salesOfficers
+                    .Select(u => u.UserId)
+                    .ToList();
 
 
             // =====================================================
-            // 3. Get Feedbacks
+            // 3. Get Assignments Of These Officers Only
             // =====================================================
 
-            var feedbacks = await _context.Feedbacks
-                .Include(f => f.LeadAssignment)
-                .Where(f =>
-                    f.LeadAssignment != null &&
-                    salesOfficers
-                        .Select(u => u.UserId)
-                        .Contains(
+            var assignments =
+                await _context.LeadAssignments
+                    .AsNoTracking()
+                    .Where(a =>
+                        !a.IsDeleted &&
+                        salesOfficerIds.Contains(
+                            a.SalesOfficerId))
+                    .ToListAsync();
+
+
+            // =====================================================
+            // 4. Get Feedbacks Of These Officers Only
+            // =====================================================
+
+            var feedbacks =
+                await _context.Feedbacks
+                    .AsNoTracking()
+                    .Include(f => f.LeadAssignment)
+                    .Where(f =>
+                        !f.IsDeleted &&
+                        f.LeadAssignment != null &&
+                        salesOfficerIds.Contains(
                             f.LeadAssignment.SalesOfficerId))
-                .ToListAsync();
+                    .ToListAsync();
 
 
             // =====================================================
-            // 4. Build Officer-wise Reports
+            // 5. Build Officer-wise Reports
             // =====================================================
 
             var officerReports =
@@ -395,7 +414,7 @@ namespace CRMSystem.Services
 
 
             // =====================================================
-            // 5. Team Summary
+            // 6. Team Summary
             // =====================================================
 
             var totalAssigned =
@@ -424,7 +443,7 @@ namespace CRMSystem.Services
 
 
             // =====================================================
-            // Team Completed Leads
+            // 7. Team Completed Leads
             // =====================================================
 
             var teamLatestFeedbacks =
@@ -445,7 +464,7 @@ namespace CRMSystem.Services
 
 
             // =====================================================
-            // Team SLA Metrics
+            // 8. Team SLA Metrics
             // =====================================================
 
             var totalAcceptanceSLAMissed =
@@ -464,7 +483,7 @@ namespace CRMSystem.Services
 
 
             // =====================================================
-            // Return Final Report
+            // 9. Return Final Report
             // =====================================================
 
             return new SalesManagerReportViewModel

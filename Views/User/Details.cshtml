@@ -10,20 +10,33 @@
 
     <!-- Page Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
+
         <div>
-            <h3 class="fw-bold mb-1">User Details</h3>
+
+            <h3 class="fw-bold mb-1">
+                User Details
+            </h3>
+
             <p class="text-muted mb-0">
                 View complete information about this user.
             </p>
+
         </div>
 
-        <a asp-action="Index" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Back
+        <a asp-action="Index"
+           class="btn btn-outline-secondary">
+
+            <i class="bi bi-arrow-left"></i>
+            Back
+
         </a>
+
     </div>
+
 
     <!-- Profile Information -->
     <div class="card shadow-sm mb-4">
+
         <div class="card-header fw-semibold">
             Profile Information
         </div>
@@ -31,6 +44,7 @@
         <div class="card-body">
 
             <div class="row mb-3">
+
                 <div class="col-md-4 fw-semibold">
                     Employee Code
                 </div>
@@ -38,9 +52,12 @@
                 <div class="col-md-8">
                     @Model.EmployeeCode
                 </div>
+
             </div>
 
+
             <div class="row mb-3">
+
                 <div class="col-md-4 fw-semibold">
                     Full Name
                 </div>
@@ -48,9 +65,12 @@
                 <div class="col-md-8">
                     @Model.FullName
                 </div>
+
             </div>
 
-            <div class="row">
+
+            <div class="row mb-3">
+
                 <div class="col-md-4 fw-semibold">
                     Role
                 </div>
@@ -58,13 +78,80 @@
                 <div class="col-md-8">
                     @Model.RoleName
                 </div>
+
             </div>
 
+
+            <!-- Team Lead -->
+            @if (Model.RoleName == "Sales Officer")
+            {
+                <div class="row mb-3">
+
+                    <div class="col-md-4 fw-semibold">
+                        Team Lead
+                    </div>
+
+                    <div class="col-md-8">
+
+                        @if (!string.IsNullOrWhiteSpace(
+                            Model.TeamLeadName))
+                        {
+                            <span>
+                                @Model.TeamLeadName
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">
+                                Not Assigned
+                            </span>
+                        }
+
+                    </div>
+
+                </div>
+            }
+
+
+            <!-- Sales Manager -->
+            @if (Model.RoleName == "Team Lead" ||
+                 Model.RoleName == "Sales Officer")
+            {
+                <div class="row">
+
+                    <div class="col-md-4 fw-semibold">
+                        Sales Manager
+                    </div>
+
+                    <div class="col-md-8">
+
+                        @if (!string.IsNullOrWhiteSpace(
+                            Model.SalesManagerName))
+                        {
+                            <span>
+                                @Model.SalesManagerName
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">
+                                Not Assigned
+                            </span>
+                        }
+
+                    </div>
+
+                </div>
+            }
+
         </div>
+
     </div>
+
 
     <!-- Contact Information -->
     <div class="card shadow-sm mb-4">
+
         <div class="card-header fw-semibold">
             Contact Information
         </div>
@@ -72,6 +159,7 @@
         <div class="card-body">
 
             <div class="row mb-3">
+
                 <div class="col-md-4 fw-semibold">
                     Email
                 </div>
@@ -79,9 +167,12 @@
                 <div class="col-md-8">
                     @Model.Email
                 </div>
+
             </div>
 
+
             <div class="row">
+
                 <div class="col-md-4 fw-semibold">
                     Phone Number
                 </div>
@@ -89,13 +180,17 @@
                 <div class="col-md-8">
                     @Model.PhoneNumber
                 </div>
+
             </div>
 
         </div>
+
     </div>
+
 
     <!-- Account Information -->
     <div class="card shadow-sm mb-4">
+
         <div class="card-header fw-semibold">
             Account Information
         </div>
@@ -103,6 +198,7 @@
         <div class="card-body">
 
             <div class="row mb-3">
+
                 <div class="col-md-4 fw-semibold">
                     Email Verified
                 </div>
@@ -123,9 +219,12 @@
                     }
 
                 </div>
+
             </div>
 
+
             <div class="row mb-3">
+
                 <div class="col-md-4 fw-semibold">
                     Status
                 </div>
@@ -146,33 +245,51 @@
                     }
 
                 </div>
+
             </div>
 
+
             <div class="row mb-3">
+
                 <div class="col-md-4 fw-semibold">
                     Last Login
                 </div>
 
                 <div class="col-md-8">
-                    @(Model.LastLoginAt?.ToString("dd MMM yyyy hh:mm tt") ?? "Never")
+
+                    @(Model.LastLoginAt?
+                        .ToString("dd MMM yyyy hh:mm tt")
+                        ?? "Never")
+
                 </div>
+
             </div>
 
+
             <div class="row">
+
                 <div class="col-md-4 fw-semibold">
                     Last Password Changed
                 </div>
 
                 <div class="col-md-8">
-                    @(Model.LastPasswordChangedAt?.ToString("dd MMM yyyy hh:mm tt") ?? "Never")
+
+                    @(Model.LastPasswordChangedAt?
+                        .ToString("dd MMM yyyy hh:mm tt")
+                        ?? "Never")
+
                 </div>
+
             </div>
 
         </div>
+
     </div>
+
 
     <!-- Work Summary -->
     <div class="card shadow-sm mb-4">
+
         <div class="card-header fw-semibold">
             Work Summary
         </div>
@@ -182,15 +299,21 @@
             <i class="bi bi-bar-chart fs-2"></i>
 
             <p class="mt-2 mb-0">
-                This section will display assigned leads, feedback statistics,
-                and performance metrics in a future update.
+
+                This section will display assigned leads,
+                feedback statistics, and performance metrics
+                in a future update.
+
             </p>
 
         </div>
+
     </div>
+
 
     <!-- Recent Assigned Leads -->
     <div class="card shadow-sm mb-4">
+
         <div class="card-header fw-semibold">
             Recent Assigned Leads
         </div>
@@ -204,10 +327,13 @@
             </p>
 
         </div>
+
     </div>
+
 
     <!-- Activity Timeline -->
     <div class="card shadow-sm">
+
         <div class="card-header fw-semibold">
             Activity Timeline
         </div>
@@ -221,6 +347,7 @@
             </p>
 
         </div>
+
     </div>
 
 </div>

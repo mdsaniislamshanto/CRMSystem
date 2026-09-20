@@ -2153,5 +2153,346 @@ namespace CRMSystem.Services
                     officer.AcceptanceRate * 0.10
                 );
         }
+
+        // =====================================================
+        // Get Sales Officer IDs Under A Sales Manager
+        // =====================================================
+
+        private async Task<HashSet<long>>
+            GetSalesOfficerIdsForSalesManagerAsync(
+                long salesManagerId)
+        {
+            var officerIds =
+                await _context.Users
+                    .AsNoTracking()
+                    .Where(u =>
+                        u.Role != null &&
+                        u.Role.RoleKey == "SALES_OFFICER" &&
+                        u.IsActive &&
+                        !u.IsDeleted &&
+                        u.TeamLead != null &&
+                        u.TeamLead.SalesManagerId ==
+                            salesManagerId)
+                    .Select(u => u.UserId)
+                    .ToListAsync();
+
+            return officerIds.ToHashSet();
+        }
+
+
+        // =====================================================
+        // Get Performance Of Sales Officers Under A Manager
+        // =====================================================
+
+        public async Task<List<SalesOfficerPerformanceViewModel>>
+            GetPerformanceForSalesManagerAsync(
+                long salesManagerId,
+                PerformanceFilterViewModel? filter = null)
+        {
+            var managerOfficerIds =
+                await GetSalesOfficerIdsForSalesManagerAsync(
+                    salesManagerId);
+
+            if (managerOfficerIds.Count == 0)
+            {
+                return new List<SalesOfficerPerformanceViewModel>();
+            }
+
+            var allPerformance =
+                await GetPerformanceAsync(filter);
+
+            return allPerformance
+                .Where(p =>
+                    managerOfficerIds.Contains(
+                        p.SalesOfficerId))
+                .ToList();
+        }
+
+        // =====================================================
+        // Get Top Performer For Sales Manager
+        // =====================================================
+
+        public async Task<PerformanceHighlightViewModel?>
+            GetTopPerformerForSalesManagerAsync(
+                long salesManagerId,
+                PerformanceFilterViewModel? filter = null)
+        {
+            var performance =
+                await GetPerformanceForSalesManagerAsync(
+                    salesManagerId,
+                    filter);
+
+            if (performance.Count == 0)
+            {
+                return null;
+            }
+
+            var scoredPerformance =
+                performance
+                    .Select(officer => new
+                    {
+                        Officer = officer,
+
+                        Score =
+                            (officer.CompletionRate * 0.25)
+                            +
+                            (officer.FirstFeedbackSLAComplianceRate * 0.20)
+                            +
+                            (officer.FollowUpTimelinessRate * 0.20)
+                            +
+                            (officer.AcceptanceSLAComplianceRate * 0.15)
+                            +
+                            (officer.NextFeedbackSLAComplianceRate * 0.10)
+                            +
+                            (officer.AcceptanceRate * 0.10)
+                    })
+                    .OrderByDescending(x => x.Score)
+                    .ThenByDescending(
+                        x => x.Officer.CompletedLeads)
+                    .ThenByDescending(
+                        x => x.Officer.TotalFeedbacks)
+                    .FirstOrDefault();
+
+            if (scoredPerformance == null)
+            {
+                return null;
+            }
+
+            var officerData =
+                scoredPerformance.Officer;
+
+            return new PerformanceHighlightViewModel
+            {
+                SalesOfficerId =
+                    officerData.SalesOfficerId,
+
+                SalesOfficerName =
+                    officerData.SalesOfficerName,
+
+                PerformanceScore =
+                    Math.Round(
+                        scoredPerformance.Score,
+                        2),
+
+                AcceptanceRate =
+                    officerData.AcceptanceRate,
+
+                AcceptanceSLAComplianceRate =
+                    officerData.AcceptanceSLAComplianceRate,
+
+                FirstFeedbackSLAComplianceRate =
+                    officerData.FirstFeedbackSLAComplianceRate,
+
+                NextFeedbackSLAComplianceRate =
+                    officerData.NextFeedbackSLAComplianceRate,
+
+                FollowUpTimelinessRate =
+                    officerData.FollowUpTimelinessRate,
+
+                CompletionRate =
+                    officerData.CompletionRate,
+
+                TotalAssignedLeads =
+                    officerData.TotalAssignedLeads,
+
+                AcceptedLeads =
+                    officerData.AcceptedLeads,
+
+                CompletedLeads =
+                    officerData.CompletedLeads,
+
+                TotalFeedbacks =
+                    officerData.TotalFeedbacks,
+
+                AcceptanceSLAMissed =
+                    officerData.AcceptanceSLAMissed,
+
+                FirstFeedbackSLAMissed =
+                    officerData.FirstFeedbackSLAMissed,
+
+                NextFeedbackSLAMissed =
+                    officerData.NextFeedbackSLAMissed,
+
+                OverdueFollowUps =
+                    officerData.OverdueFollowUps
+            };
+        }
+
+
+        // =====================================================
+        // Get Needs Attention Officer For Sales Manager
+        // =====================================================
+
+        public async Task<PerformanceHighlightViewModel?>
+            GetNeedsAttentionForSalesManagerAsync(
+                long salesManagerId,
+                PerformanceFilterViewModel? filter = null)
+        {
+            var performance =
+                await GetPerformanceForSalesManagerAsync(
+                    salesManagerId,
+                    filter);
+
+            if (performance.Count == 0)
+            {
+                return null;
+            }
+
+            var scoredPerformance =
+                performance
+                    .Select(officer =>
+                    {
+                        var attentionScore = 0.0;
+
+                        // -------------------------------------
+                        // Acceptance SLA
+                        // -------------------------------------
+
+                        attentionScore +=
+                            officer.AcceptanceSLAMissed * 3;
+
+
+                        // -------------------------------------
+                        // First Feedback SLA
+                        // -------------------------------------
+
+                        attentionScore +=
+                            officer.FirstFeedbackSLAMissed * 3;
+
+
+                        // -------------------------------------
+                        // Next Feedback SLA
+                        // -------------------------------------
+
+                        attentionScore +=
+                            officer.NextFeedbackSLAMissed * 3;
+
+
+                        // -------------------------------------
+                        // Overdue Follow-ups
+                        // -------------------------------------
+
+                        attentionScore +=
+                            officer.OverdueFollowUps * 4;
+
+
+                        // -------------------------------------
+                        // Low Acceptance Rate
+                        // -------------------------------------
+
+                        if (
+                            officer.TotalAssignedLeads > 0 &&
+                            officer.AcceptanceRate < 50)
+                        {
+                            attentionScore +=
+                                (50 - officer.AcceptanceRate) / 5;
+                        }
+
+
+                        // -------------------------------------
+                        // Low Follow-up Timeliness
+                        // -------------------------------------
+
+                        if (
+                            officer.FollowUpTimelinessRate < 70)
+                        {
+                            attentionScore +=
+                                (70 - officer.FollowUpTimelinessRate) / 7;
+                        }
+
+
+                        // -------------------------------------
+                        // Low Completion Rate
+                        // -------------------------------------
+
+                        if (
+                            officer.AcceptedLeads > 0 &&
+                            officer.CompletionRate < 50)
+                        {
+                            attentionScore +=
+                                (50 - officer.CompletionRate) / 5;
+                        }
+
+
+                        return new
+                        {
+                            Officer = officer,
+                            Score = attentionScore
+                        };
+                    })
+                    .OrderByDescending(
+                        x => x.Score)
+                    .ThenByDescending(
+                        x => x.Officer.OverdueFollowUps)
+                    .ThenByDescending(
+                        x => x.Officer.NextFeedbackSLAMissed)
+                    .ThenByDescending(
+                        x => x.Officer.CompletedLeads)
+                    .FirstOrDefault();
+
+            if (scoredPerformance == null)
+            {
+                return null;
+            }
+
+            var officerData =
+                scoredPerformance.Officer;
+
+            return new PerformanceHighlightViewModel
+            {
+                SalesOfficerId =
+                    officerData.SalesOfficerId,
+
+                SalesOfficerName =
+                    officerData.SalesOfficerName,
+
+                PerformanceScore =
+                    Math.Round(
+                        scoredPerformance.Score,
+                        2),
+
+                AcceptanceRate =
+                    officerData.AcceptanceRate,
+
+                AcceptanceSLAComplianceRate =
+                    officerData.AcceptanceSLAComplianceRate,
+
+                FirstFeedbackSLAComplianceRate =
+                    officerData.FirstFeedbackSLAComplianceRate,
+
+                NextFeedbackSLAComplianceRate =
+                    officerData.NextFeedbackSLAComplianceRate,
+
+                FollowUpTimelinessRate =
+                    officerData.FollowUpTimelinessRate,
+
+                CompletionRate =
+                    officerData.CompletionRate,
+
+                TotalAssignedLeads =
+                    officerData.TotalAssignedLeads,
+
+                AcceptedLeads =
+                    officerData.AcceptedLeads,
+
+                CompletedLeads =
+                    officerData.CompletedLeads,
+
+                TotalFeedbacks =
+                    officerData.TotalFeedbacks,
+
+                AcceptanceSLAMissed =
+                    officerData.AcceptanceSLAMissed,
+
+                FirstFeedbackSLAMissed =
+                    officerData.FirstFeedbackSLAMissed,
+
+                NextFeedbackSLAMissed =
+                    officerData.NextFeedbackSLAMissed,
+
+                OverdueFollowUps =
+                    officerData.OverdueFollowUps
+            };
+        }
     }
 }

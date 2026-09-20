@@ -7,6 +7,7 @@ using CRMSystem.Models.ViewModels;
 using CRMSystem.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
+
 namespace CRMSystem.Services
 {
     public class SettingsService : ISettingsService
@@ -17,11 +18,18 @@ namespace CRMSystem.Services
 
         private readonly INotificationService _notificationService;
 
-        public SettingsService(ApplicationDbContext context, IWebHostEnvironment environment, INotificationService notificationService)
+        private readonly IEmailService _emailService;
+
+        public SettingsService(
+            ApplicationDbContext context, 
+            IWebHostEnvironment environment, 
+            INotificationService notificationService,
+            IEmailService emailService)
         {
             _context = context;
             _environment = environment;
             _notificationService = notificationService;
+            _emailService = emailService;
         }
 
 
@@ -43,7 +51,7 @@ namespace CRMSystem.Services
             return settings;
         }
 
-        //for admin only- Auto Assignment setting update without request
+        //for admin only- Auto Assignment setting update without request (Global setting)
         public async Task UpdateAutoAssignmentAsync(bool enabled)
         {
             var settings = await GetSettingsAsync();
@@ -52,6 +60,32 @@ namespace CRMSystem.Services
 
             await _context.SaveChangesAsync();
         }
+
+
+
+
+        // =====================================================
+        // Sales Manager - Auto Assignment Status
+        // =====================================================
+
+        public async Task<bool> GetAutoAssignmentStatusAsync(
+            long salesManagerId)
+        {
+            var salesManager = await _context.Users
+                .AsNoTracking()
+                .Include(u => u.Role)
+                .FirstOrDefaultAsync(u =>
+                    u.UserId == salesManagerId &&
+                    u.Role != null &&
+                    u.Role.RoleKey == RoleKeys.SalesManager &&
+                    u.IsActive &&
+                    !u.IsDeleted);
+
+            return salesManager?.AutoAssignmentEnabled ?? false;
+        }
+
+
+
 
 
         // =====================================================
@@ -831,10 +865,10 @@ namespace CRMSystem.Services
         // =====================================================
 
         public async Task<ServiceResult>
-            ApproveProfileChangeRequestAsync(
-                long requestId,
-                long adminId,
-                string? adminComment)
+    ApproveProfileChangeRequestAsync(
+        long requestId,
+        long adminId,
+        string? adminComment)
         {
             var request =
                 await _context.ProfileChangeRequests
@@ -847,28 +881,37 @@ namespace CRMSystem.Services
                 return new ServiceResult
                 {
                     IsSuccess = false,
-                    Message = "Profile change request not found."
+                    Message =
+                        "Profile change request not found."
                 };
             }
+
 
             if (request.Status != ApprovalStatus.Pending)
             {
                 return new ServiceResult
                 {
                     IsSuccess = false,
-                    Message = "This request has already been reviewed."
+                    Message =
+                        "This request has already been reviewed."
                 };
             }
+
 
             if (request.User == null)
             {
                 return new ServiceResult
                 {
                     IsSuccess = false,
-                    Message = "Requested user was not found."
+                    Message =
+                        "Requested user was not found."
                 };
             }
 
+
+            // =====================================================
+            // Apply Requested Change
+            // =====================================================
 
             switch (request.FieldName)
             {
@@ -917,6 +960,7 @@ namespace CRMSystem.Services
                         };
                     }
 
+
                     request.User.Email =
                         request.NewValue.Trim();
 
@@ -930,25 +974,42 @@ namespace CRMSystem.Services
                     return new ServiceResult
                     {
                         IsSuccess = false,
-                        Message = "Invalid profile change field."
+                        Message =
+                            "Invalid profile change field."
                     };
             }
 
 
-            request.Status = ApprovalStatus.Approved;
+            // =====================================================
+            // Update Approval Information
+            // =====================================================
 
-            request.ReviewedBy = adminId;
+            request.Status =
+                ApprovalStatus.Approved;
 
-            request.ReviewedAt = DateTime.UtcNow;
+            request.ReviewedBy =
+                adminId;
+
+            request.ReviewedAt =
+                DateTime.UtcNow;
 
             request.AdminComment =
                 string.IsNullOrWhiteSpace(adminComment)
                     ? null
                     : adminComment.Trim();
 
+
+            // =====================================================
+            // Save Database Changes
+            // =====================================================
+
             await _context.SaveChangesAsync();
 
-            //for in app notification to user about approval of profile change request
+
+            // =====================================================
+            // In-App Notification
+            // =====================================================
+
             await _notificationService.CreateNotificationAsync(
                 request.UserId,
                 NotificationType.ProfileChangeApproved,
@@ -957,10 +1018,48 @@ namespace CRMSystem.Services
                 null,
                 null);
 
+
+            // =====================================================
+            // Email Notification
+            // =====================================================
+            //
+            // Email is sent ONLY when the approved field is Email.
+            //
+            // request.NewValue is the newly approved email address.
+            //
+
+            if (request.FieldName == "Email")
+            {
+                try
+                {
+                    await _emailService
+                        .SendProfileChangeApprovalEmailAsync(
+                            request.NewValue.Trim(),
+                            request.User.FullName,
+                            request.FieldName,
+                            request.NewValue.Trim(),
+                            request.ReviewedAt.Value);
+                }
+                catch (Exception)
+                {
+                    // The profile approval has already been saved.
+                    // Email failure must not undo the approved change.
+
+                    return new ServiceResult
+                    {
+                        IsSuccess = true,
+                        Message =
+                            "Profile change request approved successfully, but the approval email could not be sent."
+                    };
+                }
+            }
+
+
             return new ServiceResult
             {
                 IsSuccess = true,
-                Message = "Profile change request approved successfully."
+                Message =
+                    "Profile change request approved successfully."
             };
         }
 
@@ -1033,10 +1132,36 @@ namespace CRMSystem.Services
         // =====================================================
 
         public async Task<ServiceResult>
-            SubmitAutoAssignmentRequestAsync(
-                long salesManagerId,
-                bool enabled)
+    SubmitAutoAssignmentRequestAsync(
+        long salesManagerId,
+        bool enabled)
         {
+            // =====================================================
+            // 1. Find the Sales Manager
+            // =====================================================
+
+            var salesManager = await _context.Users
+                .Include(u => u.Role)
+                .FirstOrDefaultAsync(u =>
+                    u.UserId == salesManagerId &&
+                    u.Role != null &&
+                    u.Role.RoleKey == RoleKeys.SalesManager &&
+                    u.IsActive &&
+                    !u.IsDeleted);
+
+            if (salesManager == null)
+            {
+                return new ServiceResult
+                {
+                    IsSuccess = false,
+                    Message = "Sales Manager not found."
+                };
+            }
+
+            // =====================================================
+            // 2. Check Existing Pending Request
+            // =====================================================
+
             var existingPendingRequest =
                 await _context.AutoAssignmentRequests
                     .AnyAsync(r =>
@@ -1053,10 +1178,11 @@ namespace CRMSystem.Services
                 };
             }
 
-            var currentSettings =
-                await GetSettingsAsync();
+            // =====================================================
+            // 3. Check Current Manager Setting
+            // =====================================================
 
-            if (currentSettings.AutoAssignmentEnabled == enabled)
+            if (salesManager.AutoAssignmentEnabled == enabled)
             {
                 return new ServiceResult
                 {
@@ -1066,20 +1192,25 @@ namespace CRMSystem.Services
                 };
             }
 
+            // =====================================================
+            // 4. Create Request
+            // =====================================================
+
             var request = new AutoAssignmentRequest
             {
                 RequestedBy = salesManagerId,
-
                 RequestedStatus = enabled,
-
                 Status = ApprovalStatus.Pending,
-
                 RequestedAt = DateTime.UtcNow
             };
 
             _context.AutoAssignmentRequests.Add(request);
 
             await _context.SaveChangesAsync();
+
+            // =====================================================
+            // 5. Return Success
+            // =====================================================
 
             return new ServiceResult
             {
@@ -1138,20 +1269,21 @@ namespace CRMSystem.Services
         }
 
 
-        // =====================================================
-        // Approve Auto Assignment Request
-        // =====================================================
+
 
         // =====================================================
         // Approve Auto Assignment Request
         // =====================================================
-
         public async Task<ServiceResult>
-            ApproveAutoAssignmentRequestAsync(
-                long requestId,
-                long adminId,
-                string? adminComment)
+    ApproveAutoAssignmentRequestAsync(
+        long requestId,
+        long adminId,
+        string? adminComment)
         {
+            // =====================================================
+            // 1. Find Request
+            // =====================================================
+
             var request =
                 await _context.AutoAssignmentRequests
                     .FirstOrDefaultAsync(r =>
@@ -1167,6 +1299,10 @@ namespace CRMSystem.Services
                 };
             }
 
+            // =====================================================
+            // 2. Check Request Status
+            // =====================================================
+
             if (request.Status != ApprovalStatus.Pending)
             {
                 return new ServiceResult
@@ -1177,25 +1313,38 @@ namespace CRMSystem.Services
                 };
             }
 
-
             // =====================================================
-            // Get Current System Settings
-            // =====================================================
-
-            var settings =
-                await GetSettingsAsync();
-
-
-            // =====================================================
-            // Apply Requested Auto Assignment Status
+            // 3. Find Requesting Sales Manager
             // =====================================================
 
-            settings.AutoAssignmentEnabled =
+            var salesManager = await _context.Users
+                .Include(u => u.Role)
+                .FirstOrDefaultAsync(u =>
+                    u.UserId == request.RequestedBy &&
+                    u.Role != null &&
+                    u.Role.RoleKey == RoleKeys.SalesManager &&
+                    u.IsActive &&
+                    !u.IsDeleted);
+
+            if (salesManager == null)
+            {
+                return new ServiceResult
+                {
+                    IsSuccess = false,
+                    Message =
+                        "The requesting Sales Manager could not be found."
+                };
+            }
+
+            // =====================================================
+            // 4. Update ONLY Manager's Auto Assignment Setting
+            // =====================================================
+
+            salesManager.AutoAssignmentEnabled =
                 request.RequestedStatus;
 
-
             // =====================================================
-            // Update Request Status
+            // 5. Update Request Information
             // =====================================================
 
             request.Status =
@@ -1212,23 +1361,20 @@ namespace CRMSystem.Services
                     ? null
                     : adminComment.Trim();
 
-
             // =====================================================
-            // Save Approval
+            // 6. Save Changes
             // =====================================================
 
             await _context.SaveChangesAsync();
 
-
             // =====================================================
-            // Notify Sales Manager
+            // 7. Notification
             // =====================================================
 
             var requestedState =
                 request.RequestedStatus
                     ? "ON"
                     : "OFF";
-
 
             await _notificationService.CreateNotificationAsync(
                 request.RequestedBy,
@@ -1238,18 +1384,21 @@ namespace CRMSystem.Services
                 null,
                 null);
 
+            // =====================================================
+            // 8. Return Success
+            // =====================================================
 
             return new ServiceResult
             {
                 IsSuccess = true,
                 Message =
-                    "Auto Assignment request approved successfully."
+                    $"Auto Assignment request approved successfully. " +
+                    $"The Sales Manager's Auto Assignment is now {requestedState}."
             };
         }
 
-        // =====================================================
-        // Reject Auto Assignment Request
-        // =====================================================
+
+
 
         // =====================================================
         // Reject Auto Assignment Request

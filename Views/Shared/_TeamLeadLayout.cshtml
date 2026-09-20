@@ -1,0 +1,1232 @@
+﻿@using Microsoft.AspNetCore.Http
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>
+        @ViewData["Title"] - CRM System
+    </title>
+
+
+    <!-- =====================================================
+         Bootstrap
+         ===================================================== -->
+
+    <link rel="stylesheet"
+          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+
+    <!-- =====================================================
+         Bootstrap Icons
+         ===================================================== -->
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+
+
+    <!-- =====================================================
+         Site CSS
+         ===================================================== -->
+
+    <link rel="stylesheet"
+          href="~/css/site.css"
+          asp-append-version="true" />
+
+
+    <style>
+
+            /* =====================================================
+                       GLOBAL
+                       ===================================================== */
+
+            body {
+                margin: 0;
+                padding: 0;
+                background: #f5f7fb;
+                font-family: Arial, sans-serif;
+            }
+
+
+            /* =====================================================
+                       SIDEBAR
+                       ===================================================== */
+
+            .teamlead-sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 230px;
+                height: 100vh;
+                background: #1f2a3d;
+                color: white;
+                overflow-y: auto;
+                z-index: 1000;
+            }
+
+
+            /* Brand */
+
+            .teamlead-brand {
+                height: 72px;
+                display: flex;
+                align-items: center;
+                padding: 0 24px;
+                font-size: 21px;
+                font-weight: 700;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            }
+
+
+                .teamlead-brand i {
+                    font-size: 22px;
+                }
+
+
+            /* Navigation */
+
+            .teamlead-nav {
+                padding: 18px 12px 25px;
+            }
+
+
+            /* Section Title */
+
+            .teamlead-section-title {
+                margin: 20px 12px 8px;
+                font-size: 10px;
+                font-weight: 700;
+                letter-spacing: 1px;
+                text-transform: uppercase;
+                color: #9ca8ba;
+            }
+
+
+            /* Navigation Links */
+
+            .teamlead-nav-link {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                width: 100%;
+                padding: 11px 14px;
+                margin-bottom: 5px;
+                color: #dbe2ee;
+                text-decoration: none;
+                border-radius: 8px;
+                transition: background 0.2s ease, color 0.2s ease;
+            }
+
+
+                .teamlead-nav-link i {
+                    width: 20px;
+                    text-align: center;
+                    font-size: 16px;
+                }
+
+
+                .teamlead-nav-link:hover {
+                    background: rgba(255, 255, 255, 0.08);
+                    color: #ffffff;
+                }
+
+
+                .teamlead-nav-link.active {
+                    background: #2563eb;
+                    color: #ffffff;
+                }
+
+
+                /* Disabled */
+
+                .teamlead-nav-link.disabled {
+                    opacity: 0.55;
+                    cursor: default;
+                }
+
+
+                    .teamlead-nav-link.disabled:hover {
+                        background: transparent;
+                        color: #dbe2ee;
+                    }
+
+
+            /* Logout */
+
+            .teamlead-logout {
+                color: #ff6b6b !important;
+            }
+
+
+                .teamlead-logout:hover {
+                    background: rgba(255, 107, 107, 0.10) !important;
+                }
+
+
+            /* =====================================================
+                       MAIN AREA
+                       ===================================================== */
+
+            .teamlead-main {
+                margin-left: 230px;
+                min-height: 100vh;
+            }
+
+
+            /* =====================================================
+                       TOP NAVBAR
+                       ===================================================== */
+
+            .teamlead-topbar {
+                height: 72px;
+                background: #ffffff;
+                border-bottom: 1px solid #e5e7eb;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 0 28px;
+                position: sticky;
+                top: 0;
+                z-index: 900;
+            }
+
+
+            /* =====================================================
+                       PAGE TITLE
+                       ===================================================== */
+
+            .teamlead-page-title {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 15px;
+            }
+
+
+                .teamlead-page-title .home {
+                    color: #2563eb;
+                    font-weight: 600;
+                }
+
+
+                .teamlead-page-title .separator {
+                    color: #9ca3af;
+                }
+
+
+                .teamlead-page-title .current {
+                    color: #64748b;
+                }
+
+
+            /* =====================================================
+                       TOPBAR RIGHT AREA
+                       ===================================================== */
+
+            .teamlead-topbar-right {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+
+            /* =====================================================
+                       NOTIFICATION
+                       ===================================================== */
+
+            .teamlead-notification-wrapper {
+                position: relative;
+            }
+
+
+            .teamlead-notification-btn {
+                width: 42px;
+                height: 42px;
+                border: none;
+                background: #ffffff;
+                border-radius: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #334155;
+                font-size: 19px;
+                position: relative;
+                transition: all 0.2s ease;
+            }
+
+
+                .teamlead-notification-btn:hover {
+                    background: #f1f5f9;
+                    color: #2563eb;
+                }
+
+
+            .teamlead-notification-badge {
+                position: absolute;
+                top: 2px;
+                right: 2px;
+                min-width: 18px;
+                height: 18px;
+                padding: 0 5px;
+                border-radius: 50px;
+                background: #ef4444;
+                color: white;
+                font-size: 10px;
+                font-weight: 700;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                line-height: 18px;
+            }
+
+
+            /* Notification Dropdown */
+
+            .teamlead-notification-dropdown {
+                width: 370px;
+                max-width: calc(100vw - 30px);
+                padding: 0;
+                border: 1px solid #e5e7eb;
+                border-radius: 12px;
+                box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
+                overflow: hidden;
+            }
+
+
+            .teamlead-notification-header {
+                padding: 15px 18px;
+                border-bottom: 1px solid #e5e7eb;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                background: #ffffff;
+            }
+
+
+            .teamlead-notification-title {
+                font-size: 15px;
+                font-weight: 700;
+                color: #1f2937;
+            }
+
+
+            .teamlead-mark-all-btn {
+                border: none;
+                background: transparent;
+                color: #2563eb;
+                font-size: 12px;
+                font-weight: 600;
+                padding: 0;
+            }
+
+
+                .teamlead-mark-all-btn:hover {
+                    text-decoration: underline;
+                }
+
+
+            .teamlead-notification-list {
+                max-height: 390px;
+                overflow-y: auto;
+                background: #ffffff;
+            }
+
+
+            .teamlead-notification-empty {
+                padding: 35px 20px;
+                text-align: center;
+                color: #94a3b8;
+                font-size: 13px;
+            }
+
+
+                .teamlead-notification-empty i {
+                    display: block;
+                    font-size: 28px;
+                    margin-bottom: 10px;
+                }
+
+
+
+
+
+            /* =====================================================
+               TEAM LEAD NOTIFICATION ITEMS
+               ===================================================== */
+
+            .teamlead-notification-dropdown .notification-dropdown-item {
+                padding: 14px 16px;
+                border-bottom: 1px solid #eef2f7;
+                background: #ffffff;
+                transition: background 0.2s ease;
+            }
+
+                .teamlead-notification-dropdown .notification-dropdown-item:hover {
+                    background: #f8fafc;
+                }
+
+                .teamlead-notification-dropdown .notification-dropdown-item:last-child {
+                    border-bottom: none;
+                }
+
+
+                /* =====================================================
+               UNREAD NOTIFICATION
+               ===================================================== */
+
+                .teamlead-notification-dropdown .notification-dropdown-item.notification-unread {
+                    background: #f8fbff;
+                }
+
+
+            /* =====================================================
+               NOTIFICATION CONTENT
+               ===================================================== */
+
+            .teamlead-notification-dropdown .notification-content {
+                display: flex;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+
+            /* =====================================================
+               NOTIFICATION ICON
+               ===================================================== */
+
+            .teamlead-notification-dropdown .notification-dropdown-icon {
+                width: 34px;
+                height: 34px;
+                min-width: 34px;
+                border-radius: 50%;
+                background: #eef2ff;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-top: 1px;
+            }
+
+                .teamlead-notification-dropdown .notification-dropdown-icon i {
+                    font-size: 15px;
+                }
+
+
+            /* =====================================================
+               NOTIFICATION BODY
+               ===================================================== */
+
+            .teamlead-notification-dropdown .notification-body {
+                flex: 1;
+                min-width: 0;
+            }
+
+
+            /* =====================================================
+               TITLE ROW
+               ===================================================== */
+
+            .teamlead-notification-dropdown .notification-title-row {
+                display: flex;
+                align-items: center;
+                gap: 7px;
+                margin-bottom: 4px;
+            }
+
+            .teamlead-notification-dropdown .notification-title {
+                font-size: 13px;
+                font-weight: 700;
+                line-height: 1.4;
+                color: #1f2937;
+            }
+
+
+            /* =====================================================
+               NEW BADGE
+               ===================================================== */
+
+            .teamlead-notification-dropdown .notification-new-badge {
+                font-size: 9px;
+                font-weight: 600;
+                padding: 3px 6px;
+                border-radius: 10px;
+                line-height: 1;
+            }
+
+
+            /* =====================================================
+               MESSAGE
+               ===================================================== */
+
+            .teamlead-notification-dropdown .notification-message {
+                font-size: 12px;
+                line-height: 1.55;
+                color: #64748b;
+                margin-bottom: 6px;
+                word-break: break-word;
+            }
+
+
+            /* =====================================================
+               DATE
+               ===================================================== */
+
+            .teamlead-notification-dropdown .notification-date {
+                font-size: 10px;
+                color: #94a3b8;
+                margin-bottom: 5px;
+            }
+
+
+            /* =====================================================
+               MARK AS READ
+               ===================================================== */
+
+            .teamlead-notification-dropdown .notification-read-button {
+                font-size: 11px;
+                color: #2563eb;
+                text-decoration: none;
+                font-weight: 600;
+            }
+
+                .teamlead-notification-dropdown .notification-read-button:hover {
+                    color: #1d4ed8;
+                    text-decoration: underline;
+                }
+
+
+            /* =====================================================
+               SCROLLBAR
+               ===================================================== */
+
+            .teamlead-notification-list::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            .teamlead-notification-list::-webkit-scrollbar-track {
+                background: #f8fafc;
+            }
+
+            .teamlead-notification-list::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 10px;
+            }
+
+                .teamlead-notification-list::-webkit-scrollbar-thumb:hover {
+                    background: #94a3b8;
+                }
+
+
+
+
+            /* =====================================================
+                       USER DROPDOWN
+                       ===================================================== */
+
+            .teamlead-user-dropdown {
+                border: none;
+                background: transparent;
+                padding: 0;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                color: #1f2937;
+            }
+
+
+                .teamlead-user-dropdown:hover,
+                .teamlead-user-dropdown:focus {
+                    background: transparent;
+                    color: #1f2937;
+                }
+
+
+                .teamlead-user-dropdown::after {
+                    margin-left: 2px;
+                }
+
+
+            .teamlead-user-icon {
+                width: 38px;
+                height: 38px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                background: #eef2ff;
+                color: #2563eb;
+                font-size: 18px;
+            }
+
+
+            .teamlead-user-details {
+                text-align: left;
+            }
+
+
+            .teamlead-user-name {
+                font-size: 14px;
+                font-weight: 600;
+                color: #1f2937;
+            }
+
+
+            .teamlead-role {
+                font-size: 11px;
+                color: #6b7280;
+            }
+
+
+            .teamlead-user-menu {
+                min-width: 190px;
+                padding: 8px;
+                border: 1px solid #e5e7eb;
+                border-radius: 10px;
+                box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
+            }
+
+
+                .teamlead-user-menu .dropdown-item {
+                    padding: 10px 12px;
+                    border-radius: 7px;
+                    font-size: 13px;
+                }
+
+
+                    .teamlead-user-menu .dropdown-item:hover {
+                        background: #f1f5f9;
+                    }
+
+
+                .teamlead-user-menu .profile-item {
+                    color: #334155;
+                }
+
+
+                .teamlead-user-menu .logout-item {
+                    color: #dc2626;
+                }
+
+
+                    .teamlead-user-menu .logout-item:hover {
+                        background: #fef2f2;
+                        color: #dc2626;
+                    }
+
+
+            /* =====================================================
+                       CONTENT
+                       ===================================================== */
+
+            .teamlead-content {
+                padding: 30px;
+            }
+
+
+            /* =====================================================
+                       FOOTER
+                       ===================================================== */
+
+            .teamlead-footer {
+                padding: 18px 30px;
+                color: #6b7280;
+                font-size: 13px;
+                border-top: 1px solid #e5e7eb;
+                background: #ffffff;
+            }
+
+
+            /* =====================================================
+                       MOBILE
+                       ===================================================== */
+
+            @@media (max-width: 768px) {
+
+                .teamlead-sidebar {
+                    width: 70px;
+                }
+
+
+                .teamlead-brand {
+                    justify-content: center;
+                    padding: 0;
+                }
+
+
+                    .teamlead-brand span {
+                        display: none;
+                    }
+
+
+                .teamlead-nav {
+                    padding-left: 8px;
+                    padding-right: 8px;
+                }
+
+
+                .teamlead-section-title {
+                    display: none;
+                }
+
+
+                .teamlead-nav-link {
+                    justify-content: center;
+                    padding: 12px 8px;
+                }
+
+
+                    .teamlead-nav-link span {
+                        display: none;
+                    }
+
+
+                    .teamlead-nav-link i {
+                        width: auto;
+                        font-size: 18px;
+                    }
+
+
+                .teamlead-main {
+                    margin-left: 70px;
+                }
+
+
+                .teamlead-topbar {
+                    padding: 0 15px;
+                }
+
+
+                .teamlead-user-details {
+                    display: none;
+                }
+
+
+                .teamlead-content {
+                    padding: 20px;
+                }
+
+
+                .teamlead-footer {
+                    padding: 15px 20px;
+                }
+
+
+                .teamlead-notification-dropdown {
+                    position: fixed !important;
+                    top: 65px !important;
+                    right: 10px !important;
+                    left: auto !important;
+                    transform: none !important;
+                }
+            }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    
+    <!-- =====================================================
+         Form for Anti-Forgery Token
+         ===================================================== -->
+    <form id="notificationAntiForgeryToken" style="display:none;">
+        @Html.AntiForgeryToken()
+    </form>
+
+
+    <!-- =====================================================
+         TEAM LEAD SIDEBAR
+         ===================================================== -->
+
+    <aside class="teamlead-sidebar">
+
+
+        <!-- Brand -->
+
+        <div class="teamlead-brand">
+
+            <i class="bi bi-bar-chart-fill me-2"></i>
+
+            <span>
+                CRM System
+            </span>
+
+        </div>
+
+
+        <!-- Navigation -->
+
+        <nav class="teamlead-nav">
+
+
+            <!-- Dashboard -->
+
+            <a asp-controller="TeamLead"
+               asp-action="Dashboard"
+               class="teamlead-nav-link
+                @(ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard"
+                  ? "active"
+                  : "")">
+
+                <i class="bi bi-speedometer2"></i>
+
+                <span>
+                    Dashboard
+                </span>
+
+            </a>
+
+
+            <!-- =================================================
+                 TEAM MANAGEMENT
+                 ================================================= -->
+
+            <div class="teamlead-section-title">
+                Team Management
+            </div>
+
+
+            <!-- My Team -->
+
+            <a asp-controller="TeamLead"
+               asp-action="MyTeam"
+               class="teamlead-nav-link
+                @(ViewContext.RouteData.Values["action"]?.ToString() == "MyTeam"
+                  ? "active"
+                  : "")">
+
+                <i class="bi bi-people"></i>
+
+                <span>
+                    My Team
+                </span>
+
+            </a>
+
+
+            <!-- Sales Officers -->
+
+            <a asp-controller="TeamLead"
+               asp-action="SalesOfficers"
+               class="teamlead-nav-link
+                @(ViewContext.RouteData.Values["action"]?.ToString() == "SalesOfficers"
+                  ? "active"
+                  : "")">
+
+                <i class="bi bi-person-badge"></i>
+
+                <span>
+                    Sales Officers
+                </span>
+
+            </a>
+
+
+            <!-- =================================================
+                 LEAD MANAGEMENT
+                 ================================================= -->
+
+            <div class="teamlead-section-title">
+                Lead Management
+            </div>
+
+
+            <!-- Leads -->
+
+            <a asp-controller="TeamLead"
+               asp-action="Leads"
+               class="teamlead-nav-link
+                @(ViewContext.RouteData.Values["action"]?.ToString() == "Leads"
+                  ? "active"
+                  : "")">
+
+                <i class="bi bi-list-check"></i>
+
+                <span>
+                    Leads
+                </span>
+
+            </a>
+
+
+            <!-- Follow-ups -->
+
+            <a asp-controller="TeamLead"
+               asp-action="FollowUps"
+               class="teamlead-nav-link
+                @(ViewContext.RouteData.Values["action"]?.ToString() == "FollowUps"
+                  ? "active"
+                  : "")">
+
+                <i class="bi bi-calendar-check"></i>
+
+                <span>
+                    Follow-ups
+                </span>
+
+            </a>
+
+
+            <!-- =================================================
+                 ANALYTICS
+                 ================================================= -->
+
+            <div class="teamlead-section-title">
+                Analytics
+            </div>
+
+
+            <!-- Performance -->
+
+            <a asp-controller="TeamLead"
+               asp-action="Performance"
+               class="teamlead-nav-link
+                @(ViewContext.RouteData.Values["action"]?.ToString() == "Performance"
+                  ? "active"
+                  : "")">
+
+                <i class="bi bi-graph-up-arrow"></i>
+
+                <span>
+                    Performance
+                </span>
+
+            </a>
+
+
+            <!-- Reports -->
+
+            <a asp-controller="TeamLead"
+               asp-action="Reports"
+               class="teamlead-nav-link
+                @(ViewContext.RouteData.Values["action"]?.ToString() == "Reports"
+                  ? "active"
+                  : "")">
+
+                <i class="bi bi-file-earmark-bar-graph"></i>
+
+                <span>
+                    Reports
+                </span>
+
+            </a>
+
+
+            <!-- =================================================
+                 ACCOUNT
+                 ================================================= -->
+
+            <div class="teamlead-section-title">
+                Account
+            </div>
+
+
+            <!-- Profile -->
+
+            <a asp-controller="TeamLead"
+               asp-action="Profile"
+               class="teamlead-nav-link
+                @(ViewContext.RouteData.Values["action"]?.ToString() == "Profile"
+                  ? "active"
+                  : "")">
+
+                <i class="bi bi-person-circle"></i>
+
+                <span>
+                    Profile
+                </span>
+
+            </a>
+
+
+            <!-- Logout -->
+
+            <a asp-controller="Auth"
+               asp-action="Logout"
+               class="teamlead-nav-link teamlead-logout">
+
+                <i class="bi bi-box-arrow-right"></i>
+
+                <span>
+                    Logout
+                </span>
+
+            </a>
+
+
+        </nav>
+
+    </aside>
+
+
+    <!-- =====================================================
+         MAIN CONTENT
+         ===================================================== -->
+
+    <main class="teamlead-main">
+
+
+        <!-- =================================================
+             TOPBAR
+             ================================================= -->
+
+        <header class="teamlead-topbar">
+
+
+            <!-- Breadcrumb -->
+
+            <div class="teamlead-page-title">
+
+                <span class="home">
+                    Dashboard
+                </span>
+
+                <span class="separator">
+                    /
+                </span>
+
+                <span class="current">
+                    @ViewData["Title"]
+                </span>
+
+            </div>
+
+
+            <!-- =================================================
+                 TOPBAR RIGHT
+                 ================================================= -->
+
+            <div class="teamlead-topbar-right">
+
+
+                <!-- =================================================
+                     NOTIFICATION
+                     ================================================= -->
+
+                <div class="dropdown teamlead-notification-wrapper">
+
+                    <button class="teamlead-notification-btn"
+                            type="button"
+                            id="notificationBell"
+                            data-bs-toggle="dropdown"
+                            data-bs-auto-close="outside"
+                            aria-expanded="false"
+                            title="Notifications">
+
+                        <i class="bi bi-bell"></i>
+
+                        <span id="notificationBadge"
+                              class="teamlead-notification-badge">
+                            0
+                        </span>
+
+                    </button>
+
+
+                    <!-- Notification Dropdown -->
+
+                    <div class="dropdown-menu dropdown-menu-end teamlead-notification-dropdown"
+                         aria-labelledby="notificationBell">
+
+
+                        <!-- Header -->
+
+                        <div class="teamlead-notification-header">
+
+                            <span class="teamlead-notification-title">
+                                Notifications
+                            </span>
+
+                            <button type="button"
+                                    id="notificationMarkAllBtn"
+                                    class="teamlead-mark-all-btn">
+
+                                Mark all as read
+
+                            </button>
+
+                        </div>
+
+
+                        <!-- List -->
+
+                        <div id="notificationList"
+                             class="teamlead-notification-list">
+
+                            <div class="teamlead-notification-empty">
+
+                                <i class="bi bi-bell-slash"></i>
+
+                                No notifications
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     USER DROPDOWN
+                     ================================================= -->
+
+                <div class="dropdown">
+
+
+                    <button class="teamlead-user-dropdown"
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false">
+
+
+                        <div class="teamlead-user-icon">
+
+                            <i class="bi bi-person-fill"></i>
+
+                        </div>
+
+
+                        <div class="teamlead-user-details">
+
+                            <div class="teamlead-user-name">
+
+                                @Context.Session.GetString("FullName")
+
+                            </div>
+
+                            <div class="teamlead-role">
+
+                                Team Lead
+
+                            </div>
+
+                        </div>
+
+
+                    </button>
+
+
+                    <!-- User Menu -->
+
+                    <ul class="dropdown-menu dropdown-menu-end teamlead-user-menu">
+
+
+                        <!-- Profile -->
+
+                        <li>
+
+                            <a class="dropdown-item profile-item"
+                               asp-controller="TeamLead"
+                               asp-action="Profile">
+
+                                <i class="bi bi-person-circle me-2"></i>
+
+                                Profile
+
+                            </a>
+
+                        </li>
+
+
+                        <li>
+
+                            <hr class="dropdown-divider" />
+
+                        </li>
+
+
+                        <!-- Logout -->
+
+                        <li>
+
+                            <a class="dropdown-item logout-item"
+                               asp-controller="Auth"
+                               asp-action="Logout">
+
+                                <i class="bi bi-box-arrow-right me-2"></i>
+
+                                Logout
+
+                            </a>
+
+                        </li>
+
+
+                    </ul>
+
+                </div>
+
+
+            </div>
+
+
+        </header>
+
+
+        <!-- =================================================
+             PAGE CONTENT
+             ================================================= -->
+
+        <div class="teamlead-content">
+
+            @RenderBody()
+
+        </div>
+
+
+        <!-- =================================================
+             FOOTER
+             ================================================= -->
+
+        <footer class="teamlead-footer">
+
+            © @DateTime.Now.Year CRM System.
+            All Rights Reserved.
+
+        </footer>
+
+
+    </main>
+
+
+    <!-- =====================================================
+         SCRIPTS
+         ===================================================== -->
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="~/js/site.js"
+            asp-append-version="true">
+    </script>
+
+
+    <!-- =====================================================
+         Notification JavaScript
+         ===================================================== -->
+
+    <script src="~/js/notification.js"
+            asp-append-version="true">
+    </script>
+
+
+    @await RenderSectionAsync(
+        "Scripts",
+        required: false)
+
+</body>
+
+</html>

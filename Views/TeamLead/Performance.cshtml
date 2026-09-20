@@ -1,0 +1,2795 @@
+﻿@using System.Text.Json
+@model CRMSystem.Models.ViewModels.TeamLeadPerformanceTrendViewModel
+
+@{
+    ViewData["Title"] = "Performance Trend";
+    ViewData["Breadcrumb"] = "Performance Trend";
+    Layout = "_TeamLeadLayout";
+
+    var trendPoints =
+        Model.TrendPoints ?? new();
+
+    var labels =
+        trendPoints
+            .Select(x => x.Label)
+            .ToList();
+
+    var performanceScores =
+        trendPoints
+            .Select(x => x.PerformanceScore)
+            .ToList();
+
+    var assignedLeads =
+        trendPoints
+            .Select(x => x.AssignedLeads)
+            .ToList();
+
+    var acceptedLeads =
+        trendPoints
+            .Select(x => x.AcceptedLeads)
+            .ToList();
+
+    var completedLeads =
+        trendPoints
+            .Select(x => x.CompletedLeads)
+            .ToList();
+
+    var acceptanceSla =
+        trendPoints
+            .Select(x => x.AcceptanceSLAPercentage)
+            .ToList();
+
+    var firstFeedbackSla =
+        trendPoints
+            .Select(x => x.FirstFeedbackSLAPercentage)
+            .ToList();
+
+    var nextFeedbackSla =
+        trendPoints
+            .Select(x => x.NextFeedbackSLAPercentage)
+            .ToList();
+
+    var followUpPercentage =
+        trendPoints
+            .Select(x => x.FollowUpPercentage)
+            .ToList();
+
+
+    var averageScore =
+        trendPoints.Count == 0
+            ? 0
+            : trendPoints.Average(
+                x => x.PerformanceScore);
+
+
+    var averageAcceptanceSla =
+        trendPoints.Count == 0
+            ? 0
+            : trendPoints.Average(
+                x => x.AcceptanceSLAPercentage);
+
+
+    var averageFollowUp =
+        trendPoints.Count == 0
+            ? 0
+            : trendPoints.Average(
+                x => x.FollowUpPercentage);
+
+
+    var achievementPercentage =
+        Model.TargetAchievementPercentage;
+
+
+    var achievementProgressWidth =
+        Math.Min(
+            Math.Max(
+                achievementPercentage,
+                0),
+            100);
+}
+
+
+<style>
+
+    /* =========================================================
+           TEAM LEAD PERFORMANCE PAGE
+           ========================================================= */
+
+    .teamlead-performance-page {
+        background: #f8fafc;
+        min-height: 100vh;
+        padding: 1.5rem;
+    }
+
+
+        /* =========================================================
+           Page Header
+           ========================================================= */
+
+        .teamlead-performance-page .page-title {
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: #172033;
+        }
+
+
+        .teamlead-performance-page .page-subtitle {
+            color: #667085;
+            margin-bottom: 0;
+        }
+
+
+        /* =========================================================
+           Cards
+           ========================================================= */
+
+        .teamlead-performance-page .card {
+            border: 1px solid #e9edf3 !important;
+            border-radius: 14px;
+            background: #ffffff;
+            box-shadow: 0 4px 18px rgba(16, 24, 40, 0.05);
+        }
+
+
+        .teamlead-performance-page .card-header {
+            background: #ffffff;
+            border-bottom: 1px solid #edf0f4;
+        }
+
+
+    /* =========================================================
+           KPI Cards
+           ========================================================= */
+
+    .kpi-card {
+        height: 100%;
+    }
+
+
+    .kpi-label {
+        color: #667085;
+        font-size: 0.85rem;
+        margin-bottom: 0.35rem;
+    }
+
+
+    .kpi-value {
+        color: #172033;
+        font-size: 1.55rem;
+        font-weight: 700;
+    }
+
+
+    /* =========================================================
+           Quick Filter
+           ========================================================= */
+
+    .quick-filter-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.55rem;
+    }
+
+
+    .quick-filter-btn {
+        border-radius: 8px;
+        font-weight: 600;
+        min-width: 105px;
+    }
+
+
+    .reset-filter-btn {
+        border-radius: 8px;
+        font-weight: 600;
+        min-width: 95px;
+    }
+
+
+    .active-filter-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+
+    .active-filter-label {
+        color: #667085;
+        font-size: 0.82rem;
+    }
+
+
+    #activeFilterBadge {
+        font-weight: 600;
+        padding: 0.45rem 0.75rem;
+    }
+
+
+    /* =========================================================
+           Target Progress
+           ========================================================= */
+
+    .target-box {
+        border: 1px solid #e6eaf0;
+        border-radius: 12px;
+        padding: 1rem;
+        height: 100%;
+        background: #ffffff;
+    }
+
+
+    .target-box-label {
+        color: #667085;
+        font-size: 0.82rem;
+        margin-bottom: 0.3rem;
+    }
+
+
+    .target-box-value {
+        color: #172033;
+        font-size: 1.65rem;
+        font-weight: 700;
+    }
+
+
+    .target-box-description {
+        color: #667085;
+        font-size: 0.8rem;
+    }
+
+
+    .target-progress {
+        height: 11px;
+        border-radius: 10px;
+        background: #edf0f4;
+        overflow: hidden;
+    }
+
+
+        .target-progress .progress-bar {
+            border-radius: 10px;
+            transition: width 0.4s ease;
+        }
+
+
+    /* =========================================================
+           Charts
+           ========================================================= */
+
+    .chart-wrapper {
+        position: relative;
+        width: 100%;
+        height: 350px;
+    }
+
+
+        .chart-wrapper canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+
+    /* =========================================================
+           Loading
+           ========================================================= */
+
+    .performance-loading {
+        display: none;
+        padding: 1rem;
+        text-align: center;
+    }
+
+
+    /* =========================================================
+           Responsive
+           ========================================================= */
+
+    @@media (max-width: 767.98px) {
+
+        .teamlead-performance-page {
+            padding: 1rem;
+        }
+
+        .quick-filter-group {
+            width: 100%;
+        }
+
+        .quick-filter-btn,
+        .reset-filter-btn {
+            flex: 1 1 auto;
+        }
+
+        .chart-wrapper {
+            height: 280px;
+        }
+    }
+
+</style>
+
+
+<div class="container-fluid teamlead-performance-page">
+
+
+    <!-- =====================================================
+         PAGE HEADER
+         ===================================================== -->
+
+    <div class="d-flex
+        justify-content-between
+        align-items-center
+        mb-4">
+
+        <div>
+
+            <h2 class="page-title mb-1">
+                Performance Trend
+            </h2>
+
+            <p class="page-subtitle">
+                Track your team's performance trends
+                over the selected period.
+            </p>
+
+        </div>
+
+
+        <div>
+
+            <a asp-controller="TeamLead"
+               asp-action="Performance"
+               class="btn btn-primary">
+
+                <i class="bi bi-bar-chart-line me-1"></i>
+
+                Team Performance
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         PERFORMANCE FILTER
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header py-3">
+
+            <div class="fw-semibold">
+
+                <i class="bi bi-calendar3 me-2"></i>
+
+                Performance Period
+
+            </div>
+
+        </div>
+
+
+        <div class="card-body">
+
+
+            <!-- =================================================
+                 QUICK FILTERS
+                 ================================================= -->
+
+            <div class="mb-3">
+
+                <label class="form-label fw-semibold">
+                    Quick Filter
+                </label>
+
+
+                <div class="quick-filter-group">
+
+                    <button type="button"
+                            class="btn btn-outline-primary quick-filter-btn"
+                            data-range="Today">
+
+                        <i class="bi bi-calendar-day me-1"></i>
+
+                        Today
+
+                    </button>
+
+
+                    <button type="button"
+                            class="btn btn-outline-primary quick-filter-btn"
+                            data-range="ThisWeek">
+
+                        <i class="bi bi-calendar-week me-1"></i>
+
+                        This Week
+
+                    </button>
+
+
+                    <button type="button"
+                            class="btn btn-primary quick-filter-btn"
+                            data-range="ThisMonth">
+
+                        <i class="bi bi-calendar-month me-1"></i>
+
+                        This Month
+
+                    </button>
+
+
+                    <button type="button"
+                            class="btn btn-outline-secondary reset-filter-btn"
+                            id="resetFilterButton">
+
+                        <i class="bi bi-arrow-counterclockwise me-1"></i>
+
+                        Reset
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 CUSTOM DATE RANGE
+                 ================================================= -->
+
+            <form id="performanceFilterForm"
+                  asp-controller="TeamLead"
+                  asp-action="PerformanceTrend"
+                  method="get">
+
+                <div class="row g-3 align-items-end">
+
+                    <div class="col-md-4">
+
+                        <label for="fromDate"
+                               class="form-label fw-semibold">
+
+                            From Date
+
+                        </label>
+
+
+                        <input type="date"
+                               id="fromDate"
+                               name="fromDate"
+                               class="form-control" />
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <label for="toDate"
+                               class="form-label fw-semibold">
+
+                            To Date
+
+                        </label>
+
+
+                        <input type="date"
+                               id="toDate"
+                               name="toDate"
+                               class="form-control" />
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <button type="submit"
+                                id="applyDateRangeButton"
+                                class="btn btn-primary w-100">
+
+                            <i class="bi bi-funnel me-1"></i>
+
+                            <span id="applyButtonText">
+                                Apply Custom Range
+                            </span>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+
+            <!-- =================================================
+                 ACTIVE FILTER
+                 ================================================= -->
+
+            <div class="active-filter-wrapper mt-3">
+
+                <span class="active-filter-label">
+                    Active Filter:
+                </span>
+
+
+                <span id="activeFilterBadge"
+                      class="badge bg-primary-subtle text-primary">
+
+                    This Month
+
+                </span>
+
+            </div>
+
+
+            <!-- =================================================
+                 Loading
+                 ================================================= -->
+
+            <div id="performanceLoading"
+                 class="performance-loading">
+
+                <div class="spinner-border spinner-border-sm text-primary"
+                     role="status">
+
+                    <span class="visually-hidden">
+                        Loading...
+                    </span>
+
+                </div>
+
+                <span class="text-muted ms-2">
+                    Updating performance...
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         KPI SUMMARY
+         ===================================================== -->
+
+    <div class="row g-4 mb-4">
+
+
+        <!-- Team Lead -->
+
+        <div class="col-md-3">
+
+            <div class="card kpi-card">
+
+                <div class="card-body">
+
+                    <div class="kpi-label">
+                        Team Lead
+                    </div>
+
+                    <div id="teamLeadName"
+                         class="kpi-value">
+
+                        @Model.TeamLeadName
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Average Performance -->
+
+        <div class="col-md-3">
+
+            <div class="card kpi-card">
+
+                <div class="card-body">
+
+                    <div class="kpi-label">
+                        Average Performance
+                    </div>
+
+                    <div id="averagePerformance"
+                         class="kpi-value">
+
+                        @averageScore.ToString("0.00")%
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Acceptance SLA -->
+
+        <div class="col-md-3">
+
+            <div class="card kpi-card">
+
+                <div class="card-body">
+
+                    <div class="kpi-label">
+                        Acceptance SLA
+                    </div>
+
+                    <div id="averageAcceptanceSla"
+                         class="kpi-value">
+
+                        @averageAcceptanceSla.ToString("0.00")%
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Follow-up -->
+
+        <div class="col-md-3">
+
+            <div class="card kpi-card">
+
+                <div class="card-body">
+
+                    <div class="kpi-label">
+                        Follow-up
+                    </div>
+
+                    <div id="averageFollowUp"
+                         class="kpi-value">
+
+                        @averageFollowUp.ToString("0.00")%
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         TARGET ACHIEVEMENT
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+
+        <div class="card-header py-3">
+
+            <div class="d-flex
+                justify-content-between
+                align-items-center">
+
+                <div>
+
+                    <div class="fw-semibold">
+
+                        <i class="bi bi-bullseye me-2"></i>
+
+                        Target Achievement
+
+                    </div>
+
+                    <small class="text-muted">
+
+                        Team target achievement for the selected period
+
+                    </small>
+
+                </div>
+
+
+                <span id="achievementBadge"
+                      class="badge bg-primary-subtle text-primary">
+
+                    @achievementPercentage.ToString("0.00")%
+
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="card-body">
+
+
+            <div class="row g-4">
+
+
+                <!-- Team Target -->
+
+                <div class="col-md-4">
+
+                    <div class="target-box">
+
+                        <div class="target-box-label">
+                            Team Target
+                        </div>
+
+                        <div id="teamTarget"
+                             class="target-box-value">
+
+                            @Model.TeamTarget
+
+                        </div>
+
+                        <div class="target-box-description">
+                            Targeted leads
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Completed -->
+
+                <div class="col-md-4">
+
+                    <div class="target-box">
+
+                        <div class="target-box-label">
+                            Completed Leads
+                        </div>
+
+                        <div id="teamCompletedLeads"
+                             class="target-box-value">
+
+                            @Model.TeamCompletedLeads
+
+                        </div>
+
+                        <div class="target-box-description">
+                            Successfully completed
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Achievement -->
+
+                <div class="col-md-4">
+
+                    <div class="target-box">
+
+                        <div class="target-box-label">
+                            Achievement
+                        </div>
+
+                        <div id="targetAchievementPercentage"
+                             class="target-box-value">
+
+                            @achievementPercentage.ToString("0.00")%
+
+                        </div>
+
+                        <div class="target-box-description">
+                            Completed vs target
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 Progress
+                 ================================================= -->
+
+            <div class="mt-4">
+
+                <div class="d-flex
+                    justify-content-between
+                    align-items-center
+                    mb-2">
+
+                    <span class="fw-semibold">
+                        Target Progress
+                    </span>
+
+
+                    <span id="targetProgressText"
+                          class="text-muted small">
+
+                        @Model.TeamCompletedLeads /
+                        @Model.TeamTarget
+
+                    </span>
+
+                </div>
+
+
+                <div class="progress target-progress"
+                     role="progressbar"
+                     aria-valuemin="0"
+                     aria-valuemax="100"
+                     aria-valuenow="@achievementProgressWidth">
+
+                    <div id="targetProgressBar"
+                         class="progress-bar"
+                         style="width:@achievementProgressWidth.ToString("0.##")%;">
+                    </div>
+
+                </div>
+
+
+                <div id="targetAchievementMessage">
+
+                    @if (achievementPercentage > 100)
+                    {
+                        <div class="small text-success mt-2">
+
+                            <i class="bi bi-check-circle me-1"></i>
+
+                            Target exceeded by
+                            @((achievementPercentage - 100)
+                                .ToString("0.00"))%
+
+                        </div>
+                    }
+                    else if (achievementPercentage >= 80)
+                    {
+                        <div class="small text-success mt-2">
+
+                            <i class="bi bi-arrow-up-circle me-1"></i>
+
+                            Team is close to achieving the target.
+
+                        </div>
+                    }
+                    else if (achievementPercentage > 0)
+                    {
+                        <div class="small text-warning mt-2">
+
+                            <i class="bi bi-exclamation-circle me-1"></i>
+
+                            More completed leads are needed
+                            to reach the target.
+
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="small text-muted mt-2">
+
+                            <i class="bi bi-info-circle me-1"></i>
+
+                            No target achievement recorded
+                            for this period.
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         PERFORMANCE SCORE TREND
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header py-3">
+
+            <div class="fw-semibold">
+
+                <i class="bi bi-graph-up-arrow me-2"></i>
+
+                Performance Score Trend
+
+            </div>
+
+            <small class="text-muted">
+                Weekly performance score
+            </small>
+
+        </div>
+
+
+        <div class="card-body">
+
+            <div class="chart-wrapper">
+
+                <canvas id="performanceScoreChart"></canvas>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         LEAD VOLUME
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header py-3">
+
+            <div class="fw-semibold">
+
+                <i class="bi bi-bar-chart me-2"></i>
+
+                Lead Volume Trend
+
+            </div>
+
+            <small class="text-muted">
+                Assigned, accepted and completed leads
+            </small>
+
+        </div>
+
+
+        <div class="card-body">
+
+            <div class="chart-wrapper">
+
+                <canvas id="leadVolumeChart"></canvas>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         SLA TREND
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header py-3">
+
+            <div class="fw-semibold">
+
+                <i class="bi bi-shield-check me-2"></i>
+
+                SLA Performance Trend
+
+            </div>
+
+            <small class="text-muted">
+                Acceptance, feedback and follow-up performance
+            </small>
+
+        </div>
+
+
+        <div class="card-body">
+
+            <div class="chart-wrapper">
+
+                <canvas id="slaChart"></canvas>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         PERIOD INFORMATION
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <div class="row g-4">
+
+                <div class="col-md-6">
+
+                    <div class="text-muted small">
+                        Period Start
+                    </div>
+
+                    <div id="periodStart"
+                         class="fw-semibold">
+
+                        @Model.FromDate.ToString(
+                            "dd MMM yyyy")
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-6">
+
+                    <div class="text-muted small">
+                        Period End
+                    </div>
+
+                    <div id="periodEnd"
+                         class="fw-semibold">
+
+                        @Model.ToDate.ToString(
+                            "dd MMM yyyy")
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     CHART.JS
+     ========================================================= -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<script>
+
+    // =========================================================
+    // Initial Server Data
+    // =========================================================
+
+    let trendLabels =
+        @Html.Raw(
+        JsonSerializer.Serialize(labels)
+        );
+
+
+    let performanceScores =
+        @Html.Raw(
+        JsonSerializer.Serialize(performanceScores)
+        );
+
+
+    let assignedLeads =
+        @Html.Raw(
+        JsonSerializer.Serialize(assignedLeads)
+        );
+
+
+    let acceptedLeads =
+        @Html.Raw(
+        JsonSerializer.Serialize(acceptedLeads)
+        );
+
+
+    let completedLeads =
+        @Html.Raw(
+        JsonSerializer.Serialize(completedLeads)
+        );
+
+
+    let acceptanceSla =
+        @Html.Raw(
+        JsonSerializer.Serialize(acceptanceSla)
+        );
+
+
+    let firstFeedbackSla =
+        @Html.Raw(
+        JsonSerializer.Serialize(firstFeedbackSla)
+        );
+
+
+    let nextFeedbackSla =
+        @Html.Raw(
+        JsonSerializer.Serialize(nextFeedbackSla)
+        );
+
+
+    let followUpPercentage =
+        @Html.Raw(
+        JsonSerializer.Serialize(
+        followUpPercentage
+        )
+        );
+
+
+    // =========================================================
+    // Chart References
+    // =========================================================
+
+    let performanceScoreChart = null;
+
+    let leadVolumeChart = null;
+
+    let slaChart = null;
+
+
+    // =========================================================
+    // Common Chart Options
+    // =========================================================
+
+    const commonChartOptions = {
+
+        responsive: true,
+
+        maintainAspectRatio: false,
+
+        interaction: {
+
+            mode: "index",
+
+            intersect: false
+
+        },
+
+        plugins: {
+
+            legend: {
+
+                position: "top"
+
+            },
+
+            tooltip: {
+
+                enabled: true
+
+            }
+
+        },
+
+        scales: {
+
+            y: {
+
+                beginAtZero: true
+
+            }
+
+        }
+
+    };
+
+
+    // =========================================================
+    // Render Charts
+    // =========================================================
+
+    function renderCharts() {
+
+        // -----------------------------------------------------
+        // Destroy Existing Charts
+        // -----------------------------------------------------
+
+        if (performanceScoreChart) {
+
+            performanceScoreChart.destroy();
+
+            performanceScoreChart = null;
+
+        }
+
+
+        if (leadVolumeChart) {
+
+            leadVolumeChart.destroy();
+
+            leadVolumeChart = null;
+
+        }
+
+
+        if (slaChart) {
+
+            slaChart.destroy();
+
+            slaChart = null;
+
+        }
+
+
+        // =====================================================
+        // Performance Score
+        // =====================================================
+
+        const performanceCanvas =
+            document.getElementById(
+                "performanceScoreChart"
+            );
+
+
+        if (performanceCanvas) {
+
+            performanceScoreChart =
+                new Chart(
+                    performanceCanvas,
+                    {
+
+                        type: "line",
+
+                        data: {
+
+                            labels:
+                                trendLabels,
+
+                            datasets: [
+
+                                {
+
+                                    label:
+                                        "Performance Score",
+
+                                    data:
+                                        performanceScores,
+
+                                    tension:
+                                        0.35,
+
+                                    fill:
+                                        true,
+
+                                    pointRadius:
+                                        4,
+
+                                    pointHoverRadius:
+                                        6
+
+                                }
+
+                            ]
+
+                        },
+
+                        options: {
+
+                            ...commonChartOptions,
+
+                            scales: {
+
+                                y: {
+
+                                    beginAtZero:
+                                        true,
+
+                                    max:
+                                        100,
+
+                                    ticks: {
+
+                                        callback:
+                                            function(value) {
+
+                                                return value + "%";
+
+                                            }
+
+                                    }
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+                );
+
+        }
+
+
+        // =====================================================
+        // Lead Volume
+        // =====================================================
+
+        const leadVolumeCanvas =
+            document.getElementById(
+                "leadVolumeChart"
+            );
+
+
+        if (leadVolumeCanvas) {
+
+            leadVolumeChart =
+                new Chart(
+                    leadVolumeCanvas,
+                    {
+
+                        type: "bar",
+
+                        data: {
+
+                            labels:
+                                trendLabels,
+
+                            datasets: [
+
+                                {
+
+                                    label:
+                                        "Assigned",
+
+                                    data:
+                                        assignedLeads
+
+                                },
+
+                                {
+
+                                    label:
+                                        "Accepted",
+
+                                    data:
+                                        acceptedLeads
+
+                                },
+
+                                {
+
+                                    label:
+                                        "Completed",
+
+                                    data:
+                                        completedLeads
+
+                                }
+
+                            ]
+
+                        },
+
+                        options:
+                            commonChartOptions
+
+                    }
+                );
+
+        }
+
+
+        // =====================================================
+        // SLA Chart
+        // =====================================================
+
+        const slaCanvas =
+            document.getElementById(
+                "slaChart"
+            );
+
+
+        if (slaCanvas) {
+
+            slaChart =
+                new Chart(
+                    slaCanvas,
+                    {
+
+                        type: "line",
+
+                        data: {
+
+                            labels:
+                                trendLabels,
+
+                            datasets: [
+
+                                {
+
+                                    label:
+                                        "Acceptance SLA",
+
+                                    data:
+                                        acceptanceSla,
+
+                                    tension:
+                                        0.35,
+
+                                    pointRadius:
+                                        4
+
+                                },
+
+                                {
+
+                                    label:
+                                        "First Feedback SLA",
+
+                                    data:
+                                        firstFeedbackSla,
+
+                                    tension:
+                                        0.35,
+
+                                    pointRadius:
+                                        4
+
+                                },
+
+                                {
+
+                                    label:
+                                        "Next Feedback SLA",
+
+                                    data:
+                                        nextFeedbackSla,
+
+                                    tension:
+                                        0.35,
+
+                                    pointRadius:
+                                        4
+
+                                },
+
+                                {
+
+                                    label:
+                                        "Follow-up",
+
+                                    data:
+                                        followUpPercentage,
+
+                                    tension:
+                                        0.35,
+
+                                    pointRadius:
+                                        4
+
+                                }
+
+                            ]
+
+                        },
+
+                        options: {
+
+                            ...commonChartOptions,
+
+                            scales: {
+
+                                y: {
+
+                                    beginAtZero:
+                                        true,
+
+                                    max:
+                                        100,
+
+                                    ticks: {
+
+                                        callback:
+                                            function(value) {
+
+                                                return value + "%";
+
+                                            }
+
+                                    }
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+                );
+
+        }
+
+    }
+
+
+    // =========================================================
+    // Date Formatting
+    // =========================================================
+
+    function formatInputDate(date) {
+
+        const year =
+            date.getFullYear();
+
+
+        const month =
+            String(
+                date.getMonth() + 1
+            ).padStart(
+                2,
+                "0"
+            );
+
+
+        const day =
+            String(
+                date.getDate()
+            ).padStart(
+                2,
+                "0"
+            );
+
+
+        return `${year}-${month}-${day}`;
+    }
+
+
+    // =========================================================
+    // Format Display Date
+    // =========================================================
+
+    function formatDisplayDate(
+        dateString
+    ) {
+
+        if (!dateString) {
+
+            return "-";
+
+        }
+
+
+        const date =
+            new Date(dateString);
+
+
+        if (Number.isNaN(
+            date.getTime()
+        )) {
+
+            return "-";
+
+        }
+
+
+        return date.toLocaleDateString(
+            "en-GB",
+            {
+                day: "2-digit",
+                month: "short",
+                year: "numeric"
+            }
+        );
+
+    }
+
+
+    // =========================================================
+    // Get Today
+    // =========================================================
+
+    function getToday() {
+
+        const today =
+            new Date();
+
+
+        today.setHours(
+            0,
+            0,
+            0,
+            0
+        );
+
+
+        return today;
+
+    }
+
+
+    // =========================================================
+    // Get This Week
+    //
+    // Monday -> Sunday
+    // =========================================================
+
+    function getThisWeek() {
+
+        const today =
+            getToday();
+
+
+        const day =
+            today.getDay();
+
+
+        const daysFromMonday =
+            day === 0
+                ? 6
+                : day - 1;
+
+
+        const weekStart =
+            new Date(today);
+
+
+        weekStart.setDate(
+            today.getDate()
+            - daysFromMonday
+        );
+
+
+        const weekEnd =
+            new Date(weekStart);
+
+
+        weekEnd.setDate(
+            weekStart.getDate() + 6
+        );
+
+
+        return {
+
+            fromDate:
+                weekStart,
+
+            toDate:
+                weekEnd
+
+        };
+
+    }
+
+
+    // =========================================================
+    // Get This Month
+    // =========================================================
+
+    function getThisMonth() {
+
+        const today =
+            getToday();
+
+
+        const monthStart =
+            new Date(
+                today.getFullYear(),
+                today.getMonth(),
+                1
+            );
+
+
+        const monthEnd =
+            new Date(
+                today.getFullYear(),
+                today.getMonth() + 1,
+                0
+            );
+
+
+        return {
+
+            fromDate:
+                monthStart,
+
+            toDate:
+                monthEnd
+
+        };
+
+    }
+
+
+    // =========================================================
+    // Set Date Inputs
+    // =========================================================
+
+    function setDateInputs(
+        fromDate,
+        toDate
+    ) {
+
+        document.getElementById(
+            "fromDate"
+        ).value =
+            formatInputDate(
+                fromDate
+            );
+
+
+        document.getElementById(
+            "toDate"
+        ).value =
+            formatInputDate(
+                toDate
+            );
+
+    }
+
+
+    // =========================================================
+    // Set Active Filter
+    // =========================================================
+
+    function setActiveFilter(
+        filterName
+    ) {
+
+        const badge =
+            document.getElementById(
+                "activeFilterBadge"
+            );
+
+
+        if (!badge) {
+
+            return;
+
+        }
+
+
+        badge.textContent =
+            filterName;
+
+    }
+
+
+    // =========================================================
+    // Set Active Quick Button
+    // =========================================================
+
+    function setActiveQuickButton(
+        selectedRange
+    ) {
+
+        const buttons =
+            document.querySelectorAll(
+                ".quick-filter-btn"
+            );
+
+
+        buttons.forEach(
+            function(button) {
+
+                if (
+                    button.dataset.range ===
+                    selectedRange
+                ) {
+
+                    button.classList.remove(
+                        "btn-outline-primary"
+                    );
+
+                    button.classList.add(
+                        "btn-primary"
+                    );
+
+                }
+                else {
+
+                    button.classList.remove(
+                        "btn-primary"
+                    );
+
+                    button.classList.add(
+                        "btn-outline-primary"
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+
+    // =========================================================
+    // Update Achievement Message
+    // =========================================================
+
+    function updateAchievementMessage(
+        achievementPercentage
+    ) {
+
+        const container =
+            document.getElementById(
+                "targetAchievementMessage"
+            );
+
+
+        if (!container) {
+
+            return;
+
+        }
+
+
+        if (
+            achievementPercentage > 100
+        ) {
+
+            container.innerHTML = `
+
+                    <div class="small text-success mt-2">
+
+                        <i class="bi bi-check-circle me-1"></i>
+
+                        Target exceeded by
+                        ${(achievementPercentage - 100).toFixed(2)}%
+
+                    </div>
+
+                `;
+
+        }
+        else if (
+            achievementPercentage >= 80
+        ) {
+
+            container.innerHTML = `
+
+                    <div class="small text-success mt-2">
+
+                        <i class="bi bi-arrow-up-circle me-1"></i>
+
+                        Team is close to achieving the target.
+
+                    </div>
+
+                `;
+
+        }
+        else if (
+            achievementPercentage > 0
+        ) {
+
+            container.innerHTML = `
+
+                    <div class="small text-warning mt-2">
+
+                        <i class="bi bi-exclamation-circle me-1"></i>
+
+                        More completed leads are needed
+                        to reach the target.
+
+                    </div>
+
+                `;
+
+        }
+        else {
+
+            container.innerHTML = `
+
+                    <div class="small text-muted mt-2">
+
+                        <i class="bi bi-info-circle me-1"></i>
+
+                        No target achievement recorded
+                        for this period.
+
+                    </div>
+
+                `;
+
+        }
+
+    }
+
+
+    // =========================================================
+    // Update Performance Page
+    // =========================================================
+
+    function updatePerformancePage(
+        data
+    ) {
+
+        // -----------------------------------------------------
+        // Team Lead
+        // -----------------------------------------------------
+
+        document.getElementById(
+            "teamLeadName"
+        ).textContent =
+            data.teamLeadName || "-";
+
+
+        const points =
+            Array.isArray(
+                data.trendPoints
+            )
+                ? data.trendPoints
+                : [];
+
+
+        // -----------------------------------------------------
+        // Average Performance
+        // -----------------------------------------------------
+
+        const averageScore =
+            points.length === 0
+                ? 0
+                : points.reduce(
+                    function(
+                        total,
+                        point
+                    ) {
+
+                        return total +
+                            Number(
+                                point.performanceScore
+                            );
+
+                    },
+                    0
+                ) / points.length;
+
+
+        // -----------------------------------------------------
+        // Average Acceptance SLA
+        // -----------------------------------------------------
+
+        const averageAcceptance =
+            points.length === 0
+                ? 0
+                : points.reduce(
+                    function(
+                        total,
+                        point
+                    ) {
+
+                        return total +
+                            Number(
+                                point.acceptanceSLAPercentage
+                            );
+
+                    },
+                    0
+                ) / points.length;
+
+
+        // -----------------------------------------------------
+        // Average Follow-up
+        // -----------------------------------------------------
+
+        const averageFollowUp =
+            points.length === 0
+                ? 0
+                : points.reduce(
+                    function(
+                        total,
+                        point
+                    ) {
+
+                        return total +
+                            Number(
+                                point.followUpPercentage
+                            );
+
+                    },
+                    0
+                ) / points.length;
+
+
+        document.getElementById(
+            "averagePerformance"
+        ).textContent =
+            averageScore.toFixed(2)
+            + "%";
+
+
+        document.getElementById(
+            "averageAcceptanceSla"
+        ).textContent =
+            averageAcceptance.toFixed(2)
+            + "%";
+
+
+        document.getElementById(
+            "averageFollowUp"
+        ).textContent =
+            averageFollowUp.toFixed(2)
+            + "%";
+
+
+        // -----------------------------------------------------
+        // Target Achievement
+        // -----------------------------------------------------
+
+        const teamTarget =
+            Number(
+                data.teamTarget
+            ) || 0;
+
+
+        const teamCompleted =
+            Number(
+                data.teamCompletedLeads
+            ) || 0;
+
+
+        const achievement =
+            Number(
+                data.targetAchievementPercentage
+            ) || 0;
+
+
+        document.getElementById(
+            "teamTarget"
+        ).textContent =
+            teamTarget;
+
+
+        document.getElementById(
+            "teamCompletedLeads"
+        ).textContent =
+            teamCompleted;
+
+
+        document.getElementById(
+            "targetAchievementPercentage"
+        ).textContent =
+            achievement.toFixed(2)
+            + "%";
+
+
+        document.getElementById(
+            "achievementBadge"
+        ).textContent =
+            achievement.toFixed(2)
+            + "%";
+
+
+        document.getElementById(
+            "targetProgressText"
+        ).textContent =
+            teamCompleted
+            + " / "
+            + teamTarget;
+
+
+        const progressWidth =
+            Math.min(
+                Math.max(
+                    achievement,
+                    0
+                ),
+                100
+            );
+
+
+        const progressBar =
+            document.getElementById(
+                "targetProgressBar"
+            );
+
+
+        progressBar.style.width =
+            progressWidth.toFixed(2)
+            + "%";
+
+
+        progressBar.setAttribute(
+            "aria-valuenow",
+            progressWidth
+        );
+
+
+        updateAchievementMessage(
+            achievement
+        );
+
+
+        // -----------------------------------------------------
+        // Period Information
+        // -----------------------------------------------------
+
+        document.getElementById(
+            "periodStart"
+        ).textContent =
+            formatDisplayDate(
+                data.fromDate
+            );
+
+
+        document.getElementById(
+            "periodEnd"
+        ).textContent =
+            formatDisplayDate(
+                data.toDate
+            );
+
+
+        // -----------------------------------------------------
+        // Chart Data
+        // -----------------------------------------------------
+
+        trendLabels =
+            points.map(
+                function(point) {
+
+                    return point.label;
+
+                }
+            );
+
+
+        performanceScores =
+            points.map(
+                function(point) {
+
+                    return Number(
+                        point.performanceScore
+                    ) || 0;
+
+                }
+            );
+
+
+        assignedLeads =
+            points.map(
+                function(point) {
+
+                    return Number(
+                        point.assignedLeads
+                    ) || 0;
+
+                }
+            );
+
+
+        acceptedLeads =
+            points.map(
+                function(point) {
+
+                    return Number(
+                        point.acceptedLeads
+                    ) || 0;
+
+                }
+            );
+
+
+        completedLeads =
+            points.map(
+                function(point) {
+
+                    return Number(
+                        point.completedLeads
+                    ) || 0;
+
+                }
+            );
+
+
+        acceptanceSla =
+            points.map(
+                function(point) {
+
+                    return Number(
+                        point.acceptanceSLAPercentage
+                    ) || 0;
+
+                }
+            );
+
+
+        firstFeedbackSla =
+            points.map(
+                function(point) {
+
+                    return Number(
+                        point.firstFeedbackSLAPercentage
+                    ) || 0;
+
+                }
+            );
+
+
+        nextFeedbackSla =
+            points.map(
+                function(point) {
+
+                    return Number(
+                        point.nextFeedbackSLAPercentage
+                    ) || 0;
+
+                }
+            );
+
+
+        followUpPercentage =
+            points.map(
+                function(point) {
+
+                    return Number(
+                        point.followUpPercentage
+                    ) || 0;
+
+                }
+            );
+
+
+        // -----------------------------------------------------
+        // Re-render Charts
+        // -----------------------------------------------------
+
+        renderCharts();
+
+    }
+
+
+    // =========================================================
+    // Load Performance Data
+    // =========================================================
+
+    async function loadPerformanceData(
+        fromDate,
+        toDate,
+        filterName
+    ) {
+
+        const loading =
+            document.getElementById(
+                "performanceLoading"
+            );
+
+
+        const button =
+            document.getElementById(
+                "applyDateRangeButton"
+            );
+
+
+        const buttonText =
+            document.getElementById(
+                "applyButtonText"
+            );
+
+
+        try {
+
+            // -------------------------------------------------
+            // Loading State
+            // -------------------------------------------------
+
+            if (loading) {
+
+                loading.style.display =
+                    "block";
+
+            }
+
+
+            if (button) {
+
+                button.disabled =
+                    true;
+
+            }
+
+
+            if (buttonText) {
+
+                buttonText.textContent =
+                    "Loading...";
+
+            }
+
+
+            // -------------------------------------------------
+            // Build Query
+            // -------------------------------------------------
+
+            const params =
+                new URLSearchParams();
+
+
+            params.append(
+                "fromDate",
+                formatInputDate(
+                    fromDate
+                )
+            );
+
+
+            params.append(
+                "toDate",
+                formatInputDate(
+                    toDate
+                )
+            );
+
+
+            // -------------------------------------------------
+            // Request URL
+            // -------------------------------------------------
+
+            const form =
+                document.getElementById(
+                    "performanceFilterForm"
+                );
+
+
+            const url =
+                `${form.action}?${params.toString()}`;
+
+
+            // -------------------------------------------------
+            // AJAX Request
+            // -------------------------------------------------
+
+            const response =
+                await fetch(
+                    url,
+                    {
+
+                        method:
+                            "GET",
+
+                        headers:
+                        {
+
+                            "Accept":
+                                "application/json",
+
+                            "X-Requested-With":
+                                "XMLHttpRequest"
+
+                        }
+
+                    }
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Performance request failed. HTTP status: "
+                    + response.status
+                );
+
+            }
+
+
+            // -------------------------------------------------
+            // Read JSON
+            // -------------------------------------------------
+
+            const data =
+                await response.json();
+
+
+            console.log(
+                "Team Lead Performance:",
+                data
+            );
+
+
+            // -------------------------------------------------
+            // Update Page
+            // -------------------------------------------------
+
+            updatePerformancePage(
+                data
+            );
+
+
+            // -------------------------------------------------
+            // Active Filter
+            // -------------------------------------------------
+
+            setActiveFilter(
+                filterName
+            );
+
+        }
+        catch (error) {
+
+            console.error(
+                "Performance filter error:",
+                error
+            );
+
+
+            alert(
+                "Unable to load performance data. Please try again."
+            );
+
+        }
+        finally {
+
+            if (loading) {
+
+                loading.style.display =
+                    "none";
+
+            }
+
+
+            if (button) {
+
+                button.disabled =
+                    false;
+
+            }
+
+
+            if (buttonText) {
+
+                buttonText.textContent =
+                    "Apply Custom Range";
+
+            }
+
+        }
+
+    }
+
+
+    // =========================================================
+    // Quick Filters
+    // =========================================================
+
+    document
+        .querySelectorAll(
+            ".quick-filter-btn"
+        )
+        .forEach(
+            function(button) {
+
+                button.addEventListener(
+                    "click",
+                    async function() {
+
+                        const range =
+                            button.dataset.range;
+
+
+                        let rangeData =
+                            null;
+
+
+                        // -------------------------------------
+                        // Today
+                        // -------------------------------------
+
+                        if (
+                            range === "Today"
+                        ) {
+
+                            const today =
+                                getToday();
+
+
+                            rangeData = {
+
+                                fromDate:
+                                    today,
+
+                                toDate:
+                                    today
+
+                            };
+
+                        }
+
+
+                        // -------------------------------------
+                        // This Week
+                        // -------------------------------------
+
+                        else if (
+                            range === "ThisWeek"
+                        ) {
+
+                            rangeData =
+                                getThisWeek();
+
+                        }
+
+
+                        // -------------------------------------
+                        // This Month
+                        // -------------------------------------
+
+                        else if (
+                            range === "ThisMonth"
+                        ) {
+
+                            rangeData =
+                                getThisMonth();
+
+                        }
+
+
+                        if (!rangeData) {
+
+                            return;
+
+                        }
+
+
+                        // -------------------------------------
+                        // Update Inputs
+                        // -------------------------------------
+
+                        setDateInputs(
+                            rangeData.fromDate,
+                            rangeData.toDate
+                        );
+
+
+                        // -------------------------------------
+                        // Active Button
+                        // -------------------------------------
+
+                        setActiveQuickButton(
+                            range
+                        );
+
+
+                        // -------------------------------------
+                        // Display Name
+                        // -------------------------------------
+
+                        let displayName =
+                            "This Month";
+
+
+                        if (
+                            range === "Today"
+                        ) {
+
+                            displayName =
+                                "Today";
+
+                        }
+                        else if (
+                            range === "ThisWeek"
+                        ) {
+
+                            displayName =
+                                "This Week";
+
+                        }
+
+
+                        // -------------------------------------
+                        // Load Data
+                        // -------------------------------------
+
+                        await loadPerformanceData(
+                            rangeData.fromDate,
+                            rangeData.toDate,
+                            displayName
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+
+    // =========================================================
+    // Custom Date Range
+    // =========================================================
+
+    document
+        .getElementById(
+            "performanceFilterForm"
+        )
+        .addEventListener(
+            "submit",
+            async function(event) {
+
+                event.preventDefault();
+
+
+                const fromValue =
+                    document.getElementById(
+                        "fromDate"
+                    ).value;
+
+
+                const toValue =
+                    document.getElementById(
+                        "toDate"
+                    ).value;
+
+
+                // ---------------------------------------------
+                // Required Date Validation
+                // ---------------------------------------------
+
+                if (
+                    !fromValue ||
+                    !toValue
+                ) {
+
+                    alert(
+                        "Please select both From Date and To Date."
+                    );
+
+                    return;
+
+                }
+
+
+                // ---------------------------------------------
+                // Date Validation
+                // ---------------------------------------------
+
+                if (
+                    fromValue > toValue
+                ) {
+
+                    alert(
+                        "From Date cannot be after To Date."
+                    );
+
+                    return;
+
+                }
+
+
+                const fromDate =
+                    new Date(
+                        fromValue
+                        + "T00:00:00"
+                    );
+
+
+                const toDate =
+                    new Date(
+                        toValue
+                        + "T00:00:00"
+                    );
+
+
+                // ---------------------------------------------
+                // Remove Quick Filter Active State
+                // ---------------------------------------------
+
+                document
+                    .querySelectorAll(
+                        ".quick-filter-btn"
+                    )
+                    .forEach(
+                        function(button) {
+
+                            button.classList.remove(
+                                "btn-primary"
+                            );
+
+                            button.classList.add(
+                                "btn-outline-primary"
+                            );
+
+                        }
+                    );
+
+
+                // ---------------------------------------------
+                // Load Custom Range
+                // ---------------------------------------------
+
+                await loadPerformanceData(
+                    fromDate,
+                    toDate,
+                    "Custom Range"
+                );
+
+            }
+        );
+
+
+    // =========================================================
+    // Reset Filter
+    // =========================================================
+
+    document
+        .getElementById(
+            "resetFilterButton"
+        )
+        .addEventListener(
+            "click",
+            async function() {
+
+                // ---------------------------------------------
+                // Reset to This Month
+                // ---------------------------------------------
+
+                const monthData =
+                    getThisMonth();
+
+
+                // ---------------------------------------------
+                // Set Date Inputs
+                // ---------------------------------------------
+
+                setDateInputs(
+                    monthData.fromDate,
+                    monthData.toDate
+                );
+
+
+                // ---------------------------------------------
+                // Set Active Button
+                // ---------------------------------------------
+
+                setActiveQuickButton(
+                    "ThisMonth"
+                );
+
+
+                // ---------------------------------------------
+                // Load This Month
+                // ---------------------------------------------
+
+                await loadPerformanceData(
+                    monthData.fromDate,
+                    monthData.toDate,
+                    "This Month"
+                );
+
+            }
+        );
+
+
+    // =========================================================
+    // Initial Setup
+    // =========================================================
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function() {
+
+            // -----------------------------------------------
+            // Default = This Month
+            // -----------------------------------------------
+
+            const monthData =
+                getThisMonth();
+
+
+            setDateInputs(
+                monthData.fromDate,
+                monthData.toDate
+            );
+
+
+            setActiveQuickButton(
+                "ThisMonth"
+            );
+
+
+            setActiveFilter(
+                "This Month"
+            );
+
+
+            // -----------------------------------------------
+            // Initial Charts
+            // -----------------------------------------------
+
+            renderCharts();
+
+        }
+    );
+
+</script>

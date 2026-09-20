@@ -1,0 +1,404 @@
+﻿@model CRMSystem.Models.ViewModels.CreateTargetViewModel
+
+@{
+    ViewData["Title"] = "Create Team Lead Target";
+    ViewData["Breadcrumb"] = "Create Team Lead Target";
+    Layout = "_SalesManagerLayout";
+}
+
+<div class="container-fluid py-4">
+
+    <!-- ===================================================== -->
+    <!-- Page Header -->
+    <!-- ===================================================== -->
+
+    <div class="d-flex flex-wrap justify-content-between
+        align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold mb-1">
+                Create Team Lead Target
+            </h2>
+
+            <p class="text-muted mb-0">
+                Assign a performance target to one of your Team Leads.
+            </p>
+        </div>
+
+        <div class="mt-3 mt-md-0">
+
+            <a asp-controller="SalesManager"
+               asp-action="TeamLeadTargets"
+               class="btn btn-outline-secondary">
+
+                <i class="bi bi-arrow-left me-1"></i>
+                Back to Targets
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- Validation Summary -->
+    <!-- ===================================================== -->
+
+    <div asp-validation-summary="ModelOnly"
+         class="alert alert-danger"
+         role="alert">
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- Create Target Card -->
+    <!-- ===================================================== -->
+
+    <div class="row justify-content-center">
+
+        <div class="col-12 col-xl-8">
+
+            <div class="card border-0 shadow-sm">
+
+                <!-- Card Header -->
+
+                <div class="card-header bg-white border-0 py-4">
+
+                    <div class="d-flex align-items-center">
+
+                        <div class="rounded-circle
+                            bg-primary
+                            bg-opacity-10
+                            text-primary
+                            p-3 me-3">
+
+                            <i class="bi bi-bullseye fs-4"></i>
+
+                        </div>
+
+                        <div>
+
+                            <h5 class="fw-bold mb-1">
+                                Target Information
+                            </h5>
+
+                            <small class="text-muted">
+                                Define the target period and target count.
+                            </small>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Form -->
+
+                <div class="card-body p-4 p-md-5">
+
+                    <form asp-controller="SalesManager"
+                          asp-action="CreateTeamLeadTarget"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+
+                        <!-- ================================================= -->
+                        <!-- Team Lead -->
+                        <!-- ================================================= -->
+
+                        <div class="mb-4">
+
+                            <label asp-for="UserId"
+                                   class="form-label fw-semibold">
+
+                                Team Lead
+
+                                <span class="text-danger">
+                                    *
+                                </span>
+
+                            </label>
+
+                            <select asp-for="UserId"
+                                    asp-items="Model.Users"
+                                    class="form-select">
+
+                                <option value="">
+                                    -- Select Team Lead --
+                                </option>
+
+                            </select>
+
+                            <span asp-validation-for="UserId"
+                                  class="text-danger small">
+                            </span>
+
+                            <div class="form-text">
+                                Only Team Leads assigned to you are shown.
+                            </div>
+
+                        </div>
+
+
+                        <!-- ================================================= -->
+                        <!-- Target Period -->
+                        <!-- ================================================= -->
+
+                        <div class="mb-4">
+
+                            <label asp-for="PeriodType"
+                                   class="form-label fw-semibold">
+
+                                Target Period
+
+                                <span class="text-danger">
+                                    *
+                                </span>
+
+                            </label>
+
+                            <select asp-for="PeriodType"
+                                    asp-items="Html.GetEnumSelectList<CRMSystem.Enums.TargetPeriodType>()"
+                                    class="form-select">
+
+                                <option value="">
+                                    -- Select Target Period --
+                                </option>
+
+                            </select>
+
+                            <span asp-validation-for="PeriodType"
+                                  class="text-danger small">
+                            </span>
+
+                            <div class="form-text">
+                                Select the period type for this target.
+                            </div>
+
+                        </div>
+
+
+                        <!-- ================================================= -->
+                        <!-- Target Count -->
+                        <!-- ================================================= -->
+
+                        <div class="mb-4">
+
+                            <label asp-for="TargetCount"
+                                   class="form-label fw-semibold">
+
+                                Target Count
+
+                                <span class="text-danger">
+                                    *
+                                </span>
+
+                            </label>
+
+                            <div class="input-group">
+
+                                <span class="input-group-text">
+                                    <i class="bi bi-hash"></i>
+                                </span>
+
+                                <input asp-for="TargetCount"
+                                       type="number"
+                                       min="1"
+                                       class="form-control"
+                                       placeholder="Enter target count" />
+
+                            </div>
+
+                            <span asp-validation-for="TargetCount"
+                                  class="text-danger small">
+                            </span>
+
+                            <div class="form-text">
+                                Target count must be greater than zero.
+                            </div>
+
+                        </div>
+
+
+                        <!-- ================================================= -->
+                        <!-- Date Range -->
+                        <!-- ================================================= -->
+
+                        <div class="row">
+
+                            <!-- Start Date -->
+
+                            <div class="col-md-6 mb-4">
+
+                                <label asp-for="StartDate"
+                                       class="form-label fw-semibold">
+
+                                    Start Date
+
+                                    <span class="text-danger">
+                                        *
+                                    </span>
+
+                                </label>
+
+                                <input asp-for="StartDate"
+                                       type="date"
+                                       class="form-control" />
+
+                                <span asp-validation-for="StartDate"
+                                      class="text-danger small">
+                                </span>
+
+                            </div>
+
+
+                            <!-- End Date -->
+
+                            <div class="col-md-6 mb-4">
+
+                                <label asp-for="EndDate"
+                                       class="form-label fw-semibold">
+
+                                    End Date
+
+                                    <span class="text-danger">
+                                        *
+                                    </span>
+
+                                </label>
+
+                                <input asp-for="EndDate"
+                                       type="date"
+                                       class="form-control" />
+
+                                <span asp-validation-for="EndDate"
+                                      class="text-danger small">
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- ================================================= -->
+                        <!-- Information Alert -->
+                        <!-- ================================================= -->
+
+                        <div class="alert alert-info border-0 mb-4">
+
+                            <div class="d-flex">
+
+                                <i class="bi bi-info-circle fs-5 me-2"></i>
+
+                                <div>
+
+                                    <strong>
+                                        Important
+                                    </strong>
+
+                                    <div class="small mt-1">
+
+                                        You can only assign targets to
+                                        Team Leads who belong to your team.
+                                        Overlapping targets for the same
+                                        Team Lead are not allowed.
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- ================================================= -->
+                        <!-- Action Buttons -->
+                        <!-- ================================================= -->
+
+                        <div class="d-flex flex-wrap
+                            justify-content-end
+                            gap-2">
+
+                            <a asp-controller="SalesManager"
+                               asp-action="TeamLeadTargets"
+                               class="btn btn-outline-secondary">
+
+                                Cancel
+
+                            </a>
+
+                            <button type="submit"
+                                    class="btn btn-primary">
+
+                                <i class="bi bi-check-lg me-1"></i>
+
+                                Create Target
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function() {
+
+            const startDate =
+                document.getElementById("StartDate");
+
+            const endDate =
+                document.getElementById("EndDate");
+
+            if (!startDate || !endDate) {
+                return;
+            }
+
+            function validateDateRange() {
+
+                if (startDate.value &&
+                    endDate.value &&
+                    startDate.value > endDate.value) {
+
+                    endDate.setCustomValidity(
+                        "End Date cannot be earlier than Start Date."
+                    );
+
+                } else {
+
+                    endDate.setCustomValidity("");
+
+                }
+            }
+
+            startDate.addEventListener(
+                "change",
+                validateDateRange);
+
+            endDate.addEventListener(
+                "change",
+                validateDateRange);
+
+        });
+
+    </script>
+}

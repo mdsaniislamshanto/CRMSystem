@@ -11,5 +11,7 @@
         public const string SalesManager = "SALES_MANAGER";
 
         public const string HR = "HR";
+
+        public const string TeamLead = "TEAM_LEAD";
     }
 }

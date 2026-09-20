@@ -1,0 +1,315 @@
+﻿@model CRMSystem.Models.ViewModels.CreateTargetViewModel
+
+@{
+    ViewData["Title"] = "Create Sales Manager Target";
+    ViewData["Breadcrumb"] = "Sales Targets / Create";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid py-4">
+
+    <!-- =====================================================
+         Page Header
+         ===================================================== -->
+
+    <div class="mb-4">
+
+        <h2 class="fw-bold mb-1">
+            Create Sales Manager Target
+        </h2>
+
+        <p class="text-muted mb-0">
+            Set a weekly or monthly completed-lead target
+            for a Sales Manager.
+        </p>
+
+    </div>
+
+
+    <!-- =====================================================
+         Form Card
+         ===================================================== -->
+
+    <div class="row justify-content-center">
+
+        <div class="col-xl-8 col-lg-10">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-header bg-white border-0 py-3">
+
+                    <h5 class="fw-bold mb-1">
+                        Target Information
+                    </h5>
+
+                    <p class="text-muted small mb-0">
+                        Enter the target details below.
+                    </p>
+
+                </div>
+
+
+                <div class="card-body p-4">
+
+                    <form asp-controller="Admin"
+                          asp-action="CreateTarget"
+                          method="post"
+                          autocomplete="off">
+
+                        @Html.AntiForgeryToken()
+
+
+                        <!-- Validation Summary -->
+
+                        <div asp-validation-summary="ModelOnly"
+                             class="alert alert-danger"
+                             role="alert">
+                        </div>
+
+
+                        <!-- =================================================
+                             Sales Manager
+                             ================================================= -->
+
+                        <div class="mb-4">
+
+                            <label asp-for="UserId"
+                                   class="form-label fw-semibold">
+
+                                Sales Manager
+
+                            </label>
+
+                            <select asp-for="UserId"
+                                    asp-items="Model.Users"
+                                    class="form-select">
+
+                                <option value="">
+                                    -- Select Sales Manager --
+                                </option>
+
+                            </select>
+
+                            <span asp-validation-for="UserId"
+                                  class="text-danger">
+                            </span>
+
+                            <div class="form-text">
+                                Select the Sales Manager who will receive
+                                this target.
+                            </div>
+
+                        </div>
+
+
+                        <!-- =================================================
+                             Period + Target Count
+                             ================================================= -->
+
+                        <div class="row">
+
+                            <!-- Target Period -->
+
+                            <div class="col-md-6 mb-4">
+
+                                <label asp-for="PeriodType"
+                                       class="form-label fw-semibold">
+
+                                    Target Period
+
+                                </label>
+
+                                <select asp-for="PeriodType"
+                                        class="form-select">
+
+                                    <option value="">
+                                        -- Select Period --
+                                    </option>
+
+                                    <option value="1">
+                                        Weekly
+                                    </option>
+
+                                    <option value="2">
+                                        Monthly
+                                    </option>
+
+                                </select>
+
+                                <span asp-validation-for="PeriodType"
+                                      class="text-danger">
+                                </span>
+
+                            </div>
+
+
+                            <!-- Target Count -->
+
+                            <div class="col-md-6 mb-4">
+
+                                <label asp-for="TargetCount"
+                                       class="form-label fw-semibold">
+
+                                    Target Count
+
+                                </label>
+
+                                <div class="input-group">
+
+                                    <input asp-for="TargetCount"
+                                           type="number"
+                                           min="1"
+                                           class="form-control"
+                                           placeholder="e.g. 50" />
+
+                                    <span class="input-group-text">
+                                        Leads
+                                    </span>
+
+                                </div>
+
+                                <span asp-validation-for="TargetCount"
+                                      class="text-danger">
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- =================================================
+                             Date Range
+                             ================================================= -->
+
+                        <div class="row">
+
+                            <!-- Start Date -->
+
+                            <div class="col-md-6 mb-4">
+
+                                <label asp-for="StartDate"
+                                       class="form-label fw-semibold">
+
+                                    Start Date
+
+                                </label>
+
+                                <input asp-for="StartDate"
+                                       type="date"
+                                       class="form-control" />
+
+                                <span asp-validation-for="StartDate"
+                                      class="text-danger">
+                                </span>
+
+                            </div>
+
+
+                            <!-- End Date -->
+
+                            <div class="col-md-6 mb-4">
+
+                                <label asp-for="EndDate"
+                                       class="form-label fw-semibold">
+
+                                    End Date
+
+                                </label>
+
+                                <input asp-for="EndDate"
+                                       type="date"
+                                       class="form-control" />
+
+                                <span asp-validation-for="EndDate"
+                                      class="text-danger">
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- =================================================
+                             Information Box
+                             ================================================= -->
+
+                        <div class="alert alert-info border-0">
+
+                            <div class="d-flex">
+
+                                <div class="me-3">
+
+                                    <i class="bi bi-info-circle fs-5">
+                                    </i>
+
+                                </div>
+
+                                <div>
+
+                                    <strong>
+                                        Target Calculation
+                                    </strong>
+
+                                    <div class="small mt-1">
+
+                                        Achievement will be calculated
+                                        automatically from the number of
+                                        completed leads during the selected
+                                        target period.
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- =================================================
+                             Buttons
+                             ================================================= -->
+
+                        <div class="d-flex
+                            justify-content-end
+                            gap-2
+                            mt-4">
+
+                            <a asp-controller="Admin"
+                               asp-action="Targets"
+                               class="btn btn-secondary">
+
+                                <i class="bi bi-arrow-left me-1"></i>
+
+                                Cancel
+
+                            </a>
+
+
+                            <button type="submit"
+                                    class="btn btn-primary">
+
+                                <i class="bi bi-check-circle me-1"></i>
+
+                                Create Target
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+}

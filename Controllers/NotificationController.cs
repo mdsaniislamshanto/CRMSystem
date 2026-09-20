@@ -3,6 +3,8 @@ using CRMSystem.Models.ViewModels;
 using CRMSystem.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
+using System.Security.Claims;
+
 namespace CRMSystem.Controllers
 {
     public class NotificationController : Controller
@@ -96,13 +98,32 @@ namespace CRMSystem.Controllers
                     .Select(n => new
                     {
                         n.NotificationId,
+
                         n.NotificationType,
+
                         n.Title,
+
                         n.Message,
+
                         n.LeadId,
+
                         n.AssignmentId,
+
                         n.IsRead,
-                        n.CreatedAt
+
+                        // =================================================
+                        // IMPORTANT:
+                        // Explicitly mark database timestamp as UTC
+                        // and send it as ISO 8601 string with Z.
+                        // =================================================
+
+                        CreatedAt =
+                            DateTime.SpecifyKind(
+                                n.CreatedAt,
+                                DateTimeKind.Utc)
+                            .ToString("O"),
+
+                        n.ReadAt
                     })
                     .ToList();
 
@@ -172,16 +193,42 @@ namespace CRMSystem.Controllers
 
         private long? GetCurrentUserId()
         {
-            var userId =
+            // -------------------------------------------------
+            // First: Get UserId from Authentication Claim
+            // -------------------------------------------------
+
+            var claimUserId =
+                HttpContext.User?
+                    .FindFirstValue(
+                        ClaimTypes.NameIdentifier);
+
+            if (long.TryParse(
+                    claimUserId,
+                    out long claimId))
+            {
+                return claimId;
+            }
+
+
+            // -------------------------------------------------
+            // Second: Fallback to Session
+            // -------------------------------------------------
+
+            var sessionUserId =
                 HttpContext.Session.GetString(
                     SessionKeys.UserId);
 
             if (long.TryParse(
-                userId,
-                out long id))
+                    sessionUserId,
+                    out long sessionId))
             {
-                return id;
+                return sessionId;
             }
+
+
+            // -------------------------------------------------
+            // UserId could not be found
+            // -------------------------------------------------
 
             return null;
         }

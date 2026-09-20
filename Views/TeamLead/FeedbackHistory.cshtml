@@ -1,0 +1,500 @@
+﻿@model IEnumerable<CRMSystem.Models.ViewModels.FeedbackHistoryViewModel>
+
+@{
+    ViewData["Title"] = "Feedback History";
+    ViewData["Breadcrumb"] = "Leads / Feedback History";
+    Layout = "_TeamLeadLayout";
+
+    var lead =
+        ViewBag.Lead as CRMSystem.Models.ViewModels.LeadViewModel;
+
+    var feedbackList =
+        Model?
+            .OrderByDescending(x => x.SubmittedAt)
+            .ToList()
+        ?? new List<CRMSystem.Models.ViewModels.FeedbackHistoryViewModel>();
+
+    var totalFeedbacks = feedbackList.Count;
+
+    var followUpCount =
+        feedbackList.Count(x => x.NextFollowUpDate.HasValue);
+
+    var latestFeedback =
+        feedbackList.FirstOrDefault();
+}
+
+
+<div class="container-fluid">
+
+    <!-- =====================================================
+         PAGE HEADER
+         ===================================================== -->
+
+    <div class="d-flex
+        justify-content-between
+        align-items-center
+        mb-4">
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+                Feedback History
+            </h2>
+
+            <p class="text-muted mb-0">
+                View feedback and follow-up history for this lead.
+            </p>
+
+        </div>
+
+
+        <a asp-action="LeadDetails"
+           asp-route-id="@lead?.LeadId"
+           class="btn btn-outline-secondary">
+
+            <i class="bi bi-arrow-left me-1"></i>
+
+            Back to Lead
+
+        </a>
+
+    </div>
+
+
+    <!-- =====================================================
+         LEAD SUMMARY
+         ===================================================== -->
+    @if (lead != null)
+    {
+        <div class="card border-0 shadow-sm mb-4">
+
+            <div class="card-body">
+
+                <div class="row g-3">
+
+                    <div class="col-md-3">
+
+                        <small class="text-muted">
+                            Lead Code
+                        </small>
+
+                        <div class="fw-semibold">
+                            @lead.LeadCode
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-3">
+
+                        <small class="text-muted">
+                            Lead Name
+                        </small>
+
+                        <div class="fw-semibold">
+                            @lead.LeadName
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-3">
+
+                        <small class="text-muted">
+                            Company
+                        </small>
+
+                        <div class="fw-semibold">
+
+                            @(string.IsNullOrWhiteSpace(lead.CompanyName)
+                                ? "Not provided"
+                                : lead.CompanyName)
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-3">
+
+                        <small class="text-muted">
+                            Sales Officer
+                        </small>
+
+                        <div class="fw-semibold">
+
+                            @(string.IsNullOrWhiteSpace(
+                                lead.AssignedOfficerName)
+                                ? "Not Assigned"
+                                : lead.AssignedOfficerName)
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    }
+
+
+    <!-- =====================================================
+         SUMMARY CARDS
+         ===================================================== -->
+
+    <div class="row g-3 mb-4">
+
+        <!-- Total Feedbacks -->
+
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="text-muted small">
+                        Total Feedbacks
+                    </div>
+
+                    <div class="fs-3 fw-bold mt-1">
+                        @totalFeedbacks
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Follow-up -->
+
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="text-muted small">
+                        With Follow-up
+                    </div>
+
+                    <div class="fs-3 fw-bold mt-1">
+                        @followUpCount
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Latest Feedback -->
+
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="text-muted small">
+                        Latest Feedback
+                    </div>
+
+                    @if (latestFeedback == null)
+                    {
+                        <div class="fs-6 fw-semibold mt-2">
+                            No Feedback
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="fs-6 fw-semibold mt-2">
+
+                            @latestFeedback.SubmittedAt.ToString(
+                                "dd MMM yyyy hh:mm tt")
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         FEEDBACK TIMELINE
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-white">
+
+            <div class="d-flex
+                justify-content-between
+                align-items-center">
+
+                <div>
+
+                    <h5 class="mb-1 fw-semibold">
+
+                        <i class="bi bi-chat-left-text me-2"></i>
+
+                        Feedback Timeline
+
+                    </h5>
+
+                    <small class="text-muted">
+
+                        Feedback submitted by the Sales Officer.
+
+                    </small>
+
+                </div>
+
+
+                <span class="badge bg-primary">
+
+                    @totalFeedbacks
+                    Feedback@(totalFeedbacks == 1 ? "" : "s")
+
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="card-body p-0">
+
+            @if (!feedbackList.Any())
+            {
+                <!-- =================================================
+                     EMPTY STATE
+                     ================================================= -->
+
+                <div class="text-center py-5">
+
+                    <i class="bi bi-chat-square-text
+                    fs-1
+                    text-muted"></i>
+
+                    <h5 class="mt-3">
+                        No Feedback Found
+                    </h5>
+
+                    <p class="text-muted mb-0">
+
+                        No feedback has been submitted
+                        for this lead yet.
+
+                    </p>
+
+                </div>
+            }
+            else
+            {
+                <!-- =================================================
+                     FEEDBACK TABLE
+                     ================================================= -->
+
+                <div class="table-responsive">
+
+                    <table class="table
+                        table-hover
+                        align-middle
+                        mb-0">
+
+                        <thead class="table-light">
+
+                            <tr>
+
+                                <th>
+                                    Submitted
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th>
+                                    Summary
+                                </th>
+
+                                <th>
+                                    Next Follow-up
+                                </th>
+
+                                <th class="text-center">
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            @foreach (var feedback in feedbackList)
+                            {
+                                <tr>
+
+                                    <!-- Submitted -->
+
+                                    <td>
+
+                                        <div class="fw-semibold">
+
+                                            @feedback.SubmittedAt.ToString(
+                                                "dd MMM yyyy")
+
+                                        </div>
+
+                                        <small class="text-muted">
+
+                                            @feedback.SubmittedAt.ToString(
+                                                "hh:mm tt")
+
+                                        </small>
+
+                                    </td>
+
+
+                                    <!-- Status -->
+
+                                    <td>
+
+                                        <span class="badge bg-primary">
+
+                                            @feedback.Status
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- Summary -->
+
+                                    <td style="min-width: 300px;">
+
+                                        <div>
+
+                                            @feedback.Summary
+
+                                        </div>
+
+                                    </td>
+
+
+                                    <!-- Next Follow-up -->
+
+                                    <td>
+
+                                        @if (feedback.NextFollowUpDate.HasValue)
+                                        {
+                                            <div class="fw-semibold">
+
+                                                @feedback.NextFollowUpDate.Value.ToString(
+                                                    "dd MMM yyyy")
+
+                                            </div>
+
+                                            <small class="text-muted">
+
+                                                @feedback.NextFollowUpDate.Value.ToString(
+                                                    "hh:mm tt")
+
+                                            </small>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+
+                                                Not Scheduled
+
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- Action -->
+
+                                    <td class="text-center">
+
+                                        <a asp-controller="TeamLead"
+                                           asp-action="FeedbackDetails"
+                                           asp-route-id="@feedback.FeedbackId"
+                                           class="btn btn-sm btn-outline-primary"
+                                           title="View Feedback Details">
+
+                                            <i class="bi bi-eye"></i>
+
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         INFORMATION
+         ===================================================== -->
+    @if (feedbackList.Any())
+    {
+        <div class="card border-0 shadow-sm mt-4">
+
+            <div class="card-body">
+
+                <div class="d-flex align-items-center">
+
+                    <i class="bi bi-info-circle
+                    text-primary
+                    fs-4
+                    me-3"></i>
+
+                    <div>
+
+                        <h6 class="mb-1">
+                            Feedback Details
+                        </h6>
+
+                        <p class="text-muted mb-0">
+
+                            Use the View button to see complete
+                            feedback information including proof
+                            images, voice recordings, notes and
+                            follow-up details.
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    }
+
+</div>

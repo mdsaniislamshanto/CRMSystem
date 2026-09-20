@@ -1,0 +1,1086 @@
+﻿@model IEnumerable<CRMSystem.Models.ViewModels.LeadViewModel>
+
+@{
+    ViewData["Title"] = "My Team Leads";
+    Layout = "_TeamLeadLayout";
+
+    var currentPage =
+        ViewBag.CurrentPage ?? 1;
+
+    var totalPages =
+        ViewBag.TotalPages ?? 1;
+
+    var totalFilteredLeads =
+        ViewBag.TotalFilteredLeads ?? 0;
+
+    var search =
+        ViewBag.Search as string;
+
+    var selectedSort =
+        ViewBag.Sort as string;
+
+    var selectedSlaStatus =
+        ViewBag.SLAStatus as string;
+
+    CRMSystem.Enums.LeadStatus? selectedStatus =
+        ViewBag.Status;
+
+    CRMSystem.Enums.LeadPriority? selectedPriority =
+        ViewBag.Priority;
+
+    CRMSystem.Enums.LeadSource? selectedSource =
+        ViewBag.Source;
+
+    var slaBreachedLeads =
+        ViewBag.SLABreachedLeads ?? 0;
+
+    var withinSlaLeads =
+        ViewBag.WithinSLALeads ?? 0;
+
+    var pendingSlaLeads =
+        ViewBag.PendingSLALeads ?? 0;
+}
+
+<style>
+
+    .team-lead-page {
+        padding: 2rem 1.5rem 3rem;
+        background: #f7f9fc;
+        min-height: calc(100vh - 70px);
+    }
+
+    .page-header {
+        margin-bottom: 1.75rem;
+    }
+
+        .page-header h2 {
+            font-size: 1.65rem;
+            font-weight: 700;
+            color: #172033;
+            margin-bottom: .35rem;
+        }
+
+        .page-header p {
+            color: #6b7280;
+            margin-bottom: 0;
+        }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.75rem;
+    }
+
+    .summary-card {
+        background: #fff;
+        border: 1px solid #e8edf4;
+        border-radius: 12px;
+        padding: 1.15rem 1.2rem;
+        box-shadow: 0 3px 12px rgba(25,42,70,.04);
+    }
+
+    .summary-label {
+        color: #7a8496;
+        font-size: .82rem;
+        margin-bottom: .35rem;
+    }
+
+    .summary-value {
+        color: #172033;
+        font-size: 1.55rem;
+        font-weight: 700;
+    }
+
+    .filter-card {
+        background: #fff;
+        border: 1px solid #e8edf4;
+        border-radius: 12px;
+        padding: 1.2rem;
+        margin-bottom: 1.75rem;
+        box-shadow: 0 3px 12px rgba(25,42,70,.04);
+    }
+
+    .filter-title {
+        font-size: .95rem;
+        font-weight: 700;
+        color: #172033;
+        margin-bottom: .9rem;
+    }
+
+    .filter-label {
+        font-size: .76rem;
+        font-weight: 600;
+        color: #687386;
+        margin-bottom: .4rem;
+    }
+
+    .filter-card .form-control,
+    .filter-card .form-select {
+        min-height: 42px;
+        border-radius: 8px;
+        border-color: #dfe5ed;
+        font-size: .86rem;
+    }
+
+    .table-card {
+        background: #fff;
+        border: 1px solid #e8edf4;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 3px 12px rgba(25,42,70,.04);
+    }
+
+    .table-header {
+        padding: 1.15rem 1.2rem;
+        border-bottom: 1px solid #edf0f4;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .table-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #172033;
+        margin: 0;
+    }
+
+    .count-badge {
+        background: #edf4ff;
+        color: #2563eb;
+        border: 1px solid #dce9ff;
+        padding: .4rem .7rem;
+        border-radius: 20px;
+        font-size: .75rem;
+        font-weight: 600;
+    }
+
+    .lead-table {
+        margin-bottom: 0;
+        min-width: 1100px;
+    }
+
+        .lead-table thead th {
+            background: #f8fafc;
+            border-bottom: 1px solid #e8edf4;
+            color: #667085;
+            font-size: .68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: .9rem .85rem;
+            white-space: nowrap;
+        }
+
+        .lead-table tbody td {
+            padding: .85rem;
+            border-color: #edf0f4;
+            color: #344054;
+            font-size: .82rem;
+            vertical-align: middle;
+        }
+
+    .lead-name {
+        font-weight: 700;
+        color: #172033;
+    }
+
+    .lead-code {
+        display: inline-block;
+        background: #f1f4f8;
+        color: #687386;
+        border-radius: 5px;
+        padding: .18rem .42rem;
+        font-size: .68rem;
+        font-weight: 600;
+    }
+
+    .officer-name {
+        font-weight: 600;
+        color: #344054;
+    }
+
+    .badge-common {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 20px;
+        padding: .34rem .6rem;
+        font-size: .68rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .priority-high {
+        color: #c62828;
+        background: #fff0f1;
+    }
+
+    .priority-medium {
+        color: #a86400;
+        background: #fff7e8;
+    }
+
+    .priority-low {
+        color: #18794e;
+        background: #edf9f3;
+    }
+
+    .status-badge {
+        color: #2563eb;
+        background: #edf4ff;
+    }
+
+    .status-completed {
+        color: #18794e;
+        background: #edf9f3;
+    }
+
+    .sla-good {
+        color: #18794e;
+        background: #edf9f3;
+    }
+
+    .sla-pending {
+        color: #9a6700;
+        background: #fff8e6;
+    }
+
+    .sla-breached {
+        color: #c62828;
+        background: #fff0f1;
+    }
+
+    .sla-neutral {
+        color: #667085;
+        background: #f2f4f7;
+    }
+
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 7px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        background: #edf4ff;
+        color: #2563eb;
+    }
+
+        .action-btn:hover {
+            background: #dce9ff;
+            color: #2563eb;
+        }
+
+    .empty-state {
+        padding: 4rem 1.5rem;
+        text-align: center;
+        color: #98a2b3;
+    }
+
+    .pagination-wrapper {
+        padding: 1rem 1.2rem;
+        border-top: 1px solid #edf0f4;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .pagination-info {
+        color: #7a8496;
+        font-size: .76rem;
+    }
+
+    .page-link {
+        font-size: .78rem;
+        border-radius: 7px;
+        margin: 0 .1rem;
+    }
+
+    @@media (max-width: 1100px) {
+        .summary-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 767px) {
+        .team-lead-page {
+            padding: 1.25rem .85rem 2rem;
+        }
+
+        .summary-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .pagination-wrapper {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+    }
+
+</style>
+
+
+<div class="team-lead-page">
+
+    <!-- =====================================================
+         Header
+         ===================================================== -->
+
+    <div class="page-header">
+
+        <h2>
+            My Team Leads
+        </h2>
+
+        <p>
+            View and monitor leads assigned to your Sales Officers.
+        </p>
+
+    </div>
+
+
+    <!-- =====================================================
+         Summary
+         ===================================================== -->
+
+    <div class="summary-grid">
+
+        <div class="summary-card">
+            <div class="summary-label">
+                Active Leads
+            </div>
+
+            <div class="summary-value">
+                @ViewBag.TotalActiveLeads
+            </div>
+        </div>
+
+
+        <div class="summary-card">
+            <div class="summary-label">
+                New Leads
+            </div>
+
+            <div class="summary-value">
+                @ViewBag.NewLeads
+            </div>
+        </div>
+
+
+        <div class="summary-card">
+            <div class="summary-label">
+                Assigned Leads
+            </div>
+
+            <div class="summary-value">
+                @ViewBag.AssignedLeads
+            </div>
+        </div>
+
+
+        <div class="summary-card">
+            <div class="summary-label">
+                Accepted Leads
+            </div>
+
+            <div class="summary-value">
+                @ViewBag.AcceptedLeads
+            </div>
+        </div>
+
+
+        <div class="summary-card">
+            <div class="summary-label">
+                SLA Breached
+            </div>
+
+            <div class="summary-value">
+                @slaBreachedLeads
+            </div>
+        </div>
+
+
+        <div class="summary-card">
+            <div class="summary-label">
+                Pending SLA
+            </div>
+
+            <div class="summary-value">
+                @pendingSlaLeads
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         Filters
+         ===================================================== -->
+
+    <div class="filter-card">
+
+        <div class="filter-title">
+            <i class="bi bi-funnel me-1"></i>
+            Search & Filter
+        </div>
+
+
+        <form asp-action="Leads"
+              method="get">
+
+            <div class="row g-3">
+
+                <div class="col-xl-3 col-lg-4 col-md-6">
+
+                    <label class="filter-label">
+                        Search
+                    </label>
+
+                    <input type="text"
+                           name="search"
+                           value="@search"
+                           class="form-control"
+                           placeholder="Lead code, name, company or phone..." />
+
+                </div>
+
+
+                <div class="col-xl-2 col-lg-2 col-md-6">
+
+                    <label class="filter-label">
+                        Status
+                    </label>
+
+                    <select name="status"
+                            class="form-select">
+
+                        <option value="">
+                            All Status
+                        </option>
+
+                        @foreach (var item in
+                            Enum.GetValues<CRMSystem.Enums.LeadStatus>())
+                        {
+                            <option value="@item"
+                                    selected="@(selectedStatus == item)">
+                                @item
+                            </option>
+                        }
+
+                    </select>
+
+                </div>
+
+
+                <div class="col-xl-2 col-lg-2 col-md-6">
+
+                    <label class="filter-label">
+                        Priority
+                    </label>
+
+                    <select name="priority"
+                            class="form-select">
+
+                        <option value="">
+                            All Priority
+                        </option>
+
+                        @foreach (var item in
+                            Enum.GetValues<CRMSystem.Enums.LeadPriority>())
+                        {
+                            <option value="@item"
+                                    selected="@(selectedPriority == item)">
+                                @item
+                            </option>
+                        }
+
+                    </select>
+
+                </div>
+
+
+                <div class="col-xl-2 col-lg-2 col-md-6">
+
+                    <label class="filter-label">
+                        Source
+                    </label>
+
+                    <select name="source"
+                            class="form-select">
+
+                        <option value="">
+                            All Sources
+                        </option>
+
+                        @foreach (var item in
+                            Enum.GetValues<CRMSystem.Enums.LeadSource>())
+                        {
+                            <option value="@item"
+                                    selected="@(selectedSource == item)">
+                                @item
+                            </option>
+                        }
+
+                    </select>
+
+                </div>
+
+
+                <div class="col-xl-2 col-lg-2 col-md-6">
+
+                    <label class="filter-label">
+                        Acceptance SLA
+                    </label>
+
+                    <select name="slaStatus"
+                            class="form-select">
+
+                        <option value="">
+                            All SLA
+                        </option>
+
+                        <option value="notassigned"
+                                selected="@(selectedSlaStatus == "notassigned")">
+                            Not Assigned
+                        </option>
+
+                        <option value="pending"
+                                selected="@(selectedSlaStatus == "pending")">
+                            Pending
+                        </option>
+
+                        <option value="withinsla"
+                                selected="@(selectedSlaStatus == "withinsla")">
+                            Within SLA
+                        </option>
+
+                        <option value="breached"
+                                selected="@(selectedSlaStatus == "breached")">
+                            SLA Breached
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="col-xl-2 col-lg-2 col-md-6">
+
+                    <label class="filter-label">
+                        Sort By
+                    </label>
+
+                    <select name="sort"
+                            class="form-select">
+
+                        <option value="">
+                            Newest First
+                        </option>
+
+                        <option value="oldest"
+                                selected="@(selectedSort == "oldest")">
+                            Oldest First
+                        </option>
+
+                        <option value="name"
+                                selected="@(selectedSort == "name")">
+                            Name A-Z
+                        </option>
+
+                        <option value="name_desc"
+                                selected="@(selectedSort == "name_desc")">
+                            Name Z-A
+                        </option>
+
+                        <option value="priority"
+                                selected="@(selectedSort == "priority")">
+                            Highest Priority
+                        </option>
+
+                        <option value="priority_low"
+                                selected="@(selectedSort == "priority_low")">
+                            Lowest Priority
+                        </option>
+
+                        <option value="status"
+                                selected="@(selectedSort == "status")">
+                            Status
+                        </option>
+
+                        <option value="sla"
+                                selected="@(selectedSort == "sla")">
+                            SLA Breached First
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="col-12">
+
+                    <button type="submit"
+                            class="btn btn-primary">
+
+                        <i class="bi bi-funnel-fill me-1"></i>
+
+                        Apply Filters
+
+                    </button>
+
+                    <a asp-action="Leads"
+                       class="btn btn-light border ms-1">
+
+                        <i class="bi bi-arrow-counterclockwise me-1"></i>
+
+                        Reset
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- =====================================================
+         Leads Table
+         ===================================================== -->
+
+    <div class="table-card">
+
+        <div class="table-header">
+
+            <div>
+
+                <h5 class="table-title">
+                    Team Leads
+                </h5>
+
+                <small class="text-muted">
+                    Leads assigned to your Sales Officers.
+                </small>
+
+            </div>
+
+            <span class="count-badge">
+
+                @totalFilteredLeads
+
+                @(totalFilteredLeads == 1
+                    ? "Lead"
+                    : "Leads")
+
+            </span>
+
+        </div>
+
+
+        <div class="table-responsive">
+
+            <table class="table lead-table align-middle">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Lead</th>
+
+                        <th>Company</th>
+
+                        <th>Contact</th>
+
+                        <th>Priority</th>
+
+                        <th>Status</th>
+
+                        <th>Sales Officer</th>
+
+                        <th>Assigned</th>
+
+                        <th>Acceptance SLA</th>
+
+                        <th class="text-center">
+                            Action
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    @if (!Model.Any())
+                    {
+                        <tr>
+
+                            <td colspan="9">
+
+                                <div class="empty-state">
+
+                                    <i class="bi bi-search fs-2"></i>
+
+                                    <h6 class="mt-3">
+                                        No leads found
+                                    </h6>
+
+                                    <p class="mb-0">
+                                        No active leads are assigned to your team.
+                                    </p>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var lead in Model)
+                        {
+                            var slaStatus =
+                                lead.AcceptanceSLAStatus ??
+                                "Not Assigned";
+
+                            <tr>
+
+                                <!-- Lead -->
+
+                                <td>
+
+                                    <div class="lead-name">
+                                        @lead.LeadName
+                                    </div>
+
+                                    <span class="lead-code">
+                                        @lead.LeadCode
+                                    </span>
+
+                                </td>
+
+
+                                <!-- Company -->
+
+                                <td>
+                                    @(string.IsNullOrWhiteSpace(
+                                        lead.CompanyName)
+                                        ? "Not provided"
+                                        : lead.CompanyName)
+                                </td>
+
+
+                                <!-- Contact -->
+
+                                <td>
+                                    @lead.Phone
+                                </td>
+
+
+                                <!-- Priority -->
+
+                                <td>
+
+                                    @switch (lead.Priority)
+                                    {
+                                        case CRMSystem.Enums.LeadPriority.High:
+
+                                            <span class="badge-common priority-high">
+                                                High
+                                            </span>
+
+                                            break;
+
+                                        case CRMSystem.Enums.LeadPriority.Medium:
+
+                                            <span class="badge-common priority-medium">
+                                                Medium
+                                            </span>
+
+                                            break;
+
+                                        default:
+
+                                            <span class="badge-common priority-low">
+                                                Low
+                                            </span>
+
+                                            break;
+                                    }
+
+                                </td>
+
+
+                                <!-- Status -->
+
+                                <td>
+
+                                    @if (lead.Status ==
+                                        CRMSystem.Enums.LeadStatus.Completed)
+                                    {
+                                        <span class="badge-common status-completed">
+                                            <i class="bi bi-check-circle me-1"></i>
+                                            @lead.Status
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge-common status-badge">
+                                            @lead.Status
+                                        </span>
+                                    }
+
+                                </td>
+
+
+                                <!-- Sales Officer -->
+
+                                <td>
+
+                                    <span class="officer-name">
+
+                                        <i class="bi bi-person me-1"></i>
+
+                                        @lead.AssignedOfficerName
+
+                                    </span>
+
+                                </td>
+
+
+                                <!-- Assigned -->
+
+                                <td>
+
+                                    @if (lead.AssignedAt.HasValue)
+                                    {
+                                        <small>
+
+                                            @lead.AssignedAt.Value.ToLocalTime().ToString("dd MMM yyyy")
+
+                                            <br />
+
+                                            @lead.AssignedAt.Value.ToLocalTime().ToString("hh:mm tt")
+
+                                        </small>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">
+                                            —
+                                        </span>
+                                    }
+
+                                </td>
+
+
+                                <!-- SLA -->
+
+                                <td>
+
+                                    @if (slaStatus ==
+                                        "Within SLA")
+                                    {
+                                        <span class="badge-common sla-good">
+                                            <i class="bi bi-check-circle me-1"></i>
+                                            Within SLA
+                                        </span>
+                                    }
+                                    else if (
+                                        slaStatus ==
+                                        "SLA Breached")
+                                    {
+                                        <span class="badge-common sla-breached">
+                                            <i class="bi bi-exclamation-triangle me-1"></i>
+                                            SLA Breached
+                                        </span>
+                                    }
+                                    else if (
+                                        slaStatus.StartsWith(
+                                            "Pending",
+                                            StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        <span class="badge-common sla-pending">
+                                            <i class="bi bi-clock me-1"></i>
+                                            @slaStatus
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge-common sla-neutral">
+                                            @slaStatus
+                                        </span>
+                                    }
+
+                                </td>
+
+
+                                <!-- Action -->
+
+                                <td class="text-center">
+
+                                    <a asp-controller="TeamLead"
+                                       asp-action="LeadDetails"
+                                       asp-route-id="@lead.LeadId"
+                                       class="action-btn"
+                                       title="View Lead">
+
+                                        <i class="bi bi-eye"></i>
+
+                                    </a>
+
+                                </td>
+
+                            </tr>
+                        }
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <!-- =====================================================
+             Pagination
+             ===================================================== -->
+        @if (totalFilteredLeads > 0)
+        {
+            <div class="pagination-wrapper">
+
+                <div class="pagination-info">
+
+                    Showing
+
+                    <strong>
+                        @(((currentPage - 1) * 10) + 1)
+                    </strong>
+
+                    to
+
+                    <strong>
+                        @Math.Min(
+                            currentPage * 10,
+                            totalFilteredLeads)
+                    </strong>
+
+                    of
+
+                    <strong>
+                        @totalFilteredLeads
+                    </strong>
+
+                    leads
+
+                </div>
+
+
+                <nav>
+
+                    <ul class="pagination mb-0">
+
+                        <li class="page-item
+                            @(currentPage <= 1
+                                ? "disabled"
+                                : "")">
+
+                            @if (currentPage > 1)
+                            {
+                                <a class="page-link"
+                                   asp-action="Leads"
+                                   asp-route-page="@(currentPage - 1)"
+                                   asp-route-search="@search"
+                                   asp-route-status="@selectedStatus"
+                                   asp-route-priority="@selectedPriority"
+                                   asp-route-source="@selectedSource"
+                                   asp-route-slaStatus="@selectedSlaStatus"
+                                   asp-route-sort="@selectedSort">
+
+                                    <i class="bi bi-chevron-left"></i>
+
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="page-link">
+                                    <i class="bi bi-chevron-left"></i>
+                                </span>
+                            }
+
+                        </li>
+
+
+                        @for (
+                            var pageNumber = 1;
+                            pageNumber <= totalPages;
+                            pageNumber++)
+                        {
+                            <li class="page-item
+                                @(pageNumber == currentPage
+                                    ? "active"
+                                    : "")">
+
+                                <a class="page-link"
+                                   asp-action="Leads"
+                                   asp-route-page="@pageNumber"
+                                   asp-route-search="@search"
+                                   asp-route-status="@selectedStatus"
+                                   asp-route-priority="@selectedPriority"
+                                   asp-route-source="@selectedSource"
+                                   asp-route-slaStatus="@selectedSlaStatus"
+                                   asp-route-sort="@selectedSort">
+
+                                    @pageNumber
+
+                                </a>
+
+                            </li>
+                        }
+
+
+                        <li class="page-item
+                            @(currentPage >= totalPages
+                                ? "disabled"
+                                : "")">
+
+                            @if (currentPage < totalPages)
+                            {
+                                <a class="page-link"
+                                   asp-action="Leads"
+                                   asp-route-page="@(currentPage + 1)"
+                                   asp-route-search="@search"
+                                   asp-route-status="@selectedStatus"
+                                   asp-route-priority="@selectedPriority"
+                                   asp-route-source="@selectedSource"
+                                   asp-route-slaStatus="@selectedSlaStatus"
+                                   asp-route-sort="@selectedSort">
+
+                                    <i class="bi bi-chevron-right"></i>
+
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="page-link">
+                                    <i class="bi bi-chevron-right"></i>
+                                </span>
+                            }
+
+                        </li>
+
+                    </ul>
+
+                </nav>
+
+            </div>
+        }
+
+    </div>
+
+</div>

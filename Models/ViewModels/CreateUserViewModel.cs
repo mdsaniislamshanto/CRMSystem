@@ -27,16 +27,38 @@ namespace CRMSystem.Models.ViewModels
         [Display(Name = "Role")]
         public long RoleId { get; set; }
 
+        // =====================================================
+        // Sales Manager Assignment
+        // Used by Team Lead
+        // =====================================================
+
+        [Display(Name = "Sales Manager")]
+        public long? SalesManagerId { get; set; }
+
+        // =====================================================
+        // Team Lead Assignment
+        // Used by Sales Officer
+        // =====================================================
+
+        [Display(Name = "Team Lead")]
+        public long? TeamLeadId { get; set; }
+
         [Required]
         [DataType(DataType.Password)]
         public string Password { get; set; } = string.Empty;
 
         [Required]
         [DataType(DataType.Password)]
-        [Compare(nameof(Password), ErrorMessage = "Passwords do not match.")]
+        [Compare(
+            nameof(Password),
+            ErrorMessage = "Passwords do not match.")]
         [Display(Name = "Confirm Password")]
         public string ConfirmPassword { get; set; } = string.Empty;
 
         public List<SelectListItem> Roles { get; set; } = new();
+
+        public List<SelectListItem> SalesManagers { get; set; } = new();
+
+        public List<SelectListItem> TeamLeads { get; set; } = new();
     }
 }

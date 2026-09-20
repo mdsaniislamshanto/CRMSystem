@@ -8,7 +8,6 @@
 
 <div class="container mt-4">
 
-    <!-- Page Header -->
     <div class="mb-4">
 
         <h2 class="fw-bold mb-1">
@@ -21,19 +20,23 @@
 
     </div>
 
+
     <div class="card shadow-sm border-0">
 
         <div class="card-body">
 
-            <form asp-action="Edit" method="post">
+            <form asp-action="Edit"
+                  method="post">
 
                 @Html.AntiForgeryToken()
 
-                <input asp-for="UserId" type="hidden" />
+                <input asp-for="UserId"
+                       type="hidden" />
 
                 <div asp-validation-summary="ModelOnly"
                      class="text-danger mb-3">
                 </div>
+
 
                 <div class="row">
 
@@ -50,6 +53,7 @@
 
                     </div>
 
+
                     <!-- Email -->
                     <div class="col-md-6 mb-3">
 
@@ -62,6 +66,7 @@
                                readonly />
 
                     </div>
+
 
                     <!-- First Name -->
                     <div class="col-md-6 mb-3">
@@ -79,6 +84,7 @@
 
                     </div>
 
+
                     <!-- Last Name -->
                     <div class="col-md-6 mb-3">
 
@@ -94,6 +100,7 @@
                         </span>
 
                     </div>
+
 
                     <!-- Phone -->
                     <div class="col-md-6 mb-3">
@@ -111,6 +118,7 @@
 
                     </div>
 
+
                     <!-- Role -->
                     <div class="col-md-6 mb-3">
 
@@ -120,7 +128,8 @@
 
                         <select asp-for="RoleId"
                                 asp-items="Model.Roles"
-                                class="form-select">
+                                class="form-select"
+                                id="RoleId">
                         </select>
 
                         <span asp-validation-for="RoleId"
@@ -131,7 +140,71 @@
 
                 </div>
 
+
+                <!-- Sales Manager Assignment -->
+                <div class="row"
+                     id="salesManagerContainer"
+                     style="display: none;">
+
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="SalesManagerId"
+                               class="form-label">
+                        </label>
+
+                        <select asp-for="SalesManagerId"
+                                asp-items="Model.SalesManagers"
+                                class="form-select"
+                                id="SalesManagerId">
+
+                            <option value="">
+                                -- Select Sales Manager --
+                            </option>
+
+                        </select>
+
+                        <span asp-validation-for="SalesManagerId"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Team Lead Assignment -->
+                <div class="row"
+                     id="teamLeadContainer"
+                     style="display: none;">
+
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="TeamLeadId"
+                               class="form-label">
+                        </label>
+
+                        <select asp-for="TeamLeadId"
+                                asp-items="Model.TeamLeads"
+                                class="form-select"
+                                id="TeamLeadId">
+
+                            <option value="">
+                                -- Select Team Lead --
+                            </option>
+
+                        </select>
+
+                        <span asp-validation-for="TeamLeadId"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                </div>
+
+
                 <hr />
+
 
                 <div class="d-flex justify-content-end gap-2">
 
@@ -161,7 +234,94 @@
 
 </div>
 
+
 @section Scripts
 {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function() {
+
+            const roleSelect =
+                document.getElementById("RoleId");
+
+            const managerContainer =
+                document.getElementById(
+                    "salesManagerContainer"
+                );
+
+            const managerSelect =
+                document.getElementById("SalesManagerId");
+
+            const teamLeadContainer =
+                document.getElementById(
+                    "teamLeadContainer"
+                );
+
+            const teamLeadSelect =
+                document.getElementById("TeamLeadId");
+
+
+            function updateAssignmentVisibility() {
+
+                const selectedRole =
+                    roleSelect.options[
+                        roleSelect.selectedIndex
+                    ]?.text?.trim();
+
+
+                // Team Lead → Sales Manager
+
+                if (selectedRole === "Team Lead") {
+
+                    managerContainer.style.display = "block";
+
+                    teamLeadContainer.style.display = "none";
+
+                    teamLeadSelect.value = "";
+
+                }
+
+
+                // Sales Officer → Team Lead
+
+                else if (selectedRole === "Sales Officer") {
+
+                    managerContainer.style.display = "none";
+
+                    managerSelect.value = "";
+
+                    teamLeadContainer.style.display = "block";
+
+                }
+
+
+                // Other roles
+
+                else {
+
+                    managerContainer.style.display = "none";
+
+                    teamLeadContainer.style.display = "none";
+
+                    managerSelect.value = "";
+
+                    teamLeadSelect.value = "";
+
+                }
+            }
+
+
+            roleSelect.addEventListener(
+                "change",
+                updateAssignmentVisibility
+            );
+
+
+            updateAssignmentVisibility();
+
+        });
+
+    </script>
 }

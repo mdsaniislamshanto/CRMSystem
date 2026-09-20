@@ -110,6 +110,26 @@ builder.Services.AddScoped<IFollowUpService, FollowUpService>();
 // Settings
 builder.Services.AddScoped<ISettingsService, SettingsService>();
 
+// Target 
+builder.Services.AddScoped<ITargetService, TargetService>();
+
+// Team Lead Services
+builder.Services.AddScoped<ITeamLeadService, TeamLeadService>();
+
+// Team Lead Performance Services
+builder.Services.AddScoped<ITeamLeadPerformanceService,TeamLeadPerformanceService>();
+
+// Team Lead Analytics Services
+builder.Services.AddScoped<ITeamLeadAnalyticsService,TeamLeadAnalyticsService>();
+
+
+// Report Export Services For Team Lead
+builder.Services.AddScoped<IReportExportService,ReportExportService>();
+
+
+//Admin Dashboard Services
+builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
+
 
 // =====================================================
 // Sales Manager Services

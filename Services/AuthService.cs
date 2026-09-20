@@ -1,13 +1,15 @@
-﻿using CRMSystem.Data;
+﻿using CRMSystem.Constants;
+using CRMSystem.Data;
 using CRMSystem.Models.DTOs;
 using CRMSystem.Models.ViewModels;
 using CRMSystem.Services.Interfaces;
+
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+
 using System.Security.Claims;
-using CRMSystem.Constants;
 
 namespace CRMSystem.Services
 {
@@ -24,57 +26,94 @@ namespace CRMSystem.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
+
+        // =====================================================
         // Login
-        public async Task<LoginResult> LoginAsync(LoginViewModel model)
+        // =====================================================
+
+        public async Task<LoginResult> LoginAsync(
+            LoginViewModel model)
         {
             var result = new LoginResult();
 
+            // -------------------------------------------------
             // Find user by email
-            var user = await _context.Users
-                .Include(u => u.Role)
-                .FirstOrDefaultAsync(u =>
-                    u.Email == model.Email &&
-                    !u.IsDeleted);
+            // -------------------------------------------------
+
+            var user =
+                await _context.Users
+                    .Include(u => u.Role)
+                    .FirstOrDefaultAsync(u =>
+                        u.Email == model.Email &&
+                        !u.IsDeleted);
 
             if (user == null)
             {
                 result.IsSuccess = false;
-                result.Message = "Invalid email or password.";
+                result.Message =
+                    "Invalid email or password.";
+
                 return result;
             }
 
+
+            // -------------------------------------------------
             // Verify password
+            // -------------------------------------------------
+
             if (!BCrypt.Net.BCrypt.Verify(
                     model.Password,
                     user.PasswordHash))
             {
                 result.IsSuccess = false;
-                result.Message = "Invalid email or password.";
+                result.Message =
+                    "Invalid email or password.";
+
                 return result;
             }
 
+
+            // -------------------------------------------------
             // Check active status
+            // -------------------------------------------------
+
             if (!user.IsActive)
             {
                 result.IsSuccess = false;
-                result.Message = "Your account is inactive.";
+                result.Message =
+                    "Your account is inactive.";
+
                 return result;
             }
 
+
+            // -------------------------------------------------
             // Make sure role exists
+            // -------------------------------------------------
+
             if (user.Role == null)
             {
                 result.IsSuccess = false;
-                result.Message = "User role is not configured.";
+                result.Message =
+                    "User role is not configured.";
+
                 return result;
             }
 
+
+            // -------------------------------------------------
             // Update last login time
+            // -------------------------------------------------
+
             user.LastLoginAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
 
+
+            // -------------------------------------------------
             // Get current HTTP context
+            // -------------------------------------------------
+
             var httpContext =
                 _httpContextAccessor.HttpContext;
 
@@ -87,11 +126,13 @@ namespace CRMSystem.Services
                 return result;
             }
 
-            // =====================================================
-            // SESSION
-            // =====================================================
 
-            var session = httpContext.Session;
+            // =================================================
+            // SESSION
+            // =================================================
+
+            var session =
+                httpContext.Session;
 
             session.SetString(
                 SessionKeys.UserId,
@@ -110,49 +151,67 @@ namespace CRMSystem.Services
                 user.FullName);
 
 
-            // =====================================================
+            // =================================================
             // COOKIE AUTHENTICATION + ROLE CLAIM
-            // =====================================================
+            // =================================================
 
-            var claims = new List<Claim>
-            {
-                new Claim(
-                    ClaimTypes.NameIdentifier,
-                    user.UserId.ToString()),
+            var claims =
+                new List<Claim>
+                {
+                    new Claim(
+                        ClaimTypes.NameIdentifier,
+                        user.UserId.ToString()),
 
-                new Claim(
-                    ClaimTypes.Name,
-                    user.FullName),
+                    new Claim(
+                        ClaimTypes.Name,
+                        user.FullName),
 
-                new Claim(
-                    ClaimTypes.Email,
-                    user.Email),
+                    new Claim(
+                        ClaimTypes.Email,
+                        user.Email),
 
-                new Claim(
-                    ClaimTypes.Role,
-                    user.Role.RoleKey)
-            };
+                    new Claim(
+                        ClaimTypes.Role,
+                        user.Role.RoleKey)
+                };
 
-            var identity = new ClaimsIdentity(
-                claims,
-                CookieAuthenticationDefaults.AuthenticationScheme);
 
-            var principal = new ClaimsPrincipal(identity);
+            var identity =
+                new ClaimsIdentity(
+                    claims,
+                    CookieAuthenticationDefaults
+                        .AuthenticationScheme);
+
+
+            var principal =
+                new ClaimsPrincipal(identity);
+
 
             await httpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,
+                CookieAuthenticationDefaults
+                    .AuthenticationScheme,
                 principal);
 
+
+            // -------------------------------------------------
             // Login successful
+            // -------------------------------------------------
+
             result.IsSuccess = true;
-            result.Message = "Login successful.";
+
+            result.Message =
+                "Login successful.";
+
             result.User = user;
 
             return result;
         }
 
 
+        // =====================================================
         // Logout
+        // =====================================================
+
         public async void Logout()
         {
             var httpContext =
@@ -165,29 +224,73 @@ namespace CRMSystem.Services
 
                 // Remove authentication cookie
                 await httpContext.SignOutAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme);
+                    CookieAuthenticationDefaults
+                        .AuthenticationScheme);
             }
         }
 
 
+        // =====================================================
         // Get Current User Id
+        // =====================================================
+
         public long? GetCurrentUserId()
         {
-            var userId =
-                _httpContextAccessor.HttpContext?
-                    .Session
-                    .GetString(SessionKeys.UserId);
+            var httpContext =
+                _httpContextAccessor.HttpContext;
 
-            if (long.TryParse(userId, out long id))
+            if (httpContext == null)
             {
-                return id;
+                return null;
             }
+
+
+            // -------------------------------------------------
+            // First: Get UserId from authentication claim
+            // -------------------------------------------------
+
+            var claimUserId =
+                httpContext.User?
+                    .FindFirstValue(
+                        ClaimTypes.NameIdentifier);
+
+            if (long.TryParse(
+                    claimUserId,
+                    out long claimId))
+            {
+                return claimId;
+            }
+
+
+            // -------------------------------------------------
+            // Second: Fallback to Session
+            // -------------------------------------------------
+
+            var sessionUserId =
+                httpContext.Session
+                    .GetString(
+                        SessionKeys.UserId);
+
+            if (long.TryParse(
+                    sessionUserId,
+                    out long sessionId))
+            {
+                return sessionId;
+            }
+
+
+            // -------------------------------------------------
+            // UserId could not be found
+            // -------------------------------------------------
 
             return null;
         }
 
 
+        // =====================================================
         // Get Current User Role
+        // =====================================================
+
         public string? GetCurrentUserRole()
         {
             return _httpContextAccessor.HttpContext?
@@ -196,134 +299,3 @@ namespace CRMSystem.Services
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//using CRMSystem.Data;
-//using CRMSystem.Models.DTOs;
-//using CRMSystem.Models.ViewModels;
-//using CRMSystem.Services.Interfaces;
-//using Microsoft.AspNetCore.Http;
-//using Microsoft.EntityFrameworkCore;
-//using CRMSystem.Constants;
-
-
-//namespace CRMSystem.Services
-//{
-//    public class AuthService : IAuthService
-//    {
-//        private readonly ApplicationDbContext _context;
-//        private readonly IHttpContextAccessor _httpContextAccessor;
-
-//        public AuthService(
-//            ApplicationDbContext context,
-//            IHttpContextAccessor httpContextAccessor)
-//        {
-//            _context = context;
-//            _httpContextAccessor = httpContextAccessor;
-//        }
-
-//        // Login
-//        public async Task<LoginResult> LoginAsync(LoginViewModel model)
-//        {
-//            var result = new LoginResult();
-
-//            // Find user by email
-//            var user = await _context.Users
-//                .Include(u => u.Role)
-//                .FirstOrDefaultAsync(u =>
-//                    u.Email == model.Email &&
-//                    !u.IsDeleted);
-
-//            if (user == null)
-//            {
-//                result.IsSuccess = false;
-//                result.Message = "Invalid email or password.";
-//                return result;
-//            }
-
-//            // Verify password
-//            if (!BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash))
-//            {
-//                result.IsSuccess = false;
-//                result.Message = "Invalid email or password.";
-//                return result;
-//            }
-
-//            // Check active status
-//            if (!user.IsActive)
-//            {
-//                result.IsSuccess = false;
-//                result.Message = "Your account is inactive.";
-//                return result;
-//            }
-
-//            // Update last login time
-//            user.LastLoginAt = DateTime.UtcNow;
-//            await _context.SaveChangesAsync();
-
-//            // Store session
-//            var session = _httpContextAccessor.HttpContext!.Session;
-
-//            session.SetString(SessionKeys.UserId, user.UserId.ToString());
-//            session.SetString(SessionKeys.RoleId, user.RoleId.ToString());
-//            session.SetString(SessionKeys.RoleKey, user.Role!.RoleKey);
-//            session.SetString(SessionKeys.FullName, user.FullName);
-
-//            result.IsSuccess = true;
-//            result.Message = "Login successful.";
-//            result.User = user;
-
-//            return result;
-//        }
-
-//        // Logout
-//        public void Logout()
-//        {
-//            _httpContextAccessor.HttpContext?.Session.Clear();
-//        }
-
-//        // Get Current User Id
-//        public long? GetCurrentUserId()
-//        {
-//            var userId = _httpContextAccessor.HttpContext?
-//                .Session
-//                .GetString(SessionKeys.UserId);
-
-//            if (long.TryParse(userId, out long id))
-//            {
-//                return id;
-//            }
-
-//            return null;
-//        }
-
-//        // Get Current User Role
-//        public string? GetCurrentUserRole()
-//        {
-//            return _httpContextAccessor.HttpContext?
-//                .Session
-//              .GetString(SessionKeys.RoleKey);
-//        }
-//    }
-//}

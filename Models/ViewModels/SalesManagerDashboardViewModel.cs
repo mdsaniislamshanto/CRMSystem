@@ -15,6 +15,16 @@
 
         public int NewLeadsToday { get; set; }
 
+
+        // ==========================
+        // Target Overview
+        // ==========================
+        public int TotalTarget { get; set; }
+
+        public int TargetFulfilled { get; set; }
+
+
+
         // ==========================
         // Action Center
         // ==========================

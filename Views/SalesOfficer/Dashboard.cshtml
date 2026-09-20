@@ -7,54 +7,289 @@
 
 <div class="container-fluid mt-4">
 
-    <h2 class="mb-4">
-        Welcome, Sales Officer 👋
-    </h2>
+    <!-- ===================================================== -->
+    <!-- Page Header -->
+    <!-- ===================================================== -->
 
-    <div class="row">
+    <div class="mb-4">
 
-        <div class="col-md-3 mb-3">
-            <div class="card shadow-sm border-0">
-                <div class="card-body text-center">
-                    <h5>Total Assigned</h5>
-                    <h2>@Model.TotalAssigned</h2>
+        <h2 class="fw-bold mb-1">
+            Sales Officer Dashboard
+        </h2>
+
+        <p class="text-muted mb-0">
+            Welcome, Sales Officer 👋
+        </p>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- Lead Summary Cards -->
+    <!-- ===================================================== -->
+
+    <div class="row g-4">
+
+        <!-- Total Assigned -->
+        <div class="col-xl-3 col-md-6">
+
+            <div class="card shadow-sm border-0 h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <p class="text-muted mb-1">
+                                Total Assigned
+                            </p>
+
+                            <h2 class="fw-bold mb-0">
+                                @Model.TotalAssigned
+                            </h2>
+
+                            <small class="text-muted">
+                                Leads assigned to you
+                            </small>
+
+                        </div>
+
+                        <div class="fs-1 text-primary">
+
+                            <i class="bi bi-person-lines-fill"></i>
+
+                        </div>
+
+                    </div>
+
                 </div>
+
             </div>
+
         </div>
 
-        <div class="col-md-3 mb-3">
-            <div class="card shadow-sm border-0">
-                <div class="card-body text-center">
-                    <h5>Pending</h5>
-                    <h2>@Model.PendingLeads</h2>
+
+        <!-- Pending -->
+        <div class="col-xl-3 col-md-6">
+
+            <div class="card shadow-sm border-0 h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <p class="text-muted mb-1">
+                                Pending
+                            </p>
+
+                            <h2 class="fw-bold mb-0">
+                                @Model.PendingLeads
+                            </h2>
+
+                            <small class="text-muted">
+                                Awaiting acceptance
+                            </small>
+
+                        </div>
+
+                        <div class="fs-1 text-warning">
+
+                            <i class="bi bi-hourglass-split"></i>
+
+                        </div>
+
+                    </div>
+
                 </div>
+
             </div>
+
         </div>
 
-        <div class="col-md-3 mb-3">
-            <div class="card shadow-sm border-0">
-                <div class="card-body text-center">
-                    <h5>Accepted</h5>
-                    <h2>@Model.AcceptedLeads</h2>
+
+        <!-- Accepted -->
+        <div class="col-xl-3 col-md-6">
+
+            <div class="card shadow-sm border-0 h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <p class="text-muted mb-1">
+                                Accepted
+                            </p>
+
+                            <h2 class="fw-bold mb-0">
+                                @Model.AcceptedLeads
+                            </h2>
+
+                            <small class="text-muted">
+                                Leads in progress
+                            </small>
+
+                        </div>
+
+                        <div class="fs-1 text-success">
+
+                            <i class="bi bi-check-circle"></i>
+
+                        </div>
+
+                    </div>
+
                 </div>
+
             </div>
+
         </div>
 
-        <div class="col-md-3 mb-3">
-            <div class="card shadow-sm border-0">
-                <div class="card-body text-center">
-                    <h5>Completed</h5>
-                    <h2>@Model.CompletedLeads</h2>
+
+        <!-- Completed -->
+        <div class="col-xl-3 col-md-6">
+
+            <div class="card shadow-sm border-0 h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <p class="text-muted mb-1">
+                                Completed
+                            </p>
+
+                            <h2 class="fw-bold mb-0">
+                                @Model.CompletedLeads
+                            </h2>
+
+                            <small class="text-muted">
+                                Successfully completed
+                            </small>
+
+                        </div>
+
+                        <div class="fs-1 text-info">
+
+                            <i class="bi bi-check2-circle"></i>
+
+                        </div>
+
+                    </div>
+
                 </div>
+
             </div>
+
         </div>
 
     </div>
 
-    <div class="card shadow mt-4">
 
-        <div class="card-header bg-primary text-white">
+    <!-- ===================================================== -->
+    <!-- Current Target -->
+    <!-- ===================================================== -->
+
+    <div class="card shadow-sm border-0 mt-4">
+
+        <div class="card-header bg-white fw-semibold py-3">
+
+            <i class="bi bi-bullseye me-2"></i>
+            Current Target
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="row g-4">
+
+                <!-- Total Target -->
+                <div class="col-md-6">
+
+                    <div class="border rounded p-4 h-100">
+
+                        <div class="d-flex justify-content-between align-items-center">
+
+                            <div>
+
+                                <div class="text-muted small mb-1">
+                                    Total Target
+                                </div>
+
+                                <div class="fs-2 fw-bold">
+                                    @Model.TotalTarget
+                                </div>
+
+                                <small class="text-muted">
+                                    Target assigned by Sales Manager
+                                </small>
+
+                            </div>
+
+                            <i class="bi bi-bullseye fs-1 text-primary"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Target Fulfilled -->
+                <div class="col-md-6">
+
+                    <div class="border rounded p-4 h-100">
+
+                        <div class="d-flex justify-content-between align-items-center">
+
+                            <div>
+
+                                <div class="text-muted small mb-1">
+                                    Target Fulfilled
+                                </div>
+
+                                <div class="fs-2 fw-bold">
+                                    @Model.TargetFulfilled
+                                </div>
+
+                                <small class="text-muted">
+                                    Completed within target period
+                                </small>
+
+                            </div>
+
+                            <i class="bi bi-check2-circle fs-1 text-success"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- Quick Actions -->
+    <!-- ===================================================== -->
+
+    <div class="card shadow-sm border-0 mt-4">
+
+        <div class="card-header bg-white fw-semibold py-3">
+
+            <i class="bi bi-lightning-charge me-2"></i>
             Quick Actions
+
         </div>
 
         <div class="card-body">
@@ -63,6 +298,7 @@
                asp-action="MyAssignedLeads"
                class="btn btn-primary">
 
+                <i class="bi bi-list-check me-2"></i>
                 My Assigned Leads
 
             </a>
@@ -71,17 +307,23 @@
 
     </div>
 
-    <div class="card shadow mt-4">
 
-        <div class="card-header bg-secondary text-white">
+    <!-- ===================================================== -->
+    <!-- Recent Activity -->
+    <!-- ===================================================== -->
 
+    <div class="card shadow-sm border-0 mt-4">
+
+        <div class="card-header bg-white fw-semibold py-3">
+
+            <i class="bi bi-clock-history me-2"></i>
             Recent Activity
 
         </div>
 
         <div class="card-body">
 
-            <p class="text-muted">
+            <p class="text-muted mb-0">
 
                 No recent activity available.
 

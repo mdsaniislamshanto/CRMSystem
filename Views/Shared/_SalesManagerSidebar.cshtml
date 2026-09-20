@@ -53,21 +53,23 @@
 
         </li>
 
+     
+
         <!-- API Leads -->
 
-        <li>
+<li>
 
-            <a asp-controller="Lead"
-               asp-action="ApiLeads"
-               class="@(currentController == "Lead" && currentAction == "ApiLeads" ? "active" : "")">
+    <a asp-controller="SalesManager"
+       asp-action="ApiLeads"
+       class="@(currentController == "SalesManager" && currentAction == "ApiLeads" ? "active" : "")">
 
-                <i class="bi bi-cloud-arrow-down-fill"></i>
+        <i class="bi bi-cloud-arrow-down-fill"></i>
 
-                API Leads
+        API Leads
 
-            </a>
+    </a>
 
-        </li>
+</li>
 
         <li>
 
@@ -100,9 +102,9 @@
             <a asp-controller="SalesManager"
                asp-action="UnassignedLeads"
                class="@(currentController == "SalesManager" &&
-                               currentAction == "UnassignedLeads"
-                               ? "active"
-                               : "")">
+                                              currentAction == "UnassignedLeads"
+                                              ? "active"
+                                              : "")">
 
                 <i class="bi bi-person-check-fill"></i>
 
@@ -132,10 +134,12 @@
 
         </li>
 
+        <!-- Sales Officers -->
         <li>
 
             <a asp-controller="SalesManager"
-               asp-action="SalesOfficers">
+               asp-action="SalesOfficers"
+               class="@(currentController == "SalesManager" && currentAction == "SalesOfficers" ? "active" : "")">
 
                 <i class="bi bi-people-fill"></i>
 
@@ -145,10 +149,27 @@
 
         </li>
 
+        <!-- Team Lead Targets -->
         <li>
 
             <a asp-controller="SalesManager"
-               asp-action="Performance">
+               asp-action="TeamLeadTargets"
+               class="@(currentController == "SalesManager" && currentAction == "TeamLeadTargets" ? "active" : "")">
+
+                <i class="bi bi-bullseye"></i>
+
+                Team Lead Targets
+
+            </a>
+
+        </li>
+
+        <!-- Performance -->
+        <li>
+
+            <a asp-controller="SalesManager"
+               asp-action="Performance"
+               class="@(currentController == "SalesManager" && currentAction == "Performance" ? "active" : "")">
 
                 <i class="bi bi-bar-chart-fill"></i>
 
@@ -162,7 +183,8 @@
         <li>
 
             <a asp-controller="SalesManager"
-               asp-action="Reports">
+               asp-action="Reports"
+               class="@(currentController == "SalesManager" && currentAction == "Reports" ? "active" : "")">
 
                 <i class="bi bi-file-earmark-bar-graph-fill"></i>
 

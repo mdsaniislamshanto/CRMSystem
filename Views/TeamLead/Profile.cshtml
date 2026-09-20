@@ -1,0 +1,552 @@
+﻿@model CRMSystem.Models.ViewModels.ProfileViewModel
+
+@{
+    ViewData["Title"] = "My Profile";
+    ViewData["Breadcrumb"] = "Profile";
+    Layout = "_TeamLeadLayout";
+}
+
+<div class="container-fluid py-4">
+
+    <!-- =====================================================
+         PAGE HEADER
+         ===================================================== -->
+
+    <div class="d-flex justify-content-between
+        align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+                My Profile
+            </h2>
+
+            <p class="text-muted mb-0">
+                View and manage your Team Lead profile.
+            </p>
+
+        </div>
+
+        <div>
+
+            <span class="badge bg-primary fs-6 px-3 py-2">
+
+                <i class="bi bi-person-badge me-1"></i>
+
+                Team Lead
+
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         ALERTS
+         ===================================================== -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success
+            alert-dismissible fade show"
+             role="alert">
+
+            <i class="bi bi-check-circle me-2"></i>
+
+            @TempData["Success"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger
+            alert-dismissible fade show"
+             role="alert">
+
+            <i class="bi bi-exclamation-triangle me-2"></i>
+
+            @TempData["Error"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+
+        </div>
+    }
+
+
+    <div class="row g-4">
+
+        <!-- =================================================
+             PROFILE SUMMARY
+             ================================================= -->
+
+        <div class="col-lg-4">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body text-center p-4">
+
+                    <!-- Avatar -->
+
+                    <div class="
+                        rounded-circle
+                        bg-primary-subtle
+                        text-primary
+                        d-flex
+                        align-items-center
+                        justify-content-center
+                        mx-auto
+                        mb-3"
+                         style="
+                        width:110px;
+                        height:110px;
+                        overflow:hidden;
+                        ">
+
+                        @if (!string.IsNullOrWhiteSpace(Model.ProfileImage))
+                        {
+                            <img src="@Url.Content(Model.ProfileImage)?v=@DateTime.UtcNow.Ticks"
+                                 alt="Profile Picture"
+                                 style="
+                            width:100%;
+                            height:100%;
+                            object-fit:cover;
+                            " />
+                        }
+                        else
+                        {
+                            <i class="bi bi-person-fill"
+                               style="font-size:3rem;">
+                            </i>
+                        }
+
+                    </div>
+
+
+                    <!-- Name -->
+
+                    <h4 class="fw-bold mb-1">
+
+                        @Model.FirstName
+                        @Model.LastName
+
+                    </h4>
+
+
+                    <!-- Role -->
+
+                    <span class="badge
+                        bg-primary-subtle
+                        text-primary
+                        px-3 py-2">
+
+                        @Model.RoleName
+
+                    </span>
+
+
+                    <hr class="my-4" />
+
+
+                    <!-- Employee Code -->
+
+                    <div class="text-start mb-3">
+
+                        <div class="text-muted small">
+                            Employee Code
+                        </div>
+
+                        <div class="fw-semibold">
+
+                            @Model.EmployeeCode
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Email -->
+
+                    <div class="text-start mb-3">
+
+                        <div class="text-muted small">
+                            Email
+                        </div>
+
+                        <div class="fw-semibold">
+
+                            @Model.Email
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Phone -->
+
+                    <div class="text-start">
+
+                        <div class="text-muted small">
+                            Phone
+                        </div>
+
+                        <div class="fw-semibold">
+
+                            @(string.IsNullOrWhiteSpace(Model.PhoneNumber)
+                                ? "Not provided"
+                                : Model.PhoneNumber)
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             PROFILE MANAGEMENT
+             ================================================= -->
+
+        <div class="col-lg-8">
+
+            <!-- Profile Information -->
+
+            <div class="card border-0 shadow-sm mb-4">
+
+                <div class="card-header bg-white py-3">
+
+                    <h5 class="fw-semibold mb-1">
+
+                        <i class="bi bi-person-lines-fill
+                            text-primary me-2">
+                        </i>
+
+                        Profile Information
+
+                    </h5>
+
+                    <small class="text-muted">
+
+                        Name, email and phone changes require
+                        Admin approval.
+
+                    </small>
+
+                </div>
+
+
+                <div class="card-body">
+
+                    <form asp-controller="TeamLead"
+                          asp-action="UpdateProfile"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+
+                        <div class="row g-3">
+
+                            <!-- First Name -->
+
+                            <div class="col-md-6">
+
+                                <label class="form-label fw-semibold">
+
+                                    First Name
+
+                                </label>
+
+                                <input type="text"
+                                       name="FirstName"
+                                       value="@Model.FirstName"
+                                       class="form-control"
+                                       maxlength="100"
+                                       required />
+
+                            </div>
+
+
+                            <!-- Last Name -->
+
+                            <div class="col-md-6">
+
+                                <label class="form-label fw-semibold">
+
+                                    Last Name
+
+                                </label>
+
+                                <input type="text"
+                                       name="LastName"
+                                       value="@Model.LastName"
+                                       class="form-control"
+                                       maxlength="100" />
+
+                            </div>
+
+
+                            <!-- Email -->
+
+                            <div class="col-md-6">
+
+                                <label class="form-label fw-semibold">
+
+                                    Email
+
+                                </label>
+
+                                <input type="email"
+                                       name="Email"
+                                       value="@Model.Email"
+                                       class="form-control"
+                                       maxlength="150"
+                                       required />
+
+                            </div>
+
+
+                            <!-- Phone -->
+
+                            <div class="col-md-6">
+
+                                <label class="form-label fw-semibold">
+
+                                    Phone Number
+
+                                </label>
+
+                                <input type="text"
+                                       name="PhoneNumber"
+                                       value="@Model.PhoneNumber"
+                                       class="form-control"
+                                       maxlength="20" />
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="
+                            alert
+                            alert-warning
+                            mt-4
+                            mb-3">
+
+                            <i class="
+                                bi
+                                bi-shield-lock
+                                me-2">
+                            </i>
+
+                            Changes to your
+                            <strong>
+                                name, email or phone number
+                            </strong>
+                            will be sent to the Admin for approval.
+
+                        </div>
+
+
+                        <div class="text-end">
+
+                            <button type="submit"
+                                    class="btn btn-primary">
+
+                                <i class="
+                                    bi
+                                    bi-send me-1">
+                                </i>
+
+                                Submit Change Request
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+
+            <!-- Direct Actions -->
+
+            <div class="row g-4">
+
+                <!-- Password -->
+
+                <div class="col-md-6">
+
+                    <div class="card border-0 shadow-sm h-100">
+
+                        <div class="card-body p-4">
+
+                            <div class="
+                                rounded-circle
+                                bg-warning-subtle
+                                text-warning
+                                d-flex
+                                align-items-center
+                                justify-content-center
+                                mb-3"
+                                 style="
+                                width:50px;
+                                height:50px;
+                                ">
+
+                                <i class="
+                                    bi
+                                    bi-key-fill fs-4">
+                                </i>
+
+                            </div>
+
+
+                            <h5 class="fw-semibold">
+                                Password
+                            </h5>
+
+                            <p class="text-muted small">
+
+                                Change your password directly.
+                                Current password verification
+                                is required.
+
+                            </p>
+
+
+                            <a asp-controller="TeamLead"
+                               asp-action="ChangePassword"
+                               class="btn btn-outline-primary">
+
+                                <i class="
+                                    bi
+                                    bi-shield-lock me-1">
+                                </i>
+
+                                Change Password
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Profile Picture -->
+
+                <div class="col-md-6">
+
+                    <div class="card border-0 shadow-sm h-100">
+
+                        <div class="card-body p-4">
+
+                            <div class="
+                                rounded-circle
+                                bg-info-subtle
+                                text-info
+                                d-flex
+                                align-items-center
+                                justify-content-center
+                                mb-3"
+                                 style="
+                                width:50px;
+                                height:50px;
+                                ">
+
+                                <i class="
+                                    bi
+                                    bi-image-fill fs-4">
+                                </i>
+
+                            </div>
+
+
+                            <h5 class="fw-semibold">
+                                Profile Picture
+                            </h5>
+
+                            <p class="text-muted small">
+
+                                Update your profile picture
+                                directly without Admin approval.
+
+                            </p>
+
+
+                            <form asp-controller="TeamLead"
+                                  asp-action="ChangeProfilePicture"
+                                  method="post"
+                                  enctype="multipart/form-data">
+
+                                @Html.AntiForgeryToken()
+
+
+                                <div class="mb-3">
+
+                                    <label for="profileImage"
+                                           class="form-label fw-semibold">
+
+                                        Select Profile Picture
+
+                                    </label>
+
+                                    <input type="file"
+                                           id="profileImage"
+                                           name="profileImage"
+                                           class="form-control"
+                                           accept=".jpg,.jpeg,.png,.webp"
+                                           required />
+
+                                    <div class="form-text">
+
+                                        JPG, JPEG, PNG or WEBP.
+                                        Maximum size: 2 MB.
+
+                                    </div>
+
+                                </div>
+
+
+                                <button type="submit"
+                                        class="btn btn-outline-primary">
+
+                                    <i class="
+                                        bi
+                                        bi-upload me-1">
+                                    </i>
+
+                                    Change Picture
+
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

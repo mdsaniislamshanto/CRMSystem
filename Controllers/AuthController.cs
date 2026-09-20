@@ -1,8 +1,127 @@
-﻿using CRMSystem.Models.ViewModels;
+﻿//using CRMSystem.Models.ViewModels;
+//using CRMSystem.Services.Interfaces;
+//using Microsoft.AspNetCore.Mvc;
+//using CRMSystem.Constants;
+
+
+//namespace CRMSystem.Controllers
+//{
+//    public class AuthController : Controller
+//    {
+//        private readonly IAuthService _authService;
+
+//        public AuthController(IAuthService authService)
+//        {
+//            _authService = authService;
+//        }
+
+//        // ==========================
+//        // Login Page
+//        // ==========================
+//        [HttpGet]
+//        public IActionResult Login()
+//        {
+//            // If user is already logged in
+//            if (_authService.GetCurrentUserId() != null)
+//            {
+//                return RedirectToAction(nameof(RedirectToDashboard));
+//            }
+
+//            return View();
+//        }
+
+//        // ==========================
+//        // Login Process
+//        // ==========================
+//        [HttpPost]
+//        [ValidateAntiForgeryToken]
+//        public async Task<IActionResult> Login(LoginViewModel model)
+//        {
+//            if (!ModelState.IsValid)
+//                return View(model);
+
+//            var result = await _authService.LoginAsync(model);
+
+//            if (!result.IsSuccess)
+//            {
+//                ModelState.AddModelError(string.Empty, result.Message);
+//                return View(model);
+//            }
+
+//            return RedirectToAction(nameof(RedirectToDashboard));
+//        }
+
+//        // ==========================
+//        // Dashboard Redirect
+//        // ==========================
+//        public IActionResult RedirectToDashboard()
+//        {
+//            var role = _authService.GetCurrentUserRole();
+
+//            switch (role)
+//            {
+//                case RoleKeys.Admin:
+//                    return RedirectToAction("Index", "Admin");
+
+//                case RoleKeys.SalesOfficer:
+//                    return RedirectToAction("Dashboard", "SalesOfficer");
+
+//                case RoleKeys.Account:
+//                    return RedirectToAction("Index", "Account");
+
+//                case RoleKeys.SalesManager:
+//                    return RedirectToAction("Index", "SalesManager");
+
+//                case RoleKeys.HR:
+//                    return RedirectToAction("Index", "HR");
+
+//                default:
+//                    _authService.Logout();
+//                    return RedirectToAction(nameof(Login));
+//            }
+//        }
+
+//        // ==========================
+//        // Logout
+//        // ==========================
+//        public IActionResult Logout()
+//        {
+//            _authService.Logout();
+//            return RedirectToAction(nameof(Login));
+//        }
+
+
+//        //for assecc denied
+//        [HttpGet]
+//        public IActionResult AccessDenied()
+//        {
+//            return View();
+//        }
+//    }
+//}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+using CRMSystem.Models.ViewModels;
 using CRMSystem.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using CRMSystem.Constants;
-
 
 namespace CRMSystem.Controllers
 {
@@ -10,88 +129,145 @@ namespace CRMSystem.Controllers
     {
         private readonly IAuthService _authService;
 
-        public AuthController(IAuthService authService)
+        public AuthController(
+            IAuthService authService)
         {
             _authService = authService;
         }
 
-        // ==========================
-        // Login Page
-        // ==========================
+
+        // =========================================================
+        // Login - GET
+        // =========================================================
+
         [HttpGet]
         public IActionResult Login()
         {
-            // If user is already logged in
             if (_authService.GetCurrentUserId() != null)
             {
-                return RedirectToAction(nameof(RedirectToDashboard));
+                return RedirectToAction(
+                    nameof(RedirectToDashboard));
             }
 
             return View();
         }
 
-        // ==========================
-        // Login Process
-        // ==========================
+
+        // =========================================================
+        // Login - POST
+        // =========================================================
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model)
+        public async Task<IActionResult> Login(
+            LoginViewModel model)
         {
             if (!ModelState.IsValid)
-                return View(model);
-
-            var result = await _authService.LoginAsync(model);
-
-            if (!result.IsSuccess)
             {
-                ModelState.AddModelError(string.Empty, result.Message);
                 return View(model);
             }
 
-            return RedirectToAction(nameof(RedirectToDashboard));
+
+            var result =
+                await _authService.LoginAsync(model);
+
+
+            if (!result.IsSuccess)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    result.Message);
+
+                return View(model);
+            }
+
+
+            return RedirectToAction(
+                nameof(RedirectToDashboard));
         }
 
-        // ==========================
-        // Dashboard Redirect
-        // ==========================
+
+        // =========================================================
+        // Redirect User According to Role
+        // =========================================================
+
         public IActionResult RedirectToDashboard()
         {
-            var role = _authService.GetCurrentUserRole();
+            var role =
+                _authService.GetCurrentUserRole();
+
 
             switch (role)
             {
                 case RoleKeys.Admin:
-                    return RedirectToAction("Index", "Admin");
+
+                    return RedirectToAction(
+                        "Index",
+                        "Admin");
+
 
                 case RoleKeys.SalesOfficer:
-                    return RedirectToAction("Dashboard", "SalesOfficer");
+
+                    return RedirectToAction(
+                        "Dashboard",
+                        "SalesOfficer");
+
 
                 case RoleKeys.Account:
-                    return RedirectToAction("Index", "Account");
+
+                    return RedirectToAction(
+                        "Index",
+                        "Account");
+
 
                 case RoleKeys.SalesManager:
-                    return RedirectToAction("Index", "SalesManager");
+
+                    return RedirectToAction(
+                        "Index",
+                        "SalesManager");
+
+
+                case RoleKeys.TeamLead:
+
+                    return RedirectToAction(
+                        "Dashboard",
+                        "TeamLead");
+
 
                 case RoleKeys.HR:
-                    return RedirectToAction("Index", "HR");
+
+                    return RedirectToAction(
+                        "Index",
+                        "HR");
+
 
                 default:
+
                     _authService.Logout();
-                    return RedirectToAction(nameof(Login));
+
+                    return RedirectToAction(
+                        nameof(Login));
             }
         }
 
-        // ==========================
+
+        // =========================================================
         // Logout
-        // ==========================
+        // =========================================================
+
         public IActionResult Logout()
         {
             _authService.Logout();
-            return RedirectToAction(nameof(Login));
+
+            return RedirectToAction(
+                nameof(Login));
         }
 
 
-        //for assecc denied
+        // =========================================================
+        // Access Denied
+        // =========================================================
+
         [HttpGet]
         public IActionResult AccessDenied()
         {

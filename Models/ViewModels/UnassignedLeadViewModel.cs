@@ -19,5 +19,13 @@ namespace CRMSystem.Models.ViewModels
         public LeadSource Source { get; set; }
 
         public DateTime CreatedAt { get; set; }
+
+        public string? Profession { get; set; }
+
+        public string? Email { get; set; }
+
+        public string? Address { get; set; }
+
+        public LeadStatus Status { get; set; }
     }
 }

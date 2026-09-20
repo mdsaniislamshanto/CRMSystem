@@ -1,6 +1,9 @@
 ﻿@{
-    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
-    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    var currentController =
+        ViewContext.RouteData.Values["controller"]?.ToString();
+
+    var currentAction =
+        ViewContext.RouteData.Values["action"]?.ToString();
 }
 
 <div class="sidebar">
@@ -213,6 +216,29 @@
                 <i class="bi bi-graph-up-arrow"></i>
 
                 Reports
+
+            </a>
+
+        </li>
+
+
+        <!-- =====================================================
+             Sales Targets
+             ===================================================== -->
+
+        <li>
+
+            <a asp-controller="Admin"
+               asp-action="Targets"
+               class="@(currentController == "Admin" &&
+                                       (currentAction == "Targets" ||
+                                        currentAction == "CreateTarget")
+                                       ? "active"
+                                       : "")">
+
+                <i class="bi bi-bullseye"></i>
+
+                Sales Targets
 
             </a>
 

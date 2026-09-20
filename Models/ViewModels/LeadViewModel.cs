@@ -59,5 +59,7 @@ namespace CRMSystem.Models.ViewModels
         public DateTime? ArchivedAt { get; set; }
 
         public string? ArchivedByName { get; set; }
+
+        public DateTime? LastContactDate { get; set; }
     }
 }

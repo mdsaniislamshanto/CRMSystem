@@ -1,0 +1,588 @@
+﻿@model CRMSystem.Models.ViewModels.LeadViewModel
+
+@{
+    ViewData["Title"] = "Lead Details";
+    ViewData["Breadcrumb"] = "Leads / Lead Details";
+    Layout = "_TeamLeadLayout";
+}
+
+<div class="container-fluid">
+
+    <!-- =====================================================
+         PAGE HEADER
+         ===================================================== -->
+
+    <div class="d-flex
+        justify-content-between
+        align-items-center
+        mb-4">
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+                Lead Details
+            </h2>
+
+            <p class="text-muted mb-0">
+                View lead information and assignment details.
+            </p>
+
+        </div>
+
+
+        <a asp-action="Leads"
+           class="btn btn-outline-secondary">
+
+            <i class="bi bi-arrow-left me-1"></i>
+
+            Back to Leads
+
+        </a>
+
+    </div>
+
+
+    <!-- =====================================================
+         LEAD INFORMATION
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white fw-semibold">
+
+            <i class="bi bi-person-lines-fill me-2"></i>
+
+            Lead Information
+
+        </div>
+
+
+        <div class="card-body">
+
+            <div class="row mb-3">
+
+                <div class="col-md-4 fw-semibold">
+                    Lead Code
+                </div>
+
+                <div class="col-md-8">
+                    @Model.LeadCode
+                </div>
+
+            </div>
+
+
+            <div class="row mb-3">
+
+                <div class="col-md-4 fw-semibold">
+                    Lead Name
+                </div>
+
+                <div class="col-md-8">
+                    @Model.LeadName
+                </div>
+
+            </div>
+
+
+            <div class="row mb-3">
+
+                <div class="col-md-4 fw-semibold">
+                    Company
+                </div>
+
+                <div class="col-md-8">
+
+                    @(string.IsNullOrWhiteSpace(
+                        Model.CompanyName)
+                        ? "Not provided"
+                        : Model.CompanyName)
+
+                </div>
+
+            </div>
+
+
+            <div class="row mb-3">
+
+                <div class="col-md-4 fw-semibold">
+                    Profession
+                </div>
+
+                <div class="col-md-8">
+
+                    @(string.IsNullOrWhiteSpace(
+                        Model.Profession)
+                        ? "Not provided"
+                        : Model.Profession)
+
+                </div>
+
+            </div>
+
+
+            <div class="row mb-3">
+
+                <div class="col-md-4 fw-semibold">
+                    Source
+                </div>
+
+                <div class="col-md-8">
+
+                    <span class="badge bg-light text-dark border">
+                        @Model.Source
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="row mb-3">
+
+                <div class="col-md-4 fw-semibold">
+                    Priority
+                </div>
+
+                <div class="col-md-8">
+
+                    @switch (Model.Priority)
+                    {
+                        case CRMSystem.Enums.LeadPriority.High:
+
+                            <span class="badge bg-danger">
+                                High
+                            </span>
+
+                            break;
+
+                        case CRMSystem.Enums.LeadPriority.Medium:
+
+                            <span class="badge bg-warning text-dark">
+                                Medium
+                            </span>
+
+                            break;
+
+                        default:
+
+                            <span class="badge bg-success">
+                                Low
+                            </span>
+
+                            break;
+                    }
+
+                </div>
+
+            </div>
+
+
+            <div class="row">
+
+                <div class="col-md-4 fw-semibold">
+                    Status
+                </div>
+
+                <div class="col-md-8">
+
+                    <span class="badge bg-primary">
+                        @Model.Status
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         CONTACT INFORMATION
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white fw-semibold">
+
+            <i class="bi bi-telephone me-2"></i>
+
+            Contact Information
+
+        </div>
+
+
+        <div class="card-body">
+
+            <div class="row mb-3">
+
+                <div class="col-md-4 fw-semibold">
+                    Email
+                </div>
+
+                <div class="col-md-8">
+
+                    @(string.IsNullOrWhiteSpace(
+                        Model.Email)
+                        ? "Not provided"
+                        : Model.Email)
+
+                </div>
+
+            </div>
+
+
+            <div class="row mb-3">
+
+                <div class="col-md-4 fw-semibold">
+                    Phone Number
+                </div>
+
+                <div class="col-md-8">
+                    @Model.Phone
+                </div>
+
+            </div>
+
+
+            <div class="row">
+
+                <div class="col-md-4 fw-semibold">
+                    Address
+                </div>
+
+                <div class="col-md-8">
+
+                    @(string.IsNullOrWhiteSpace(
+                        Model.Address)
+                        ? "Not provided"
+                        : Model.Address)
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         ASSIGNMENT INFORMATION
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white fw-semibold">
+
+            <i class="bi bi-person-check me-2"></i>
+
+            Assignment Information
+
+        </div>
+
+
+        <div class="card-body">
+
+            <div class="row mb-3">
+
+                <div class="col-md-4 fw-semibold">
+                    Sales Officer
+                </div>
+
+                <div class="col-md-8">
+
+                    @(string.IsNullOrWhiteSpace(
+                        Model.AssignedOfficerName)
+                        ? "Not Assigned"
+                        : Model.AssignedOfficerName)
+
+                </div>
+
+            </div>
+
+
+            <div class="row mb-3">
+
+                <div class="col-md-4 fw-semibold">
+                    Assigned At
+                </div>
+
+                <div class="col-md-8">
+
+                    @(Model.AssignedAt?
+                        .ToString(
+                            "dd MMM yyyy hh:mm tt")
+                        ?? "Not Assigned")
+
+                </div>
+
+            </div>
+
+
+            <div class="row mb-3">
+
+                <div class="col-md-4 fw-semibold">
+                    Accepted At
+                </div>
+
+                <div class="col-md-8">
+
+                    @(Model.AcceptedAt?
+                        .ToString(
+                            "dd MMM yyyy hh:mm tt")
+                        ?? "Not Accepted")
+
+                </div>
+
+            </div>
+
+
+            <div class="row">
+
+                <div class="col-md-4 fw-semibold">
+                    Assignment Status
+                </div>
+
+                <div class="col-md-8">
+
+                    @if (Model.AssignmentStatus.HasValue)
+                    {
+                        <span class="badge bg-primary">
+                            @Model.AssignmentStatus
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">
+                            Not Assigned
+                        </span>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         ACCEPTANCE SLA
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white fw-semibold">
+
+            <i class="bi bi-clock-history me-2"></i>
+
+            Acceptance SLA
+
+        </div>
+
+
+        <div class="card-body">
+
+            <div class="row mb-3">
+
+                <div class="col-md-4 fw-semibold">
+                    SLA Status
+                </div>
+
+                <div class="col-md-8">
+
+                    @if (Model.AcceptanceSLAMissed)
+                    {
+                        <span class="badge bg-danger">
+                            SLA Breached
+                        </span>
+                    }
+                    else if (
+                        Model.AcceptanceSLAStatus
+                            .StartsWith(
+                                "Pending",
+                                StringComparison.OrdinalIgnoreCase))
+                    {
+                        <span class="badge bg-warning text-dark">
+                            @Model.AcceptanceSLAStatus
+                        </span>
+                    }
+                    else if (
+                        Model.AcceptanceSLAStatus ==
+                        "Within SLA")
+                    {
+                        <span class="badge bg-success">
+                            Within SLA
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">
+                            @Model.AcceptanceSLAStatus
+                        </span>
+                    }
+
+                </div>
+
+            </div>
+
+
+            <div class="row">
+
+                <div class="col-md-4 fw-semibold">
+                    SLA Breached
+                </div>
+
+                <div class="col-md-8">
+
+                    @if (Model.AcceptanceSLAMissed)
+                    {
+                        <span class="text-danger fw-semibold">
+                            Yes
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="text-success fw-semibold">
+                            No
+                        </span>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         FOLLOW-UP INFORMATION
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white fw-semibold">
+
+            <i class="bi bi-calendar-check me-2"></i>
+
+            Follow-up Information
+
+        </div>
+
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-4 fw-semibold">
+                    Next Follow-up Date
+                </div>
+
+                <div class="col-md-8">
+
+                    @(Model.FollowUpDate?
+                        .ToString(
+                            "dd MMM yyyy")
+                        ?? "Not Scheduled")
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         DESCRIPTION
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white fw-semibold">
+
+            <i class="bi bi-card-text me-2"></i>
+
+            Description
+
+        </div>
+
+
+        <div class="card-body">
+
+            @if (string.IsNullOrWhiteSpace(
+                Model.Description))
+            {
+                <span class="text-muted">
+                    No description provided.
+                </span>
+            }
+            else
+            {
+                <p class="mb-0">
+                    @Model.Description
+                </p>
+            }
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+     FEEDBACK HISTORY
+     ===================================================== -->
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-body">
+
+            <div class="d-flex
+                justify-content-between
+                align-items-center">
+
+                <div>
+
+                    <i class="bi bi-chat-left-text
+                    fs-3
+                    text-primary"></i>
+
+                    <h5 class="mt-2 mb-1">
+                        Feedback & Follow-up History
+                    </h5>
+
+                    <p class="text-muted mb-0">
+
+                        View all feedback submitted by
+                        the assigned Sales Officer.
+
+                    </p>
+
+                </div>
+
+
+                <a asp-controller="TeamLead"
+                   asp-action="FeedbackHistory"
+                   asp-route-id="@Model.LeadId"
+                   class="btn btn-primary">
+
+                    <i class="bi bi-clock-history me-1"></i>
+
+                    View Feedback History
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

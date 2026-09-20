@@ -1,0 +1,355 @@
+﻿@model CRMSystem.Models.ViewModels.UserDetailsViewModel
+
+@{
+    ViewData["Title"] = "Sales Officer Details";
+    ViewData["Breadcrumb"] = "My Team / Officer Details";
+    Layout = "_TeamLeadLayout";
+}
+
+
+<div class="container-fluid">
+
+    <!-- =====================================================
+         PAGE HEADER
+         ===================================================== -->
+
+    <div class="d-flex
+        justify-content-between
+        align-items-center
+        mb-4">
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+                Sales Officer Details
+            </h2>
+
+            <p class="text-muted mb-0">
+                View information and performance summary
+                of your team member.
+            </p>
+
+        </div>
+
+
+        <a asp-action="MyTeam"
+           class="btn btn-outline-secondary">
+
+            <i class="bi bi-arrow-left me-1"></i>
+
+            Back to My Team
+
+        </a>
+
+    </div>
+
+
+    <!-- =====================================================
+         PROFILE INFORMATION
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white fw-semibold">
+
+            <i class="bi bi-person me-2"></i>
+
+            Profile Information
+
+        </div>
+
+
+        <div class="card-body">
+
+            <div class="row mb-3">
+
+                <div class="col-md-4 fw-semibold">
+                    Employee Code
+                </div>
+
+                <div class="col-md-8">
+                    @Model.EmployeeCode
+                </div>
+
+            </div>
+
+
+            <div class="row mb-3">
+
+                <div class="col-md-4 fw-semibold">
+                    Full Name
+                </div>
+
+                <div class="col-md-8">
+                    @Model.FullName
+                </div>
+
+            </div>
+
+
+            <div class="row mb-3">
+
+                <div class="col-md-4 fw-semibold">
+                    Role
+                </div>
+
+                <div class="col-md-8">
+
+                    <span class="badge bg-primary">
+                        @Model.RoleName
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="row">
+
+                <div class="col-md-4 fw-semibold">
+                    Status
+                </div>
+
+                <div class="col-md-8">
+
+                    @if (Model.IsActive)
+                    {
+                        <span class="badge bg-success">
+                            Active
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">
+                            Inactive
+                        </span>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         CONTACT INFORMATION
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white fw-semibold">
+
+            <i class="bi bi-telephone me-2"></i>
+
+            Contact Information
+
+        </div>
+
+
+        <div class="card-body">
+
+            <div class="row mb-3">
+
+                <div class="col-md-4 fw-semibold">
+                    Email
+                </div>
+
+                <div class="col-md-8">
+                    @Model.Email
+                </div>
+
+            </div>
+
+
+            <div class="row">
+
+                <div class="col-md-4 fw-semibold">
+                    Phone Number
+                </div>
+
+                <div class="col-md-8">
+
+                    @(string.IsNullOrWhiteSpace(
+                        Model.PhoneNumber)
+                        ? "Not provided"
+                        : Model.PhoneNumber)
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         SALES HIERARCHY
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white fw-semibold">
+
+            <i class="bi bi-diagram-3 me-2"></i>
+
+            Sales Hierarchy
+
+        </div>
+
+
+        <div class="card-body">
+
+            <div class="row mb-3">
+
+                <div class="col-md-4 fw-semibold">
+                    Sales Manager
+                </div>
+
+                <div class="col-md-8">
+
+                    @(string.IsNullOrWhiteSpace(
+                        Model.SalesManagerName)
+                        ? "Not Assigned"
+                        : Model.SalesManagerName)
+
+                </div>
+
+            </div>
+
+
+            <div class="row">
+
+                <div class="col-md-4 fw-semibold">
+                    Team Lead
+                </div>
+
+                <div class="col-md-8">
+
+                    @(string.IsNullOrWhiteSpace(
+                        Model.TeamLeadName)
+                        ? "Not Assigned"
+                        : Model.TeamLeadName)
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         ACCOUNT INFORMATION
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white fw-semibold">
+
+            <i class="bi bi-shield-check me-2"></i>
+
+            Account Information
+
+        </div>
+
+
+        <div class="card-body">
+
+            <div class="row mb-3">
+
+                <div class="col-md-4 fw-semibold">
+                    Email Verification
+                </div>
+
+                <div class="col-md-8">
+
+                    @if (Model.IsEmailVerified)
+                    {
+                        <span class="badge bg-success">
+                            Verified
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">
+                            Not Verified
+                        </span>
+                    }
+
+                </div>
+
+            </div>
+
+
+            <div class="row mb-3">
+
+                <div class="col-md-4 fw-semibold">
+                    Last Login
+                </div>
+
+                <div class="col-md-8">
+
+                    @(Model.LastLoginAt?
+                        .ToString(
+                            "dd MMM yyyy hh:mm tt")
+                        ?? "Never")
+
+                </div>
+
+            </div>
+
+
+            <div class="row">
+
+                <div class="col-md-4 fw-semibold">
+                    Last Password Changed
+                </div>
+
+                <div class="col-md-8">
+
+                    @(Model.LastPasswordChangedAt?
+                        .ToString(
+                            "dd MMM yyyy hh:mm tt")
+                        ?? "Never")
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         NEXT SECTION PLACEHOLDER
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-body text-center py-5">
+
+            <i class="bi bi-bar-chart-line fs-1 text-muted"></i>
+
+            <h5 class="mt-3">
+                Performance & Lead Summary
+            </h5>
+
+            <p class="text-muted mb-0">
+
+                Assigned leads, feedback history,
+                follow-ups and performance details
+                will be added in the next Team Lead module.
+
+            </p>
+
+        </div>
+
+    </div>
+
+</div>

@@ -15,8 +15,10 @@ namespace CRMSystem.Services.Interfaces
         // =====================================================
         // Sales Manager Report
         // =====================================================
-
         Task<SalesManagerReportViewModel>
-            GetSalesManagerReportAsync();
+            GetSalesManagerReportAsync(
+                long salesManagerId);
+
+        //Task<SalesManagerReportViewModel>GetSalesManagerReportAsync();
     }
 }

@@ -20,6 +20,7 @@ namespace CRMSystem.Controllers
         private readonly ISalesOfficerPerformanceService _salesOfficerPerformanceService;
         private readonly IPerformanceExportService _performanceExportService;
         private readonly IFollowUpService _followUpService;
+        private readonly ITargetService _targetService;
 
         public SalesManagerController(
             ISalesManagerDashboardService dashboardService,
@@ -30,7 +31,8 @@ namespace CRMSystem.Controllers
             ISalesOfficerServiceForSalesManager salesOfficerServiceForSalesManager,
             ISalesOfficerPerformanceService salesOfficerPerformanceService,
             IPerformanceExportService performanceExportService,
-            IFollowUpService followUpService)
+            IFollowUpService followUpService,
+            ITargetService targetService)
         {
             _dashboardService = dashboardService;
             _leadService = leadService;
@@ -45,6 +47,8 @@ namespace CRMSystem.Controllers
                 performanceExportService;
             _followUpService =
                 followUpService;
+            _targetService =
+                targetService;
         }
 
         // ==========================
@@ -52,8 +56,20 @@ namespace CRMSystem.Controllers
         // ==========================
         public async Task<IActionResult> Index()
         {
+            var salesManagerId =
+                _GetCurrentUserId();
+
+            if (!salesManagerId.HasValue)
+            {
+                return RedirectToAction(
+                    "Login",
+                    "Auth");
+            }
+
             var model =
-                await _dashboardService.GetDashboardAsync();
+                await _dashboardService
+                    .GetDashboardAsync(
+                        salesManagerId.Value);
 
             return View(model);
         }
@@ -74,16 +90,16 @@ namespace CRMSystem.Controllers
             ViewData["Title"] = "Lead Queue";
             ViewData["Breadcrumb"] = "Lead Queue";
 
-            // -------------------------------------------------
-            // Get all active leads
-            // -------------------------------------------------
+            var salesManagerId = _GetCurrentUserId();
+
+            if (!salesManagerId.HasValue)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
 
             var allLeads =
-                await _leadService.GetAllLeadsAsync();
-
-            // -------------------------------------------------
-            // Summary Statistics
-            // -------------------------------------------------
+                await _leadService.GetLeadsForSalesManagerAsync(
+                    salesManagerId.Value);
 
             ViewBag.TotalActiveLeads =
                 allLeads.Count;
@@ -109,10 +125,6 @@ namespace CRMSystem.Controllers
                 allLeads.Count(x =>
                     x.Status == LeadStatus.New);
 
-            // -------------------------------------------------
-            // SLA Summary
-            // -------------------------------------------------
-
             ViewBag.SLABreachedLeads =
                 allLeads.Count(x =>
                     x.AcceptanceSLAMissed);
@@ -128,10 +140,6 @@ namespace CRMSystem.Controllers
                         "Pending",
                         StringComparison.OrdinalIgnoreCase));
 
-            // -------------------------------------------------
-            // Preserve filter values
-            // -------------------------------------------------
-
             ViewBag.Search = search;
             ViewBag.Status = status;
             ViewBag.Priority = priority;
@@ -139,14 +147,9 @@ namespace CRMSystem.Controllers
             ViewBag.SLAStatus = slaStatus;
             ViewBag.Sort = sort;
 
-            // -------------------------------------------------
-            // Filtering
-            // -------------------------------------------------
-
             IEnumerable<LeadViewModel> filteredLeads =
                 allLeads;
 
-            // Search
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var searchValue =
@@ -180,7 +183,6 @@ namespace CRMSystem.Controllers
                     );
             }
 
-            // Status
             if (status.HasValue)
             {
                 filteredLeads =
@@ -188,7 +190,6 @@ namespace CRMSystem.Controllers
                         x.Status == status.Value);
             }
 
-            // Priority
             if (priority.HasValue)
             {
                 filteredLeads =
@@ -196,17 +197,12 @@ namespace CRMSystem.Controllers
                         x.Priority == priority.Value);
             }
 
-            // Source
             if (source.HasValue)
             {
                 filteredLeads =
                     filteredLeads.Where(x =>
                         x.Source == source.Value);
             }
-
-            // -------------------------------------------------
-            // Acceptance SLA Filter
-            // -------------------------------------------------
 
             if (!string.IsNullOrWhiteSpace(slaStatus))
             {
@@ -253,10 +249,6 @@ namespace CRMSystem.Controllers
                         break;
                 }
             }
-
-            // -------------------------------------------------
-            // Sorting
-            // -------------------------------------------------
 
             filteredLeads =
                 sort switch
@@ -308,10 +300,6 @@ namespace CRMSystem.Controllers
                                 x => x.LeadId)
                 };
 
-            // -------------------------------------------------
-            // Pagination
-            // -------------------------------------------------
-
             const int pageSize = 10;
 
             var filteredList =
@@ -346,10 +334,6 @@ namespace CRMSystem.Controllers
                     .Take(pageSize)
                     .ToList();
 
-            // -------------------------------------------------
-            // Pagination Data
-            // -------------------------------------------------
-
             ViewBag.CurrentPage =
                 page;
 
@@ -365,43 +349,170 @@ namespace CRMSystem.Controllers
             return View(paginatedLeads);
         }
 
-        // ==========================
-        // GET: Assign Lead
-        // ==========================
+
+
+
+
+        // =========================================================
+        // API Leads - For Sales Manager
+        // =========================================================
+
+        [HttpGet]
+        public async Task<IActionResult> ApiLeads(
+            string? search,
+            LeadSource? source,
+            LeadStatus? status)
+        {
+            var salesManagerId =
+                _GetCurrentUserId();
+
+            if (!salesManagerId.HasValue)
+            {
+                return RedirectToAction(
+                    "Login",
+                    "Auth");
+            }
+
+            var leads =
+                await _leadService
+                    .GetApiLeadsForSalesManagerAsync(
+                        salesManagerId.Value,
+                        search,
+                        source,
+                        status);
+
+            var model =
+                new ApiLeadFilterViewModel
+                {
+                    Search = search,
+                    Source = source,
+                    Status = status,
+                    Leads = leads
+                };
+
+            ViewData["Title"] =
+                "API Leads";
+
+            ViewData["Breadcrumb"] =
+                "API Leads";
+
+            return View(
+                "~/Views/Lead/ApiLeads.cshtml",
+                model);
+        }
+        //// =========================================================
+        //// API Leads - For Sales Manager
+        //// =========================================================
+        //[HttpGet]
+        //public async Task<IActionResult> ApiLeads(
+        //    string? search,
+        //    LeadSource? source,
+        //    LeadStatus? status)
+        //{
+        //    var salesManagerId = _GetCurrentUserId();
+
+        //    if (!salesManagerId.HasValue)
+        //    {
+        //        return RedirectToAction("Login", "Auth");
+        //    }
+
+        //    var leads =
+        //        await _leadService
+        //            .GetApiLeadsForSalesManagerAsync(
+        //                salesManagerId.Value,
+        //                search,
+        //                source,
+        //                status);
+
+        //    ViewBag.Search = search;
+        //    ViewBag.Source = source;
+        //    ViewBag.Status = status;
+
+        //    return View(leads);
+        //}
+
+
+
+
+
+
+
+
+
+        // =========================================================
+        // GET: Assign Lead - Sales Manager
+        // =========================================================
+
         [HttpGet]
         public async Task<IActionResult> AssignLead(long id)
         {
+            var salesManagerId =
+                _GetCurrentUserId();
+
+            if (!salesManagerId.HasValue)
+            {
+                return RedirectToAction(
+                    "Login",
+                    "Auth");
+            }
+
             var model =
                 await _leadService
-                    .GetAssignLeadViewModelAsync(id);
+                    .GetAssignLeadViewModelForSalesManagerAsync(
+                        id,
+                        salesManagerId.Value);
 
             if (model == null)
             {
                 return NotFound();
             }
 
+            ViewData["Title"] =
+                "Assign Lead";
+
+            ViewData["Breadcrumb"] =
+                "Assign Lead";
+
             return View(model);
         }
 
-        // ==========================
-        // POST: Assign Lead
-        // ==========================
+        // =========================================================
+        // POST: Assign Lead - Sales Manager
+        // =========================================================
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AssignLead(
             AssignLeadViewModel model)
         {
+            var salesManagerId =
+                _GetCurrentUserId();
+
+            if (!salesManagerId.HasValue)
+            {
+                return RedirectToAction(
+                    "Login",
+                    "Auth");
+            }
+
             if (!ModelState.IsValid)
             {
                 var viewModel =
                     await _leadService
-                        .GetAssignLeadViewModelAsync(
-                            model.LeadId);
+                        .GetAssignLeadViewModelForSalesManagerAsync(
+                            model.LeadId,
+                            salesManagerId.Value);
 
                 if (viewModel == null)
                 {
                     return NotFound();
                 }
+
+                model.LeadCode =
+                    viewModel.LeadCode;
+
+                model.LeadName =
+                    viewModel.LeadName;
 
                 model.SalesOfficers =
                     viewModel.SalesOfficers;
@@ -409,20 +520,16 @@ namespace CRMSystem.Controllers
                 return View(model);
             }
 
-            var userId =
-                HttpContext.Session.GetString(
-                    SessionKeys.UserId);
+            var success =
+                await _leadService
+                    .AssignLeadForSalesManagerAsync(
+                        model,
+                        salesManagerId.Value);
 
-            if (string.IsNullOrEmpty(userId))
+            if (!success)
             {
-                return RedirectToAction(
-                    "Login",
-                    "Auth");
+                return Forbid();
             }
-
-            await _leadService.AssignLeadAsync(
-                model,
-                long.Parse(userId));
 
             TempData["Success"] =
                 "Lead assigned successfully.";
@@ -438,9 +545,21 @@ namespace CRMSystem.Controllers
         public async Task<IActionResult> LeadDetails(
             long id)
         {
+            var salesManagerId =
+                _GetCurrentUserId();
+
+            if (!salesManagerId.HasValue)
+            {
+                return RedirectToAction(
+                    "Login",
+                    "Auth");
+            }
+
             var lead =
                 await _leadService
-                    .GetLeadByIdAsync(id);
+                    .GetLeadForSalesManagerAsync(
+                        id,
+                        salesManagerId.Value);
 
             if (lead == null)
             {
@@ -460,23 +579,26 @@ namespace CRMSystem.Controllers
         // GET: Edit Lead
         // ==========================
         [HttpGet]
-        public async Task<IActionResult> EditLead(
-            long id)
+        public async Task<IActionResult> EditLead(long id)
         {
-            var model =
-                await _leadService
-                    .GetLeadForEditAsync(id);
+            var salesManagerId = _GetCurrentUserId();
+
+            if (!salesManagerId.HasValue)
+            {
+                return RedirectToAction(
+                    "Login",
+                    "Auth");
+            }
+
+            var model = await _leadService
+                .GetLeadForEditForSalesManagerAsync(
+                    id,
+                    salesManagerId.Value);
 
             if (model == null)
             {
                 return NotFound();
             }
-
-            ViewData["Title"] =
-                "Edit Lead";
-
-            ViewData["Breadcrumb"] =
-                "Edit Lead";
 
             return View(model);
         }
@@ -487,33 +609,69 @@ namespace CRMSystem.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditLead(
-            EditLeadViewModel model)
+    EditLeadViewModel model)
         {
+            var salesManagerId = _GetCurrentUserId();
+
+            if (!salesManagerId.HasValue)
+            {
+                return RedirectToAction(
+                    "Login",
+                    "Auth");
+            }
+
             if (!ModelState.IsValid)
             {
                 return View(model);
             }
 
-            await _leadService
-                .UpdateLeadAsync(model);
+            var updated = await _leadService
+                .UpdateLeadForSalesManagerAsync(
+                    model,
+                    salesManagerId.Value);
 
-            TempData["Success"] =
+            if (!updated)
+            {
+                return NotFound();
+            }
+
+            TempData["SuccessMessage"] =
                 "Lead updated successfully.";
 
             return RedirectToAction(
                 nameof(LeadQueue));
         }
 
+
+
+        // ==========================
+        // GET: Reassign Lead
+        // ==========================
         // ==========================
         // GET: Reassign Lead
         // ==========================
         [HttpGet]
-        public async Task<IActionResult> ReassignLead(
-            long id)
+        public async Task<IActionResult> ReassignLead(long id)
         {
+            var userId =
+                HttpContext.Session.GetString(
+                    SessionKeys.UserId);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction(
+                    "Login",
+                    "Auth");
+            }
+
+            var salesManagerId =
+                long.Parse(userId);
+
             var model =
                 await _leadService
-                    .GetReassignLeadViewModelAsync(id);
+                    .GetReassignLeadViewModelForSalesManagerAsync(
+                        id,
+                        salesManagerId);
 
             if (model == null)
             {
@@ -532,17 +690,35 @@ namespace CRMSystem.Controllers
         // ==========================
         // POST: Reassign Lead
         // ==========================
+        // ==========================
+        // POST: Reassign Lead
+        // ==========================
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ReassignLead(
             ReassignLeadViewModel model)
         {
+            var userId =
+                HttpContext.Session.GetString(
+                    SessionKeys.UserId);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction(
+                    "Login",
+                    "Auth");
+            }
+
+            var salesManagerId =
+                long.Parse(userId);
+
             if (!ModelState.IsValid)
             {
                 var viewModel =
                     await _leadService
-                        .GetReassignLeadViewModelAsync(
-                            model.LeadId);
+                        .GetReassignLeadViewModelForSalesManagerAsync(
+                            model.LeadId,
+                            salesManagerId);
 
                 if (viewModel == null)
                 {
@@ -555,21 +731,10 @@ namespace CRMSystem.Controllers
                 return View(model);
             }
 
-            var userId =
-                HttpContext.Session.GetString(
-                    SessionKeys.UserId);
-
-            if (string.IsNullOrEmpty(userId))
-            {
-                return RedirectToAction(
-                    "Login",
-                    "Auth");
-            }
-
             await _leadService
                 .ReassignLeadAsync(
                     model,
-                    long.Parse(userId));
+                    salesManagerId);
 
             TempData["Success"] =
                 "Lead reassigned successfully.";
@@ -668,40 +833,58 @@ namespace CRMSystem.Controllers
                 nameof(LeadQueue));
         }
 
-        // ==========================
-        // Archive Lead
-        // ==========================
+        /// =========================================================
+        // POST: Archive Lead - Sales Manager
+        // =========================================================
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Archive(long id)
         {
-            var userIdClaim =
-                User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var salesManagerId =
+                _GetCurrentUserId();
 
-            if (!long.TryParse(userIdClaim, out long archivedBy))
+            if (!salesManagerId.HasValue)
             {
-                TempData["Error"] =
-                    "Unable to identify the current user.";
-
-                return RedirectToAction(nameof(LeadQueue));
+                return RedirectToAction(
+                    "Login",
+                    "Auth");
             }
 
-            await _leadService.ArchiveLeadAsync(
-                id,
-                archivedBy);
+            var success =
+                await _leadService
+                    .ArchiveLeadForSalesManagerAsync(
+                        id,
+                        salesManagerId.Value);
+
+            if (!success)
+            {
+                return Forbid();
+            }
 
             TempData["Success"] =
                 "Lead archived successfully.";
 
-            return RedirectToAction(nameof(LeadQueue));
+            return RedirectToAction(
+                nameof(LeadQueue));
         }
 
         // ==========================
         // Archived Leads
-        // ==========================
+        // =========================
         [HttpGet]
         public async Task<IActionResult> ArchivedLeads()
         {
+            var salesManagerId =
+                _GetCurrentUserId();
+
+            if (!salesManagerId.HasValue)
+            {
+                return RedirectToAction(
+                    "Login",
+                    "Auth");
+            }
+
             ViewData["Title"] =
                 "Archived Leads";
 
@@ -710,7 +893,8 @@ namespace CRMSystem.Controllers
 
             var leads =
                 await _leadService
-                    .GetArchivedLeadsAsync();
+                    .GetArchivedLeadsForSalesManagerAsync(
+                        salesManagerId.Value);
 
             return View(leads);
         }
@@ -718,13 +902,23 @@ namespace CRMSystem.Controllers
         // =========================================================
         // ARCHIVED LEAD DETAILS
         // =========================================================
-
         [HttpGet]
         public async Task<IActionResult> ArchivedLeadDetails(long id)
         {
+            var salesManagerId = _GetCurrentUserId();
+
+            if (!salesManagerId.HasValue)
+            {
+                return RedirectToAction(
+                    "Login",
+                    "Auth");
+            }
+
             var lead =
                 await _leadService
-                    .GetArchivedLeadByIdAsync(id);
+                    .GetArchivedLeadForSalesManagerAsync(
+                        id,
+                        salesManagerId.Value);
 
             if (lead == null)
             {
@@ -740,16 +934,36 @@ namespace CRMSystem.Controllers
             return View(lead);
         }
 
+
+
+
         // ==========================
         // Restore Lead
         // ==========================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RestoreLead(
-            long id)
+        public async Task<IActionResult> Restore(long id)
         {
-            await _leadService
-                .RestoreLeadAsync(id);
+            var salesManagerId =
+                _GetCurrentUserId();
+
+            if (!salesManagerId.HasValue)
+            {
+                return RedirectToAction(
+                    "Login",
+                    "Auth");
+            }
+
+            var success =
+                await _leadService
+                    .RestoreLeadForSalesManagerAsync(
+                        id,
+                        salesManagerId.Value);
+
+            if (!success)
+            {
+                return Forbid();
+            }
 
             TempData["Success"] =
                 "Lead restored successfully.";
@@ -758,12 +972,26 @@ namespace CRMSystem.Controllers
                 nameof(ArchivedLeads));
         }
 
-        // ==========================
+
+
+        // =========================================================
         // Sales Officers
-        // ==========================
+        // Sales Manager → Own Hierarchy Only
+        // =========================================================
+
         [HttpGet]
         public async Task<IActionResult> SalesOfficers()
         {
+            var salesManagerId =
+                _GetCurrentUserId();
+
+            if (!salesManagerId.HasValue)
+            {
+                return RedirectToAction(
+                    "Login",
+                    "Auth");
+            }
+
             ViewData["Title"] =
                 "Sales Officers";
 
@@ -772,14 +1000,17 @@ namespace CRMSystem.Controllers
 
             var salesOfficers =
                 await _salesOfficerServiceForSalesManager
-                    .GetSalesOfficersAsync();
+                    .GetSalesOfficersAsync(
+                        salesManagerId.Value);
 
             return View(salesOfficers);
         }
 
+
         // =====================================================
         // Sales Officer Performance
         // =====================================================
+
         [HttpGet]
         [Authorize(Roles = "ADMIN,SALES_MANAGER")]
         public async Task<IActionResult> Performance(
@@ -833,76 +1064,224 @@ namespace CRMSystem.Controllers
                 }
             }
 
-            var performance =
-                await _salesOfficerPerformanceService
-                    .GetPerformanceAsync(filter);
+            var currentUserId =
+                _GetCurrentUserId();
 
-            var topPerformer =
-                await _salesOfficerPerformanceService
-                    .GetTopPerformerAsync(filter);
-
-            var needsAttention =
-                await _salesOfficerPerformanceService
-                    .GetNeedsAttentionAsync(filter);
-
-            ViewData["PerformanceFilter"] =
-                filter;
-
-            ViewData["TopPerformer"] =
-                topPerformer;
-
-            ViewData["NeedsAttention"] =
-                needsAttention;
-
-            return View(performance);
-        }
-
-        // =====================================================
-        // Settings
-        // =====================================================
-        [HttpGet]
-        public async Task<IActionResult> Settings()
-        {
-            var settings =
-                await _settingsService
-                    .GetSettingsAsync();
-
-            var model =
-                new AutoAssignmentSettingsViewModel
-                {
-                    SettingId =
-                        settings.SettingId,
-
-                    AutoAssignmentEnabled =
-                        settings.AutoAssignmentEnabled
-                };
-
-            return View(model);
-        }
-
-        // =====================================================
-        // Save Settings
-        // =====================================================
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Settings(
-            AutoAssignmentSettingsViewModel model)
-        {
-            if (!ModelState.IsValid)
+            if (!currentUserId.HasValue)
             {
-                return View(model);
+                return RedirectToAction(
+                    "Login",
+                    "Auth");
             }
 
-            await _settingsService
-                .UpdateAutoAssignmentAsync(
-                    model.AutoAssignmentEnabled);
 
-            TempData["Success"] =
-                "Settings updated successfully.";
+            // =====================================================
+            // ADMIN
+            // Global Performance
+            // =====================================================
 
-            return RedirectToAction(
-                nameof(Settings));
+            if (User.IsInRole("ADMIN"))
+            {
+                var performance =
+                    await _salesOfficerPerformanceService
+                        .GetPerformanceAsync(filter);
+
+                var topPerformer =
+                    await _salesOfficerPerformanceService
+                        .GetTopPerformerAsync(filter);
+
+                var needsAttention =
+                    await _salesOfficerPerformanceService
+                        .GetNeedsAttentionAsync(filter);
+
+                ViewData["PerformanceFilter"] =
+                    filter;
+
+                ViewData["TopPerformer"] =
+                    topPerformer;
+
+                ViewData["NeedsAttention"] =
+                    needsAttention;
+
+                return View(performance);
+            }
+
+
+            // =====================================================
+            // SALES MANAGER
+            // Own Hierarchy Only
+            // =====================================================
+
+            if (User.IsInRole("SALES_MANAGER"))
+            {
+                var performance =
+                    await _salesOfficerPerformanceService
+                        .GetPerformanceForSalesManagerAsync(
+                            currentUserId.Value,
+                            filter);
+
+                var topPerformer =
+                    await _salesOfficerPerformanceService
+                        .GetTopPerformerForSalesManagerAsync(
+                            currentUserId.Value,
+                            filter);
+
+                var needsAttention =
+                    await _salesOfficerPerformanceService
+                        .GetNeedsAttentionForSalesManagerAsync(
+                            currentUserId.Value,
+                            filter);
+
+                ViewData["PerformanceFilter"] =
+                    filter;
+
+                ViewData["TopPerformer"] =
+                    topPerformer;
+
+                ViewData["NeedsAttention"] =
+                    needsAttention;
+
+                return View(performance);
+            }
+
+
+            return Forbid();
         }
+        //// =====================================================
+        //// Sales Officer Performance
+        //// =====================================================
+        //[HttpGet]
+        //[Authorize(Roles = "ADMIN,SALES_MANAGER")]
+        //public async Task<IActionResult> Performance(
+        //    PerformanceFilterViewModel? filter)
+        //{
+        //    filter ??=
+        //        new PerformanceFilterViewModel();
+
+        //    if (string.IsNullOrWhiteSpace(
+        //            filter.Range))
+        //    {
+        //        filter.Range =
+        //            "ThisMonth";
+        //    }
+
+        //    if (string.Equals(
+        //            filter.Range,
+        //            "Custom",
+        //            StringComparison.OrdinalIgnoreCase))
+        //    {
+        //        if (!filter.FromDate.HasValue ||
+        //            !filter.ToDate.HasValue)
+        //        {
+        //            TempData["Error"] =
+        //                "Please select both From Date and To Date.";
+
+        //            filter.Range =
+        //                "ThisMonth";
+
+        //            filter.FromDate =
+        //                null;
+
+        //            filter.ToDate =
+        //                null;
+        //        }
+        //        else if (
+        //            filter.FromDate.Value.Date >
+        //            filter.ToDate.Value.Date)
+        //        {
+        //            TempData["Error"] =
+        //                "From Date cannot be later than To Date.";
+
+        //            filter.Range =
+        //                "ThisMonth";
+
+        //            filter.FromDate =
+        //                null;
+
+        //            filter.ToDate =
+        //                null;
+        //        }
+        //    }
+
+        //    var performance =
+        //        await _salesOfficerPerformanceService
+        //            .GetPerformanceAsync(filter);
+
+        //    var topPerformer =
+        //        await _salesOfficerPerformanceService
+        //            .GetTopPerformerAsync(filter);
+
+        //    var needsAttention =
+        //        await _salesOfficerPerformanceService
+        //            .GetNeedsAttentionAsync(filter);
+
+        //    ViewData["PerformanceFilter"] =
+        //        filter;
+
+        //    ViewData["TopPerformer"] =
+        //        topPerformer;
+
+        //    ViewData["NeedsAttention"] =
+        //        needsAttention;
+
+        //    return View(performance);
+        //}
+
+
+
+
+
+        //// =====================================================
+        //// Settings
+        //// =====================================================
+        //[HttpGet]
+        //public async Task<IActionResult> Settings()
+        //{
+        //    var settings =
+        //        await _settingsService
+        //            .GetSettingsAsync();
+
+        //    var model =
+        //        new AutoAssignmentSettingsViewModel
+        //        {
+        //            SettingId =
+        //                settings.SettingId,
+
+        //            AutoAssignmentEnabled =
+        //                settings.AutoAssignmentEnabled
+        //        };
+
+        //    return View(model);
+        //}
+
+        //// =====================================================
+        //// Save Settings
+        //// =====================================================
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Settings(
+        //    AutoAssignmentSettingsViewModel model)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return View(model);
+        //    }
+
+        //    await _settingsService
+        //        .UpdateAutoAssignmentAsync(
+        //            model.AutoAssignmentEnabled);
+
+        //    TempData["Success"] =
+        //        "Settings updated successfully.";
+
+        //    return RedirectToAction(
+        //        nameof(Settings));
+        //}
+
+
+
+
+
 
         // =====================================================
         // Follow-ups
@@ -914,10 +1293,6 @@ namespace CRMSystem.Controllers
         {
             ViewData["Title"] = "Follow-ups";
             ViewData["Breadcrumb"] = "Follow-ups";
-
-            // -------------------------------------------------
-            // Validate Date Range
-            // -------------------------------------------------
 
             if (filter.FromDate.HasValue &&
                 filter.ToDate.HasValue &&
@@ -931,9 +1306,21 @@ namespace CRMSystem.Controllers
                 filter.ToDate = null;
             }
 
+            var salesManagerId =
+    _GetCurrentUserId();
+
+            if (!salesManagerId.HasValue)
+            {
+                return RedirectToAction(
+                    "Login",
+                    "Auth");
+            }
+
             var model =
                 await _followUpService
-                    .GetFollowUpsAsync(filter);
+                    .GetFollowUpsForSalesManagerAsync(
+                        filter,
+                        salesManagerId.Value);
 
             return View(model);
         }
@@ -945,9 +1332,21 @@ namespace CRMSystem.Controllers
         public async Task<IActionResult> FollowUpDetails(
             long id)
         {
+            var salesManagerId =
+                _GetCurrentUserId();
+
+            if (!salesManagerId.HasValue)
+            {
+                return RedirectToAction(
+                    "Login",
+                    "Auth");
+            }
+
             var model =
                 await _followUpService
-                    .GetFollowUpDetailsAsync(id);
+                    .GetFollowUpDetailsForSalesManagerAsync(
+                        id,
+                        salesManagerId.Value);
 
             if (model == null)
             {
@@ -976,10 +1375,6 @@ namespace CRMSystem.Controllers
             ViewData["Breadcrumb"] =
                 "Assign Leads";
 
-            // =====================================================
-            // Validate Date Range
-            // =====================================================
-
             if (filter.FromDate.HasValue &&
                 filter.ToDate.HasValue &&
                 filter.FromDate.Value.Date >
@@ -992,12 +1387,16 @@ namespace CRMSystem.Controllers
                 filter.ToDate = null;
             }
 
-            // =====================================================
-            // Get Filtered Leads
-            // =====================================================
+            var salesManagerId = _GetCurrentUserId();
+
+            if (!salesManagerId.HasValue)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
 
             filter.Leads =
-                await _leadService.GetUnassignedLeadsAsync(
+                await _leadService.GetUnassignedLeadsForSalesManagerAsync(
+                    salesManagerId.Value,
                     filter.Search,
                     filter.Source,
                     filter.Priority,
@@ -1019,12 +1418,25 @@ namespace CRMSystem.Controllers
             ViewData["Breadcrumb"] =
                 "Reports";
 
+            var salesManagerId =
+                _GetCurrentUserId();
+
+            if (!salesManagerId.HasValue)
+            {
+                return RedirectToAction(
+                    "Login",
+                    "Auth");
+            }
+
             var report =
                 await _reportService
-                    .GetSalesManagerReportAsync();
+                    .GetSalesManagerReportAsync(
+                        salesManagerId.Value);
 
             return View(report);
         }
+
+
 
         // =====================================================
         // Sales Officer Details
@@ -1049,6 +1461,142 @@ namespace CRMSystem.Controllers
             }
 
             return View(officer);
+        }
+
+        // =====================================================
+        // Team Lead Targets
+        // =====================================================
+        [HttpGet]
+        [Authorize(Roles = RoleKeys.SalesManager)]
+        public async Task<IActionResult> TeamLeadTargets()
+        {
+            var salesManagerId =
+                _GetCurrentUserId();
+
+            if (!salesManagerId.HasValue)
+            {
+                return RedirectToAction(
+                    "Login",
+                    "Auth");
+            }
+
+            ViewData["Title"] =
+                "Team Lead Targets";
+
+            ViewData["Breadcrumb"] =
+                "Team Lead Targets";
+
+            var targets =
+                await _targetService
+                    .GetTeamLeadTargetAchievementsAsync(
+                        salesManagerId.Value);
+
+            return View(targets);
+        }
+
+        // =====================================================
+        // GET: Create Team Lead Target
+        // =====================================================
+        [HttpGet]
+        [Authorize(Roles = RoleKeys.SalesManager)]
+        public async Task<IActionResult> CreateTeamLeadTarget()
+        {
+            var salesManagerId =
+                _GetCurrentUserId();
+
+            if (!salesManagerId.HasValue)
+            {
+                return RedirectToAction(
+                    "Login",
+                    "Auth");
+            }
+
+            var model =
+                await _targetService
+                    .GetCreateTeamLeadTargetViewModelAsync(
+                        salesManagerId.Value);
+
+            ViewData["Title"] =
+                "Create Team Lead Target";
+
+            ViewData["Breadcrumb"] =
+                "Create Team Lead Target";
+
+            return View(model);
+        }
+
+        // =====================================================
+        // POST: Create Team Lead Target
+        // =====================================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = RoleKeys.SalesManager)]
+        public async Task<IActionResult> CreateTeamLeadTarget(
+            CreateTargetViewModel model)
+        {
+            var salesManagerId =
+                _GetCurrentUserId();
+
+            if (!salesManagerId.HasValue)
+            {
+                return RedirectToAction(
+                    "Login",
+                    "Auth");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var viewModel =
+                    await _targetService
+                        .GetCreateTeamLeadTargetViewModelAsync(
+                            salesManagerId.Value);
+
+                model.Users =
+                    viewModel.Users;
+
+                ViewData["Title"] =
+                    "Create Team Lead Target";
+
+                ViewData["Breadcrumb"] =
+                    "Create Team Lead Target";
+
+                return View(model);
+            }
+
+            var result =
+                await _targetService
+                    .CreateTeamLeadTargetAsync(
+                        model,
+                        salesManagerId.Value);
+
+            if (!result.IsSuccess)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    result.Message);
+
+                var viewModel =
+                    await _targetService
+                        .GetCreateTeamLeadTargetViewModelAsync(
+                            salesManagerId.Value);
+
+                model.Users =
+                    viewModel.Users;
+
+                ViewData["Title"] =
+                    "Create Team Lead Target";
+
+                ViewData["Breadcrumb"] =
+                    "Create Team Lead Target";
+
+                return View(model);
+            }
+
+            TempData["Success"] =
+                result.Message;
+
+            return RedirectToAction(
+                nameof(TeamLeadTargets));
         }
 
         // =====================================================
@@ -1146,5 +1694,36 @@ namespace CRMSystem.Controllers
                 "application/pdf",
                 fileName);
         }
+
+        // =====================================================
+        // Current Logged-in User ID
+        // =====================================================
+        private long? _GetCurrentUserId()
+        {
+            var userId =
+                HttpContext.Session.GetString(
+                    SessionKeys.UserId);
+
+            if (long.TryParse(
+                    userId,
+                    out var parsedUserId))
+            {
+                return parsedUserId;
+            }
+
+            var claimUserId =
+                User.FindFirstValue(
+                    ClaimTypes.NameIdentifier);
+
+            if (long.TryParse(
+                    claimUserId,
+                    out parsedUserId))
+            {
+                return parsedUserId;
+            }
+
+            return null;
+        }
     }
 }
+

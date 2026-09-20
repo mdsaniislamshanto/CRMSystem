@@ -1,9 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using CRMSystem.Enums;
+using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using CRMSystem.Enums;
 
 namespace CRMSystem.Models.Entities
 {
+    [Index(nameof(SalesManagerId))]
     public class Lead : BaseEntity
     {
         [Key]
@@ -75,5 +77,14 @@ namespace CRMSystem.Models.Entities
 
         [ForeignKey(nameof(CreatedBy))]
         public User? CreatedByUser { get; set; }
+
+
+        // =====================================================
+        // API Lead Manager Ownership
+        // =====================================================
+        public long? SalesManagerId { get; set; }
+
+        [ForeignKey(nameof(SalesManagerId))]
+        public User? SalesManager { get; set; }
     }
 }

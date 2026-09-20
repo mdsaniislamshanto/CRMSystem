@@ -6,7 +6,6 @@ using CRMSystem.Models.ViewModels;
 using CRMSystem.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 
 namespace CRMSystem.Services
@@ -35,7 +34,7 @@ namespace CRMSystem.Services
 
 
         // =========================================================
-        // API LEADS
+        // API LEADS for admin
         // =========================================================
 
         public async Task<List<ApiLeadViewModel>> GetApiLeadsAsync(
@@ -110,6 +109,168 @@ namespace CRMSystem.Services
                 .OrderByDescending(l => l.CreatedAt)
                 .ToListAsync();
         }
+
+
+
+        // =========================================================
+        // API LEADS for Sales Manager
+        // =========================================================
+        public async Task<List<ApiLeadViewModel>>
+                    GetApiLeadsForSalesManagerAsync(
+                        long salesManagerId,
+                        string? search = null,
+                        LeadSource? source = null,
+                        LeadStatus? status = null)
+        {
+            var query =
+                _context.Leads
+                    .Where(l =>
+                        !l.IsDeleted &&
+
+                        // -------------------------------------------------
+                        // Must be an API captured Lead
+                        // -------------------------------------------------
+                        _context.LeadCaptureLogs.Any(c =>
+                            c.LeadId == l.LeadId &&
+                            c.CaptureStatus == CaptureStatus.Success &&
+                            !c.IsDeleted) &&
+
+                        // -------------------------------------------------
+                        // Manager ownership
+                        // -------------------------------------------------
+                        (
+                            // New API Lead routed to Manager queue
+                            l.SalesManagerId == salesManagerId
+
+                            ||
+
+                            // Backward compatibility for older API Leads
+                            // already assigned under this Manager
+                            _context.LeadAssignments.Any(a =>
+                                a.LeadId == l.LeadId &&
+                                a.IsActive &&
+                                !a.IsDeleted &&
+                                a.SalesOfficer != null &&
+                                a.SalesOfficer.TeamLead != null &&
+                                a.SalesOfficer.TeamLead.SalesManagerId ==
+                                    salesManagerId)
+                        ))
+                    .AsQueryable();
+
+
+            // =============================================================
+            // SEARCH
+            // =============================================================
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.Trim();
+
+                query = query.Where(l =>
+                    l.LeadName.Contains(search) ||
+
+                    (l.CompanyName != null &&
+                     l.CompanyName.Contains(search)) ||
+
+                    (l.Email != null &&
+                     l.Email.Contains(search)) ||
+
+                    l.Phone.Contains(search) ||
+
+                    l.LeadCode.Contains(search));
+            }
+
+
+            // =============================================================
+            // SOURCE FILTER
+            // =============================================================
+
+            if (source.HasValue)
+            {
+                query = query.Where(l =>
+                    l.Source == source.Value);
+            }
+
+
+            // =============================================================
+            // STATUS FILTER
+            // =============================================================
+
+            if (status.HasValue)
+            {
+                query = query.Where(l =>
+                    l.Status == status.Value);
+            }
+
+
+            // =============================================================
+            // PROJECTION
+            // =============================================================
+
+            return await query
+                .Select(l => new ApiLeadViewModel
+                {
+                    LeadId =
+                        l.LeadId,
+
+                    LeadCode =
+                        l.LeadCode,
+
+                    LeadName =
+                        l.LeadName,
+
+                    CompanyName =
+                        l.CompanyName,
+
+                    Email =
+                        l.Email,
+
+                    Phone =
+                        l.Phone,
+
+                    Address =
+                        l.Address,
+
+                    Profession =
+                        l.Profession,
+
+                    Source =
+                        l.Source,
+
+                    Priority =
+                        l.Priority,
+
+                    Status =
+                        l.Status,
+
+                    AssignedTo =
+                        _context.LeadAssignments
+                            .Where(a =>
+                                a.LeadId == l.LeadId &&
+                                a.IsActive &&
+                                !a.IsDeleted)
+                            .OrderByDescending(a =>
+                                a.AssignedAt)
+                            .Select(a =>
+                                a.SalesOfficer != null
+                                    ? a.SalesOfficer.FullName
+                                    : null)
+                            .FirstOrDefault(),
+
+                    CreatedAt =
+                        l.CreatedAt,
+
+                    LastContactDate =
+                        l.LastContactDate
+                })
+                .OrderByDescending(l =>
+                    l.CreatedAt)
+                .ToListAsync();
+        }
+
+
+
+
 
 
         // =========================================================
@@ -311,27 +472,173 @@ namespace CRMSystem.Services
         }
 
 
+
+        // =========================================================
+        // GET ACTIVE LEADS FOR SALES MANAGER
+        // =========================================================
+        public async Task<List<LeadViewModel>>
+            GetLeadsForSalesManagerAsync(
+                long salesManagerId)
+        {
+            var leads =
+                await _context.Leads
+                    .Where(l =>
+                        !l.IsArchived &&
+                        !l.IsDeleted &&
+
+                        (
+                            // =================================================
+                            // 1. Created by current Sales Manager
+                            // =================================================
+                            l.CreatedBy == salesManagerId
+
+                            ||
+
+                            // =================================================
+                            // 2. API / Queue Lead owned by current Manager
+                            // =================================================
+                            l.SalesManagerId == salesManagerId
+
+                            ||
+
+                            // =================================================
+                            // 3. Assigned to Officer under current Manager
+                            // =================================================
+                            _context.LeadAssignments.Any(a =>
+                                a.LeadId == l.LeadId &&
+                                a.IsActive &&
+                                !a.IsDeleted &&
+                                a.SalesOfficer != null &&
+                                a.SalesOfficer.TeamLead != null &&
+                                a.SalesOfficer.TeamLead.SalesManagerId ==
+                                    salesManagerId)
+                        ))
+                    .OrderByDescending(l =>
+                        l.CreatedAt)
+                    .Select(l => new LeadViewModel
+                    {
+                        LeadId =
+                            l.LeadId,
+
+                        LeadCode =
+                            l.LeadCode,
+
+                        CompanyName =
+                            l.CompanyName,
+
+                        LeadName =
+                            l.LeadName,
+
+                        Profession =
+                            l.Profession,
+
+                        Email =
+                            l.Email,
+
+                        Phone =
+                            l.Phone,
+
+                        Address =
+                            l.Address,
+
+                        Source =
+                            l.Source,
+
+                        Priority =
+                            l.Priority,
+
+                        Status =
+                            l.Status,
+
+                        Description =
+                            l.Description,
+
+                        FollowUpDate =
+                            l.FollowUpDate,
+
+                        AssignedOfficerName =
+                            _context.LeadAssignments
+                                .Where(a =>
+                                    a.LeadId == l.LeadId &&
+                                    a.IsActive &&
+                                    !a.IsDeleted)
+                                .OrderByDescending(a =>
+                                    a.AssignedAt)
+                                .Select(a =>
+                                    a.SalesOfficer != null
+                                        ? a.SalesOfficer.FullName
+                                        : null)
+                                .FirstOrDefault(),
+
+                        AssignedAt =
+                            _context.LeadAssignments
+                                .Where(a =>
+                                    a.LeadId == l.LeadId &&
+                                    a.IsActive &&
+                                    !a.IsDeleted)
+                                .OrderByDescending(a =>
+                                    a.AssignedAt)
+                                .Select(a =>
+                                    (DateTime?)a.AssignedAt)
+                                .FirstOrDefault(),
+
+                        AcceptedAt =
+                            _context.LeadAssignments
+                                .Where(a =>
+                                    a.LeadId == l.LeadId &&
+                                    a.IsActive &&
+                                    !a.IsDeleted)
+                                .OrderByDescending(a =>
+                                    a.AssignedAt)
+                                .Select(a =>
+                                    a.AcceptedAt)
+                                .FirstOrDefault(),
+
+                        AssignmentStatus =
+                            _context.LeadAssignments
+                                .Where(a =>
+                                    a.LeadId == l.LeadId &&
+                                    a.IsActive &&
+                                    !a.IsDeleted)
+                                .OrderByDescending(a =>
+                                    a.AssignedAt)
+                                .Select(a =>
+                                    (AssignmentStatus?)a.AssignmentStatus)
+                                .FirstOrDefault(),
+
+                        AcceptanceSLAMissed =
+                            _context.LeadAssignments
+                                .Where(a =>
+                                    a.LeadId == l.LeadId &&
+                                    a.IsActive &&
+                                    !a.IsDeleted)
+                                .OrderByDescending(a =>
+                                    a.AssignedAt)
+                                .Select(a =>
+                                    a.AcceptanceSLAMissed)
+                                .FirstOrDefault()
+                    })
+                    .ToListAsync();
+
+
+            foreach (var lead in leads)
+            {
+                CalculateAcceptanceSLA(lead);
+            }
+
+
+            return leads;
+        }
+
+
+
         // =========================================================
         // CREATE MANUAL LEAD
         // =========================================================
-
-        public async Task CreateLeadAsync(CreateLeadViewModel model)
+        public async Task CreateLeadAsync(
+    CreateLeadViewModel model)
         {
-            var lead = CreateLeadEntity(model);
-
-            _context.Leads.Add(lead);
-
-            await _context.SaveChangesAsync();
-
-            lead.LeadCode =
-                $"L{lead.LeadId:D6}";
-
-            await _context.SaveChangesAsync();
-
-            // =====================================================
-            // Current Logged-in User
-            // =====================================================
-
+            // 1. Current user
             var httpContext =
                 _httpContextAccessor.HttpContext;
 
@@ -353,14 +660,75 @@ namespace CRMSystem.Services
                     "Current logged-in user could not be identified.");
             }
 
-            // =====================================================
-            // Auto Assignment
-            // =====================================================
+            // 2. Create Lead
+            var lead =
+                CreateLeadEntity(model);
 
-            await _autoAssignmentService.AutoAssignLeadAsync(
-                lead.LeadId,
-                userId);
+            // 3. Set actual creator
+            lead.CreatedBy =
+                userId;
+
+            // 4. Save
+            _context.Leads.Add(lead);
+
+            await _context.SaveChangesAsync();
+
+            // 5. Generate Lead Code
+            lead.LeadCode =
+                $"L{lead.LeadId:D6}";
+
+            await _context.SaveChangesAsync();
+
+            // 6. Auto Assignment
+            await _autoAssignmentService
+                .AutoAssignLeadAsync(
+                    lead.LeadId,
+                    userId);
         }
+
+
+        //// =========================================================
+        //// CREATE MANUAL LEAD
+        //// =========================================================
+
+        //public async Task CreateLeadAsync(CreateLeadViewModel model)
+        //{
+        //    var lead = CreateLeadEntity(model);
+
+        //    _context.Leads.Add(lead);
+
+        //    await _context.SaveChangesAsync();
+
+        //    lead.LeadCode =
+        //        $"L{lead.LeadId:D6}";
+
+        //    await _context.SaveChangesAsync();
+
+        //    // =====================================================
+        //    // Current Logged-in User
+        //    // =====================================================
+
+        //    var httpContext =
+        //        _httpContextAccessor.HttpContext;
+
+        //    if (httpContext == null)
+        //    {
+        //        throw new InvalidOperationException(
+        //            "HTTP context is not available.");
+        //    }
+
+        //    var userIdClaim =
+        //        httpContext.User.FindFirstValue(
+        //            ClaimTypes.NameIdentifier);
+
+        //    if (!long.TryParse(
+        //            userIdClaim,
+        //            out long userId))
+        //    {
+        //        throw new InvalidOperationException(
+        //            "Current logged-in user could not be identified.");
+        //    }
+
 
 
         // =========================================================
@@ -717,8 +1085,128 @@ namespace CRMSystem.Services
         }
 
 
+
         // =========================================================
-        // GET ARCHIVED LEAD DETAILS
+        // GET LEAD FOR SALES MANAGER Only
+        // =========================================================
+        public async Task<LeadViewModel?>
+     GetLeadForSalesManagerAsync(
+         long leadId,
+         long salesManagerId)
+        {
+            var lead = await _context.Leads
+                .Where(l =>
+                    l.LeadId == leadId &&
+                    !l.IsArchived &&
+                    !l.IsDeleted &&
+                    (
+                        // 1. Created by current Sales Manager
+                        l.CreatedBy == salesManagerId
+
+                        ||
+
+                        // 2. API / Queue Lead owned by current Sales Manager
+                        l.SalesManagerId == salesManagerId
+
+                        ||
+
+                        // 3. Assigned to Officer under current Sales Manager
+                        _context.LeadAssignments.Any(a =>
+                            a.LeadId == l.LeadId &&
+                            a.IsActive &&
+                            !a.IsDeleted &&
+                            a.SalesOfficer != null &&
+                            a.SalesOfficer.TeamLead != null &&
+                            a.SalesOfficer.TeamLead.SalesManagerId ==
+                                salesManagerId)
+                    ))
+                .Select(l => new LeadViewModel
+                {
+                    LeadId = l.LeadId,
+                    LeadCode = l.LeadCode,
+                    CompanyName = l.CompanyName,
+                    LeadName = l.LeadName,
+                    Profession = l.Profession,
+                    Email = l.Email,
+                    Phone = l.Phone,
+                    Address = l.Address,
+                    Source = l.Source,
+                    Priority = l.Priority,
+                    Status = l.Status,
+                    Description = l.Description,
+                    FollowUpDate = l.FollowUpDate,
+
+                    AssignedOfficerName =
+                        _context.LeadAssignments
+                            .Where(a =>
+                                a.LeadId == l.LeadId &&
+                                a.IsActive &&
+                                !a.IsDeleted)
+                            .OrderByDescending(a => a.AssignedAt)
+                            .Select(a =>
+                                a.SalesOfficer != null
+                                    ? a.SalesOfficer.FullName
+                                    : null)
+                            .FirstOrDefault(),
+
+                    AssignedAt =
+                        _context.LeadAssignments
+                            .Where(a =>
+                                a.LeadId == l.LeadId &&
+                                a.IsActive &&
+                                !a.IsDeleted)
+                            .OrderByDescending(a => a.AssignedAt)
+                            .Select(a =>
+                                (DateTime?)a.AssignedAt)
+                            .FirstOrDefault(),
+
+                    AcceptedAt =
+                        _context.LeadAssignments
+                            .Where(a =>
+                                a.LeadId == l.LeadId &&
+                                a.IsActive &&
+                                !a.IsDeleted)
+                            .OrderByDescending(a => a.AssignedAt)
+                            .Select(a => a.AcceptedAt)
+                            .FirstOrDefault(),
+
+                    AssignmentStatus =
+                        _context.LeadAssignments
+                            .Where(a =>
+                                a.LeadId == l.LeadId &&
+                                a.IsActive &&
+                                !a.IsDeleted)
+                            .OrderByDescending(a => a.AssignedAt)
+                            .Select(a =>
+                                (AssignmentStatus?)a.AssignmentStatus)
+                            .FirstOrDefault(),
+
+                    AcceptanceSLAMissed =
+                        _context.LeadAssignments
+                            .Where(a =>
+                                a.LeadId == l.LeadId &&
+                                a.IsActive &&
+                                !a.IsDeleted)
+                            .OrderByDescending(a => a.AssignedAt)
+                            .Select(a => a.AcceptanceSLAMissed)
+                            .FirstOrDefault()
+                })
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+
+            if (lead == null)
+            {
+                return null;
+            }
+
+            CalculateAcceptanceSLA(lead);
+
+            return lead;
+        }
+
+
+        // =========================================================
+        // GET ARCHIVED LEAD DETAILS For admin
         // =========================================================
 
         public async Task<LeadViewModel?> GetArchivedLeadByIdAsync(long id)
@@ -836,8 +1324,143 @@ namespace CRMSystem.Services
         }
 
 
+
+
+
+
         // =========================================================
-        // EDIT
+        // GET ARCHIVED LEAD DETAILS For sales manager
+        // =========================================================
+        public async Task<LeadViewModel?>
+    GetArchivedLeadForSalesManagerAsync(
+        long leadId,
+        long salesManagerId)
+        {
+            var lead = await _context.Leads
+                .Where(l =>
+                    l.LeadId == leadId &&
+                    l.IsArchived &&
+                    !l.IsDeleted &&
+                    (
+                        // 1. Lead manually created by this Sales Manager
+                        l.CreatedBy == salesManagerId
+
+                        ||
+
+                        // 2. Lead belongs to this Sales Manager's queue
+                        l.SalesManagerId == salesManagerId
+
+                        ||
+
+                        // 3. Lead was historically assigned
+                        //    to a Sales Officer under this Manager
+                        _context.LeadAssignments.Any(a =>
+                            a.LeadId == l.LeadId &&
+                            !a.IsDeleted &&
+                            a.SalesOfficer != null &&
+                            a.SalesOfficer.TeamLead != null &&
+                            a.SalesOfficer.TeamLead.SalesManagerId ==
+                                salesManagerId
+                        )
+                    ))
+                .Select(l => new LeadViewModel
+                {
+                    LeadId = l.LeadId,
+                    LeadCode = l.LeadCode,
+
+                    CompanyName = l.CompanyName,
+                    LeadName = l.LeadName,
+                    Profession = l.Profession,
+
+                    Email = l.Email,
+                    Phone = l.Phone,
+                    Address = l.Address,
+
+                    Source = l.Source,
+                    Priority = l.Priority,
+                    Status = l.Status,
+
+                    Description = l.Description,
+
+                    FollowUpDate = l.FollowUpDate,
+                    LastContactDate = l.LastContactDate,
+
+                    IsArchived = l.IsArchived,
+                    ArchivedAt = l.ArchivedAt,
+
+                    AssignedOfficerName =
+                        _context.LeadAssignments
+                            .Where(a =>
+                                a.LeadId == l.LeadId &&
+                                !a.IsDeleted)
+                            .OrderByDescending(a => a.AssignedAt)
+                            .Select(a =>
+                                a.SalesOfficer != null
+                                    ? a.SalesOfficer.FullName
+                                    : null)
+                            .FirstOrDefault(),
+
+                    AssignedAt =
+                        _context.LeadAssignments
+                            .Where(a =>
+                                a.LeadId == l.LeadId &&
+                                !a.IsDeleted)
+                            .OrderByDescending(a => a.AssignedAt)
+                            .Select(a =>
+                                (DateTime?)a.AssignedAt)
+                            .FirstOrDefault(),
+
+                    AcceptedAt =
+                        _context.LeadAssignments
+                            .Where(a =>
+                                a.LeadId == l.LeadId &&
+                                !a.IsDeleted)
+                            .OrderByDescending(a => a.AssignedAt)
+                            .Select(a => a.AcceptedAt)
+                            .FirstOrDefault(),
+
+                    AssignmentStatus =
+                        _context.LeadAssignments
+                            .Where(a =>
+                                a.LeadId == l.LeadId &&
+                                !a.IsDeleted)
+                            .OrderByDescending(a => a.AssignedAt)
+                            .Select(a =>
+                                (AssignmentStatus?)a.AssignmentStatus)
+                            .FirstOrDefault(),
+
+                    AcceptanceSLAMissed =
+                        _context.LeadAssignments
+                            .Where(a =>
+                                a.LeadId == l.LeadId &&
+                                !a.IsDeleted)
+                            .OrderByDescending(a => a.AssignedAt)
+                            .Select(a => a.AcceptanceSLAMissed)
+                            .FirstOrDefault()
+                })
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+
+            if (lead == null)
+            {
+                return null;
+            }
+
+            CalculateAcceptanceSLA(lead);
+
+            return lead;
+        }
+
+
+
+
+
+
+
+
+
+        // =========================================================
+        // EDIT General
         // =========================================================
 
         public async Task<EditLeadViewModel?> GetLeadForEditAsync(long id)
@@ -867,7 +1490,62 @@ namespace CRMSystem.Services
 
 
         // =========================================================
-        // UPDATE
+        // GET LEAD FOR SALES MANAGER EDIT
+        // =========================================================
+        public async Task<EditLeadViewModel?>
+            GetLeadForEditForSalesManagerAsync(
+                long leadId,
+                long salesManagerId)
+        {
+            return await _context.Leads
+                .Where(l =>
+                    l.LeadId == leadId &&
+                    !l.IsArchived &&
+                    !l.IsDeleted &&
+                    (
+                        // 1. Created by current Sales Manager
+                        l.CreatedBy == salesManagerId
+
+                        ||
+
+                        // 2. Owned by current Sales Manager queue
+                        l.SalesManagerId == salesManagerId
+
+                        ||
+
+                        // 3. Assigned under current Sales Manager
+                        _context.LeadAssignments.Any(a =>
+                            a.LeadId == l.LeadId &&
+                            a.IsActive &&
+                            !a.IsDeleted &&
+                            a.SalesOfficer != null &&
+                            a.SalesOfficer.TeamLead != null &&
+                            a.SalesOfficer.TeamLead.SalesManagerId ==
+                                salesManagerId)
+                    ))
+                .Select(l => new EditLeadViewModel
+                {
+                    LeadId = l.LeadId,
+                    LeadCode = l.LeadCode,
+                    CompanyName = l.CompanyName,
+                    LeadName = l.LeadName,
+                    Profession = l.Profession,
+                    Email = l.Email,
+                    Phone = l.Phone,
+                    Address = l.Address,
+                    Source = l.Source,
+                    Priority = l.Priority,
+                    Status = l.Status,
+                    Description = l.Description,
+                    FollowUpDate = l.FollowUpDate
+                })
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+        }
+
+
+        // =========================================================
+        // UPDATE Genaral
         // =========================================================
 
         public async Task UpdateLeadAsync(
@@ -921,7 +1599,58 @@ namespace CRMSystem.Services
 
 
         // =========================================================
-        // ARCHIVE 
+        // UPDATE LEAD FOR SALES MANAGER
+        // =========================================================
+
+        public async Task<bool> UpdateLeadForSalesManagerAsync(
+            EditLeadViewModel model,
+            long salesManagerId)
+        {
+            var lead = await _context.Leads
+    .FirstOrDefaultAsync(l =>
+        l.LeadId == model.LeadId &&
+        !l.IsDeleted &&
+        !l.IsArchived &&
+        (
+            l.CreatedBy == salesManagerId ||
+
+            l.SalesManagerId == salesManagerId ||
+
+            _context.LeadAssignments.Any(a =>
+                a.LeadId == l.LeadId &&
+                a.IsActive &&
+                !a.IsDeleted &&
+                a.SalesOfficer != null &&
+                a.SalesOfficer.TeamLead != null &&
+                a.SalesOfficer.TeamLead.SalesManagerId ==
+                    salesManagerId)
+        ));
+
+            if (lead == null)
+            {
+                return false;
+            }
+
+            lead.CompanyName = model.CompanyName;
+            lead.LeadName = model.LeadName;
+            lead.Profession = model.Profession;
+            lead.Email = model.Email;
+            lead.Phone = model.Phone;
+            lead.Address = model.Address;
+            lead.Source = model.Source;
+            lead.Priority = model.Priority;
+            lead.Status = model.Status;
+            lead.Description = model.Description;
+            lead.FollowUpDate = model.FollowUpDate;
+
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+
+        // =========================================================
+        // ARCHIVE For Admin
         // =========================================================
 
         public async Task ArchiveLeadAsync(
@@ -960,8 +1689,92 @@ namespace CRMSystem.Services
         }
 
 
+
+
         // =========================================================
-        // ARCHIVED LEADS
+        // ARCHIVE LEAD FOR SALES MANAGER
+        // =========================================================
+
+        public async Task<bool>
+            ArchiveLeadForSalesManagerAsync(
+                long leadId,
+                long salesManagerId)
+        {
+            // =====================================================
+            // 1. Find Active Lead
+            // =====================================================
+
+            var lead =
+                await _context.Leads
+                    .FirstOrDefaultAsync(l =>
+                        l.LeadId == leadId &&
+                        !l.IsDeleted &&
+                        !l.IsArchived);
+
+            if (lead == null)
+            {
+                return false;
+            }
+
+            // =====================================================
+            // 2. Check Sales Manager Access
+            //
+            // Manager can archive:
+            // A. Lead created by himself/herself
+            // OR
+            // B. Lead assigned to an Officer under himself/herself
+            // =====================================================
+
+            var hasAccess =
+                lead.CreatedBy == salesManagerId
+                ||
+                await _context.LeadAssignments
+                    .AnyAsync(a =>
+                        a.LeadId == leadId &&
+                        a.IsActive &&
+                        !a.IsDeleted &&
+                        a.SalesOfficer != null &&
+                        a.SalesOfficer.TeamLead != null &&
+                        a.SalesOfficer.TeamLead.SalesManagerId ==
+                            salesManagerId);
+
+            if (!hasAccess)
+            {
+                return false;
+            }
+
+            // =====================================================
+            // 3. Archive Lead
+            // =====================================================
+
+            lead.IsArchived =
+                true;
+
+            // =====================================================
+            // 4. Archive Metadata
+            // =====================================================
+
+            lead.ArchivedAt =
+                DateTime.UtcNow;
+
+            lead.ArchivedBy =
+                salesManagerId;
+
+            // =====================================================
+            // 5. Save Changes
+            // =====================================================
+
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+
+
+
+
+        // =========================================================
+        // ARCHIVED LEADS For admin
         // =========================================================
 
         public async Task<List<LeadViewModel>> GetArchivedLeadsAsync()
@@ -1015,8 +1828,101 @@ namespace CRMSystem.Services
                 .ToListAsync();
         }
 
+
+
         // =========================================================
-        // RESTORE Leads
+        // GET ARCHIVED LEADS FOR SALES MANAGER
+        // =========================================================
+
+        public async Task<List<LeadViewModel>>
+            GetArchivedLeadsForSalesManagerAsync(
+                long salesManagerId)
+        {
+            var leads =
+                await _context.Leads
+                    .AsNoTracking()
+                    .Where(l =>
+                        l.IsArchived &&
+                        !l.IsDeleted &&
+                        (
+                            // -----------------------------------------
+                            // Lead created by current Sales Manager
+                            // -----------------------------------------
+                            l.CreatedBy == salesManagerId
+
+                            ||
+
+                            // -----------------------------------------
+                            // Lead belongs to Sales Manager hierarchy
+                            // -----------------------------------------
+                            _context.LeadAssignments.Any(a =>
+                                a.LeadId == l.LeadId &&
+                                !a.IsDeleted &&
+                                a.SalesOfficer != null &&
+                                a.SalesOfficer.TeamLead != null &&
+                                a.SalesOfficer.TeamLead.SalesManagerId ==
+                                    salesManagerId)
+                        ))
+                    .OrderByDescending(l => l.ArchivedAt)
+                    .Select(l => new LeadViewModel
+                    {
+                        LeadId =
+                            l.LeadId,
+
+                        LeadCode =
+                            l.LeadCode,
+
+                        CompanyName =
+                            l.CompanyName,
+
+                        LeadName =
+                            l.LeadName,
+
+                        Profession =
+                            l.Profession,
+
+                        Email =
+                            l.Email,
+
+                        Phone =
+                            l.Phone,
+
+                        Address =
+                            l.Address,
+
+                        Source =
+                            l.Source,
+
+                        Priority =
+                            l.Priority,
+
+                        Status =
+                            l.Status,
+
+                        Description =
+                            l.Description,
+
+                        FollowUpDate =
+                            l.FollowUpDate,
+
+
+                        IsArchived =
+                            l.IsArchived,
+
+                        ArchivedAt =
+                            l.ArchivedAt
+                    })
+                    .ToListAsync();
+
+            return leads;
+        }
+
+
+
+
+
+        // =========================================================
+        // RESTORE Leads for Admin
         // =========================================================
 
         public async Task RestoreLeadAsync(long id)
@@ -1052,7 +1958,57 @@ namespace CRMSystem.Services
 
 
         // =========================================================
-        // ASSIGN VIEW MODEL
+        // RESTORE Leads for Sales manager
+        // =========================================================
+        public async Task<bool>
+    RestoreLeadForSalesManagerAsync(
+        long leadId,
+        long salesManagerId)
+        {
+            var lead =
+                await _context.Leads
+                    .FirstOrDefaultAsync(l =>
+                        l.LeadId == leadId &&
+                        l.IsArchived &&
+                        !l.IsDeleted);
+
+            if (lead == null)
+            {
+                return false;
+            }
+
+            var hasAccess =
+                lead.CreatedBy == salesManagerId
+                ||
+                await _context.LeadAssignments.AnyAsync(a =>
+                    a.LeadId == leadId &&
+                    !a.IsDeleted &&
+                    a.SalesOfficer != null &&
+                    a.SalesOfficer.TeamLead != null &&
+                    a.SalesOfficer.TeamLead.SalesManagerId ==
+                        salesManagerId);
+
+            if (!hasAccess)
+            {
+                return false;
+            }
+
+            lead.IsArchived = false;
+            lead.ArchivedAt = null;
+            lead.ArchivedBy = null;
+
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+
+
+
+
+
+        // =========================================================
+        // ASSIGN VIEW MODEL For Admin
         // =========================================================
 
         public async Task<AssignLeadViewModel?>
@@ -1106,7 +2062,7 @@ namespace CRMSystem.Services
 
 
         // =========================================================
-        // ASSIGN LEAD
+        // ASSIGN LEAD For Admin
         // =========================================================
 
         public async Task AssignLeadAsync(
@@ -1234,6 +2190,261 @@ namespace CRMSystem.Services
                     lead.LeadId,
                     assignment.AssignmentId);
         }
+
+
+
+
+        // =========================================================
+        // SALES MANAGER ASSIGN VIEW MODEL
+        // =========================================================
+
+        public async Task<AssignLeadViewModel?>
+            GetAssignLeadViewModelForSalesManagerAsync(
+                long leadId,
+                long salesManagerId)
+        {
+            // =====================================================
+            // Find Lead
+            // =====================================================
+
+            var lead =
+                await _context.Leads
+                    .FirstOrDefaultAsync(l =>
+                        l.LeadId == leadId &&
+                        !l.IsDeleted &&
+                        !l.IsArchived);
+
+            if (lead == null)
+            {
+                return null;
+            }
+
+            // =====================================================
+            // Check Lead Access
+            //
+            // Lead must either:
+            // 1. Be created by this Sales Manager
+            // OR
+            // 2. Be assigned to a Sales Officer under this Manager
+            // =====================================================
+
+            var hasAccess =
+                lead.CreatedBy == salesManagerId
+                ||
+                await _context.LeadAssignments
+                    .AnyAsync(a =>
+                        a.LeadId == leadId &&
+                        a.IsActive &&
+                        !a.IsDeleted &&
+                        a.SalesOfficer != null &&
+                        a.SalesOfficer.TeamLead != null &&
+                        a.SalesOfficer.TeamLead.SalesManagerId
+                            == salesManagerId);
+
+            if (!hasAccess)
+            {
+                return null;
+            }
+
+            // =====================================================
+            // Get Only Sales Officers Under This Manager
+            // =====================================================
+
+            var salesOfficers =
+                await _context.Users
+                    .Include(u => u.Role)
+                    .Include(u => u.TeamLead)
+                    .Where(u =>
+                        u.IsActive &&
+                        !u.IsDeleted &&
+                        u.Role != null &&
+                        u.Role.RoleKey == RoleKeys.SalesOfficer &&
+                        u.TeamLead != null &&
+                        u.TeamLead.SalesManagerId ==
+                            salesManagerId)
+                    .Select(u =>
+                        new SelectListItem
+                        {
+                            Value =
+                                u.UserId.ToString(),
+
+                            Text =
+                                u.FullName
+                        })
+                    .ToListAsync();
+
+            // =====================================================
+            // Return View Model
+            // =====================================================
+
+            return new AssignLeadViewModel
+            {
+                LeadId =
+                    lead.LeadId,
+
+                LeadCode =
+                    lead.LeadCode,
+
+                LeadName =
+                    lead.LeadName,
+
+                SalesOfficers =
+                    salesOfficers
+            };
+        }
+
+
+
+
+
+        // =========================================================
+        // SALES MANAGER ASSIGN LEAD
+        // =========================================================
+
+        public async Task<bool>
+            AssignLeadForSalesManagerAsync(
+                AssignLeadViewModel model,
+                long salesManagerId)
+        {
+            // =====================================================
+            // 1. Find Lead
+            // =====================================================
+
+            var lead =
+                await _context.Leads
+                    .FirstOrDefaultAsync(l =>
+                        l.LeadId == model.LeadId &&
+                        !l.IsDeleted &&
+                        !l.IsArchived);
+
+            if (lead == null)
+            {
+                return false;
+            }
+
+            // =====================================================
+            // 2. Check Sales Manager Access to Lead
+            //
+            // Lead must either:
+            // - be created by this Sales Manager
+            // OR
+            // - be assigned to an Officer under this Manager
+            // =====================================================
+
+            var hasLeadAccess =
+                lead.CreatedBy == salesManagerId
+                ||
+                await _context.LeadAssignments
+                    .AnyAsync(a =>
+                        a.LeadId == model.LeadId &&
+                        a.IsActive &&
+                        !a.IsDeleted &&
+                        a.SalesOfficer != null &&
+                        a.SalesOfficer.TeamLead != null &&
+                        a.SalesOfficer.TeamLead.SalesManagerId
+                            == salesManagerId);
+
+            if (!hasLeadAccess)
+            {
+                return false;
+            }
+
+            // =====================================================
+            // 3. Validate Selected Sales Officer
+            // =====================================================
+
+            var salesOfficer =
+                await _context.Users
+                    .Include(u => u.Role)
+                    .Include(u => u.TeamLead)
+                    .FirstOrDefaultAsync(u =>
+                        u.UserId == model.SalesOfficerId &&
+                        u.IsActive &&
+                        !u.IsDeleted &&
+                        u.Role != null &&
+                        u.Role.RoleKey == RoleKeys.SalesOfficer);
+
+            if (salesOfficer == null)
+            {
+                return false;
+            }
+
+            // =====================================================
+            // 4. IMPORTANT:
+            //    Officer must belong to current Sales Manager
+            // =====================================================
+
+            if (salesOfficer.TeamLead == null ||
+                salesOfficer.TeamLead.SalesManagerId !=
+                    salesManagerId)
+            {
+                return false;
+            }
+
+            // =====================================================
+            // 5. Check Existing Active Assignment
+            // =====================================================
+
+            var existingAssignment =
+                await _context.LeadAssignments
+                    .FirstOrDefaultAsync(a =>
+                        a.LeadId == model.LeadId &&
+                        a.IsActive &&
+                        !a.IsDeleted);
+
+            if (existingAssignment != null)
+            {
+                return false;
+            }
+
+            // =====================================================
+            // 6. Create Assignment
+            // =====================================================
+
+            var assignment =
+                new LeadAssignment
+                {
+                    LeadId =
+                        model.LeadId,
+
+                    SalesOfficerId =
+                        model.SalesOfficerId,
+
+                    AssignedBy =
+                        salesManagerId,
+
+                    AssignedAt =
+                        DateTime.UtcNow,
+
+                    AssignmentStatus =
+                        AssignmentStatus.Pending,
+
+                    IsActive =
+                        true
+                };
+
+            _context.LeadAssignments.Add(
+                assignment);
+
+            // =====================================================
+            // 7. Update Lead Status
+            // =====================================================
+
+            lead.Status =
+                LeadStatus.Assigned;
+
+            // =====================================================
+            // 8. Save
+            // =====================================================
+
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+
+
+
 
 
         // =========================================================
@@ -1387,7 +2598,7 @@ namespace CRMSystem.Services
                 FollowUpDate =
                     model.FollowUpDate,
 
-                CreatedBy = 1
+                //CreatedBy = 1
             };
         }
 
@@ -1443,7 +2654,7 @@ namespace CRMSystem.Services
 
 
         // =========================================================
-        // REASSIGN VIEW MODEL
+        // REASSIGN VIEW MODEL For Admin
         // =========================================================
 
         public async Task<ReassignLeadViewModel?>
@@ -1524,6 +2735,71 @@ namespace CRMSystem.Services
 
 
         // =========================================================
+        // REASSIGN VIEW MODEL FOR SALES MANAGER
+        // =========================================================
+
+        public async Task<ReassignLeadViewModel?>
+            GetReassignLeadViewModelForSalesManagerAsync(
+                long leadId,
+                long salesManagerId)
+        {
+            var assignment =
+                await _context.LeadAssignments
+                    .Include(a => a.Lead)
+                    .Include(a => a.SalesOfficer)
+                    .FirstOrDefaultAsync(a =>
+                        a.LeadId == leadId &&
+                        a.IsActive &&
+                        !a.IsDeleted &&
+                        a.Lead != null &&
+                        !a.Lead.IsDeleted &&
+                        !a.Lead.IsArchived &&
+                        a.SalesOfficer != null &&
+                        a.SalesOfficer.TeamLead != null &&
+                        a.SalesOfficer.TeamLead.SalesManagerId ==
+                            salesManagerId);
+
+            if (assignment == null)
+            {
+                return null;
+            }
+
+            var salesOfficers =
+                await _context.Users
+                    .Include(u => u.Role)
+                    .Where(u =>
+                        u.IsActive &&
+                        !u.IsDeleted &&
+                        u.Role != null &&
+                        u.Role.RoleKey == RoleKeys.SalesOfficer &&
+                        u.UserId != assignment.SalesOfficerId &&
+                        u.TeamLead != null &&
+                        u.TeamLead.SalesManagerId ==
+                            salesManagerId)
+                    .Select(u =>
+                        new SelectListItem
+                        {
+                            Value = u.UserId.ToString(),
+                            Text = u.FullName
+                        })
+                    .ToListAsync();
+
+            return new ReassignLeadViewModel
+            {
+                LeadId = assignment.Lead!.LeadId,
+                AssignmentId = assignment.AssignmentId,
+                LeadCode = assignment.Lead.LeadCode,
+                LeadName = assignment.Lead.LeadName,
+                CurrentSalesOfficer =
+                    assignment.SalesOfficer != null
+                        ? assignment.SalesOfficer.FullName
+                        : string.Empty,
+                SalesOfficers = salesOfficers
+            };
+        }
+
+
+        // =========================================================
         // REASSIGN LEAD
         // =========================================================
 
@@ -1531,17 +2807,67 @@ namespace CRMSystem.Services
             ReassignLeadViewModel model,
             long salesManagerId)
         {
+            //var currentAssignment =
+            //    await _context.LeadAssignments
+            //        .FirstOrDefaultAsync(
+            //            a =>
+            //                a.AssignmentId ==
+            //                model.AssignmentId);
             var currentAssignment =
-                await _context.LeadAssignments
-                    .FirstOrDefaultAsync(
-                        a =>
-                            a.AssignmentId ==
-                            model.AssignmentId);
+                   await _context.LeadAssignments
+                    .Include(a => a.Lead)
+                    .Include(a => a.SalesOfficer)
+                    .ThenInclude(o => o!.TeamLead)
+                    .FirstOrDefaultAsync(a =>
+                        a.AssignmentId == model.AssignmentId &&
+                        a.LeadId == model.LeadId &&
+                        a.IsActive &&
+                        !a.IsDeleted &&
+                        a.Lead != null &&
+                        !a.Lead.IsDeleted &&
+                        !a.Lead.IsArchived);
 
             if (currentAssignment == null)
             {
                 return;
             }
+
+            // =========================================================
+            // SALES MANAGER HIERARCHY VALIDATION
+            // =========================================================
+            if (currentAssignment.SalesOfficer?.TeamLead?.SalesManagerId
+                != salesManagerId)
+            {
+                return;
+            }
+
+            // =========================================================
+            // NEW SALES OFFICER VALIDATION
+            // =========================================================
+
+            var newSalesOfficer =
+                await _context.Users
+                    .Include(u => u.Role)
+                    .Include(u => u.TeamLead)
+                    .FirstOrDefaultAsync(u =>
+                        u.UserId == model.NewSalesOfficerId &&
+                        u.IsActive &&
+                        !u.IsDeleted &&
+                        u.Role != null &&
+                        u.Role.RoleKey == RoleKeys.SalesOfficer);
+
+            if (newSalesOfficer == null)
+            {
+                return;
+            }
+
+            if (newSalesOfficer.TeamLead == null ||
+                newSalesOfficer.TeamLead.SalesManagerId != salesManagerId)
+            {
+                return;
+            }
+
+
 
             currentAssignment.AssignmentStatus =
                 AssignmentStatus.Reassigned;
@@ -1622,7 +2948,7 @@ namespace CRMSystem.Services
 
 
         // =========================================================
-        // UNASSIGNED LEADS
+        // UNASSIGNED LEADS For admin
         // =========================================================
 
         public async Task<List<UnassignedLeadViewModel>>
@@ -1739,6 +3065,106 @@ namespace CRMSystem.Services
         }
 
 
+
+        // =========================================================
+        // UNASSIGNED LEADS For Sales Manager
+        // =========================================================
+        public async Task<List<UnassignedLeadViewModel>>
+    GetUnassignedLeadsForSalesManagerAsync(
+        long salesManagerId,
+        string? search = null,
+        LeadSource? source = null,
+        LeadPriority? priority = null,
+        DateTime? fromDate = null,
+        DateTime? toDate = null)
+        {
+            var query = _context.Leads
+                .Where(l =>
+                    l.Status == LeadStatus.New &&
+                    !l.IsDeleted &&
+                    !l.IsArchived &&
+
+                    // No active assignment
+                    !_context.LeadAssignments.Any(a =>
+                        a.LeadId == l.LeadId &&
+                        a.IsActive &&
+                        !a.IsDeleted) &&
+
+                    // Sales Manager ownership
+                    (
+                        l.CreatedBy == salesManagerId ||
+                        l.SalesManagerId == salesManagerId
+                    ));
+
+            // Search
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.Trim();
+
+                query = query.Where(l =>
+                    l.LeadCode.Contains(search) ||
+                    l.LeadName.Contains(search) ||
+                    (l.CompanyName != null &&
+                     l.CompanyName.Contains(search)) ||
+                    l.Phone.Contains(search) ||
+                    (l.Email != null &&
+                     l.Email.Contains(search)));
+            }
+
+            // Source filter
+            if (source.HasValue)
+            {
+                query = query.Where(l =>
+                    l.Source == source.Value);
+            }
+
+            // Priority filter
+            if (priority.HasValue)
+            {
+                query = query.Where(l =>
+                    l.Priority == priority.Value);
+            }
+
+            // From date
+            if (fromDate.HasValue)
+            {
+                query = query.Where(l =>
+                    l.CreatedAt >= fromDate.Value);
+            }
+
+            // To date
+            if (toDate.HasValue)
+            {
+                var endDate = toDate.Value.Date.AddDays(1);
+
+                query = query.Where(l =>
+                    l.CreatedAt < endDate);
+            }
+
+            return await query
+                .OrderByDescending(l => l.CreatedAt)
+                .Select(l => new UnassignedLeadViewModel
+                {
+                    LeadId = l.LeadId,
+                    LeadCode = l.LeadCode,
+                    CompanyName = l.CompanyName,
+                    LeadName = l.LeadName,
+                    Profession = l.Profession,
+                    Email = l.Email,
+                    Phone = l.Phone,
+                    Address = l.Address,
+                    Source = l.Source,
+                    Priority = l.Priority,
+                    Status = l.Status,
+                    CreatedAt = l.CreatedAt
+                })
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
+
+
+
         // =========================================================
         // ACCEPTANCE SLA CALCULATOR
         // =========================================================
@@ -1834,6 +3260,8 @@ namespace CRMSystem.Services
                 lead.AssignmentStatus.Value
                     .ToString();
         }
+
+
 
 
 

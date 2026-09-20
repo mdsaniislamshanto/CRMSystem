@@ -16,6 +16,7 @@
 
         AutoAssignmentApproved,
 
-        AutoAssignmentRejected
+        AutoAssignmentRejected,
+        TargetAssigned
     }
 }

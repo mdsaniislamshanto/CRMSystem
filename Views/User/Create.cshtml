@@ -11,7 +11,9 @@
 
         <div class="card-header bg-primary text-white">
 
-            <h4 class="mb-0">Create User</h4>
+            <h4 class="mb-0">
+                Create User
+            </h4>
 
         </div>
 
@@ -27,57 +29,136 @@
                      class="text-danger mb-3">
                 </div>
 
+                <!-- Employee Code + Role -->
                 <div class="row">
 
                     <div class="col-md-6 mb-3">
 
-                        <label asp-for="EmployeeCode" class="form-label"></label>
+                        <label asp-for="EmployeeCode"
+                               class="form-label">
+                        </label>
 
                         <input asp-for="EmployeeCode"
                                class="form-control"
                                readonly />
 
                         <span asp-validation-for="EmployeeCode"
-                              class="text-danger"></span>
+                              class="text-danger">
+                        </span>
 
                     </div>
 
                     <div class="col-md-6 mb-3">
 
-                        <label asp-for="RoleId" class="form-label"></label>
+                        <label asp-for="RoleId"
+                               class="form-label">
+                        </label>
 
                         <select asp-for="RoleId"
                                 asp-items="Model.Roles"
-                                class="form-select">
+                                class="form-select"
+                                id="RoleId">
 
-                            <option value="">-- Select Role --</option>
+                            <option value="">
+                                -- Select Role --
+                            </option>
 
                         </select>
 
                         <span asp-validation-for="RoleId"
-                              class="text-danger"></span>
+                              class="text-danger">
+                        </span>
 
                     </div>
 
                 </div>
 
+
+                <!-- Sales Manager Assignment -->
+                <div class="row"
+                     id="salesManagerContainer"
+                     style="display: none;">
+
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="SalesManagerId"
+                               class="form-label">
+                        </label>
+
+                        <select asp-for="SalesManagerId"
+                                asp-items="Model.SalesManagers"
+                                class="form-select"
+                                id="SalesManagerId">
+
+                            <option value="">
+                                -- Select Sales Manager --
+                            </option>
+
+                        </select>
+
+                        <span asp-validation-for="SalesManagerId"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Team Lead Assignment -->
+                <div class="row"
+                     id="teamLeadContainer"
+                     style="display: none;">
+
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="TeamLeadId"
+                               class="form-label">
+                        </label>
+
+                        <select asp-for="TeamLeadId"
+                                asp-items="Model.TeamLeads"
+                                class="form-select"
+                                id="TeamLeadId">
+
+                            <option value="">
+                                -- Select Team Lead --
+                            </option>
+
+                        </select>
+
+                        <span asp-validation-for="TeamLeadId"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Name -->
                 <div class="row">
 
                     <div class="col-md-6 mb-3">
 
-                        <label asp-for="FirstName" class="form-label"></label>
+                        <label asp-for="FirstName"
+                               class="form-label">
+                        </label>
 
                         <input asp-for="FirstName"
                                class="form-control" />
 
                         <span asp-validation-for="FirstName"
-                              class="text-danger"></span>
+                              class="text-danger">
+                        </span>
 
                     </div>
 
                     <div class="col-md-6 mb-3">
 
-                        <label asp-for="LastName" class="form-label"></label>
+                        <label asp-for="LastName"
+                               class="form-label">
+                        </label>
 
                         <input asp-for="LastName"
                                class="form-control" />
@@ -86,62 +167,82 @@
 
                 </div>
 
+
+                <!-- Contact -->
                 <div class="row">
 
                     <div class="col-md-6 mb-3">
 
-                        <label asp-for="Email" class="form-label"></label>
+                        <label asp-for="Email"
+                               class="form-label">
+                        </label>
 
                         <input asp-for="Email"
                                class="form-control" />
 
                         <span asp-validation-for="Email"
-                              class="text-danger"></span>
+                              class="text-danger">
+                        </span>
 
                     </div>
 
                     <div class="col-md-6 mb-3">
 
-                        <label asp-for="PhoneNumber" class="form-label"></label>
+                        <label asp-for="PhoneNumber"
+                               class="form-label">
+                        </label>
 
                         <input asp-for="PhoneNumber"
                                class="form-control" />
+
+                        <span asp-validation-for="PhoneNumber"
+                              class="text-danger">
+                        </span>
 
                     </div>
 
                 </div>
 
+
+                <!-- Password -->
                 <div class="row">
 
                     <div class="col-md-6 mb-3">
 
-                        <label asp-for="Password" class="form-label"></label>
+                        <label asp-for="Password"
+                               class="form-label">
+                        </label>
 
                         <input asp-for="Password"
                                class="form-control"
                                autocomplete="new-password" />
 
                         <span asp-validation-for="Password"
-                              class="text-danger"></span>
+                              class="text-danger">
+                        </span>
 
                     </div>
 
                     <div class="col-md-6 mb-3">
 
                         <label asp-for="ConfirmPassword"
-                               class="form-label"></label>
+                               class="form-label">
+                        </label>
 
                         <input asp-for="ConfirmPassword"
                                class="form-control"
                                autocomplete="new-password" />
 
                         <span asp-validation-for="ConfirmPassword"
-                              class="text-danger"></span>
+                              class="text-danger">
+                        </span>
 
                     </div>
 
                 </div>
 
+
+                <!-- Buttons -->
                 <div class="d-flex justify-content-end">
 
                     <a asp-action="Index"
@@ -168,7 +269,100 @@
 
 </div>
 
+
 @section Scripts
 {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function() {
+
+            const roleSelect =
+                document.getElementById("RoleId");
+
+            const managerContainer =
+                document.getElementById(
+                    "salesManagerContainer"
+                );
+
+            const managerSelect =
+                document.getElementById("SalesManagerId");
+
+            const teamLeadContainer =
+                document.getElementById(
+                    "teamLeadContainer"
+                );
+
+            const teamLeadSelect =
+                document.getElementById("TeamLeadId");
+
+
+            function updateAssignmentVisibility() {
+
+                const selectedRole =
+                    roleSelect.options[
+                        roleSelect.selectedIndex
+                    ]?.text?.trim();
+
+
+                // -------------------------------------------------
+                // Team Lead → Sales Manager
+                // -------------------------------------------------
+
+                if (selectedRole === "Team Lead") {
+
+                    managerContainer.style.display = "block";
+
+                    teamLeadContainer.style.display = "none";
+
+                    teamLeadSelect.value = "";
+
+                }
+
+
+                // -------------------------------------------------
+                // Sales Officer → Team Lead
+                // -------------------------------------------------
+
+                else if (selectedRole === "Sales Officer") {
+
+                    managerContainer.style.display = "none";
+
+                    managerSelect.value = "";
+
+                    teamLeadContainer.style.display = "block";
+
+                }
+
+
+                // -------------------------------------------------
+                // Other Roles
+                // -------------------------------------------------
+
+                else {
+
+                    managerContainer.style.display = "none";
+
+                    teamLeadContainer.style.display = "none";
+
+                    managerSelect.value = "";
+
+                    teamLeadSelect.value = "";
+
+                }
+            }
+
+
+            roleSelect.addEventListener(
+                "change",
+                updateAssignmentVisibility
+            );
+
+
+            updateAssignmentVisibility();
+
+        });
+
+    </script>
 }

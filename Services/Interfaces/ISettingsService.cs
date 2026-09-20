@@ -85,9 +85,19 @@ namespace CRMSystem.Services.Interfaces
             string? adminComment);
 
 
+
+
+
+
+
+
         // =====================================================
         // Auto Assignment Requests
         // =====================================================
+
+        // Sales Manager - get own Auto Assignment status
+        Task<bool> GetAutoAssignmentStatusAsync(
+            long salesManagerId);
 
         Task<ServiceResult> SubmitAutoAssignmentRequestAsync(
             long salesManagerId,
@@ -105,6 +115,8 @@ namespace CRMSystem.Services.Interfaces
             long requestId,
             long adminId,
             string? adminComment);
+
+
 
 
 

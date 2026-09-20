@@ -286,6 +286,9 @@ namespace CRMSystem.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
+                    b.Property<long?>("SalesManagerId")
+                        .HasColumnType("bigint");
+
                     b.Property<int>("Source")
                         .HasColumnType("int");
 
@@ -314,6 +317,8 @@ namespace CRMSystem.Migrations
 
                     b.HasIndex("LeadCode")
                         .IsUnique();
+
+                    b.HasIndex("SalesManagerId");
 
                     b.HasIndex("Source", "SourceReferenceId")
                         .IsUnique();
@@ -658,6 +663,62 @@ namespace CRMSystem.Migrations
                     b.ToTable("Roles");
                 });
 
+            modelBuilder.Entity("CRMSystem.Models.Entities.SalesTarget", b =>
+                {
+                    b.Property<long>("TargetId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("TargetId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<long?>("CreatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<long?>("DeletedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("PeriodType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("TargetCount")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<long?>("UpdatedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("TargetId");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("UserId", "PeriodType", "StartDate", "EndDate");
+
+                    b.ToTable("SalesTargets");
+                });
+
             modelBuilder.Entity("CRMSystem.Models.Entities.SystemSettings", b =>
                 {
                     b.Property<long>("SettingId")
@@ -720,6 +781,9 @@ namespace CRMSystem.Migrations
                         .HasColumnType("bigint");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("UserId"));
+
+                    b.Property<bool>("AutoAssignmentEnabled")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
@@ -786,6 +850,12 @@ namespace CRMSystem.Migrations
                     b.Property<long>("RoleId")
                         .HasColumnType("bigint");
 
+                    b.Property<long?>("SalesManagerId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("TeamLeadId")
+                        .HasColumnType("bigint");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
@@ -801,6 +871,10 @@ namespace CRMSystem.Migrations
                         .IsUnique();
 
                     b.HasIndex("RoleId");
+
+                    b.HasIndex("SalesManagerId");
+
+                    b.HasIndex("TeamLeadId");
 
                     b.ToTable("Users");
                 });
@@ -845,9 +919,15 @@ namespace CRMSystem.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("CRMSystem.Models.Entities.User", "SalesManager")
+                        .WithMany()
+                        .HasForeignKey("SalesManagerId");
+
                     b.Navigation("ArchivedByUser");
 
                     b.Navigation("CreatedByUser");
+
+                    b.Navigation("SalesManager");
                 });
 
             modelBuilder.Entity("CRMSystem.Models.Entities.LeadAssignment", b =>
@@ -926,6 +1006,24 @@ namespace CRMSystem.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("CRMSystem.Models.Entities.SalesTarget", b =>
+                {
+                    b.HasOne("CRMSystem.Models.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("CRMSystem.Models.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("CRMSystem.Models.Entities.User", b =>
                 {
                     b.HasOne("CRMSystem.Models.Entities.Role", "Role")
@@ -934,7 +1032,21 @@ namespace CRMSystem.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("CRMSystem.Models.Entities.User", "SalesManager")
+                        .WithMany("SalesOfficers")
+                        .HasForeignKey("SalesManagerId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("CRMSystem.Models.Entities.User", "TeamLead")
+                        .WithMany("TeamLeadOfficers")
+                        .HasForeignKey("TeamLeadId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Role");
+
+                    b.Navigation("SalesManager");
+
+                    b.Navigation("TeamLead");
                 });
 
             modelBuilder.Entity("CRMSystem.Models.Entities.LeadAssignment", b =>
@@ -945,6 +1057,13 @@ namespace CRMSystem.Migrations
             modelBuilder.Entity("CRMSystem.Models.Entities.Role", b =>
                 {
                     b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("CRMSystem.Models.Entities.User", b =>
+                {
+                    b.Navigation("SalesOfficers");
+
+                    b.Navigation("TeamLeadOfficers");
                 });
 #pragma warning restore 612, 618
         }

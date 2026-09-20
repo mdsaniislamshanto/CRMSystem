@@ -1,0 +1,659 @@
+﻿@model CRMSystem.Models.ViewModels.FollowUpFilterViewModel
+
+@{
+    ViewData["Title"] = "Follow-ups";
+    ViewData["Breadcrumb"] = "Follow-ups";
+    Layout = "_TeamLeadLayout";
+}
+
+
+<div class="container-fluid">
+
+    <!-- =====================================================
+         PAGE HEADER
+         ===================================================== -->
+
+    <div class="mb-4">
+
+        <h2 class="fw-bold mb-1">
+            Follow-ups
+        </h2>
+
+        <p class="text-muted mb-0">
+            Monitor follow-ups scheduled by your Sales Officers.
+        </p>
+
+    </div>
+
+
+    <!-- =====================================================
+         SUMMARY CARDS
+         ===================================================== -->
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-3">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <small class="text-muted">
+                        Total Follow-ups
+                    </small>
+
+                    <div class="fs-3 fw-bold mt-1">
+                        @Model.TotalFollowUps
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-3">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <small class="text-muted">
+                        Due Today
+                    </small>
+
+                    <div class="fs-3 fw-bold mt-1">
+                        @Model.DueTodayCount
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-3">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <small class="text-muted">
+                        Upcoming
+                    </small>
+
+                    <div class="fs-3 fw-bold mt-1">
+                        @Model.UpcomingCount
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-3">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <small class="text-muted">
+                        Overdue
+                    </small>
+
+                    <div class="fs-3 fw-bold mt-1">
+                        @Model.OverdueCount
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         SEARCH & FILTER
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <form asp-action="FollowUps"
+                  method="get">
+
+                <div class="row g-3">
+
+                    <!-- Search -->
+
+                    <div class="col-lg-3 col-md-6">
+
+                        <label class="form-label small fw-semibold">
+                            Search
+                        </label>
+
+                        <input type="text"
+                               name="Search"
+                               value="@Model.Search"
+                               class="form-control"
+                               placeholder="Lead, company or officer..." />
+
+                    </div>
+
+
+                    <!-- Follow-up Status -->
+
+                    <div class="col-lg-2 col-md-6">
+
+                        <label class="form-label small fw-semibold">
+                            Follow-up Status
+                        </label>
+
+                        <select name="FollowUpStatus"
+                                class="form-select">
+
+                            <option value="">
+                                All Status
+                            </option>
+
+                            <option value="overdue"
+                                    selected="@(Model.FollowUpStatus == "overdue")">
+                                Overdue
+                            </option>
+
+                            <option value="duetoday"
+                                    selected="@(Model.FollowUpStatus == "duetoday")">
+                                Due Today
+                            </option>
+
+                            <option value="upcoming"
+                                    selected="@(Model.FollowUpStatus == "upcoming")">
+                                Upcoming
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- Feedback Status -->
+
+                    <div class="col-lg-2 col-md-6">
+
+                        <label class="form-label small fw-semibold">
+                            Feedback Status
+                        </label>
+
+                        <select name="FeedbackStatus"
+                                class="form-select">
+
+                            <option value="">
+                                All Status
+                            </option>
+
+                            @foreach (var item in Enum.GetValues<
+                                CRMSystem.Enums.FeedbackStatus>())
+                            {
+                                <option value="@item"
+                                        selected="@(Model.FeedbackStatus == item.ToString())">
+                                    @item
+                                </option>
+                            }
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- From Date -->
+
+                    <div class="col-lg-2 col-md-6">
+
+                        <label class="form-label small fw-semibold">
+                            From Date
+                        </label>
+
+                        <input type="date"
+                               name="FromDate"
+                               value="@(Model.FromDate?.ToString("yyyy-MM-dd"))"
+                               class="form-control" />
+
+                    </div>
+
+
+                    <!-- To Date -->
+
+                    <div class="col-lg-2 col-md-6">
+
+                        <label class="form-label small fw-semibold">
+                            To Date
+                        </label>
+
+                        <input type="date"
+                               name="ToDate"
+                               value="@(Model.ToDate?.ToString("yyyy-MM-dd"))"
+                               class="form-control" />
+
+                    </div>
+
+
+                    <!-- Sort -->
+
+                    <div class="col-lg-2 col-md-6">
+
+                        <label class="form-label small fw-semibold">
+                            Sort By
+                        </label>
+
+                        <select name="Sort"
+                                class="form-select">
+
+                            <option value="">
+                                Follow-up Date
+                            </option>
+
+                            <option value="oldest"
+                                    selected="@(Model.Sort == "oldest")">
+                                Oldest First
+                            </option>
+
+                            <option value="lead"
+                                    selected="@(Model.Sort == "lead")">
+                                Lead Name
+                            </option>
+
+                            <option value="lead_desc"
+                                    selected="@(Model.Sort == "lead_desc")">
+                                Lead Name Z-A
+                            </option>
+
+                            <option value="officer"
+                                    selected="@(Model.Sort == "officer")">
+                                Sales Officer
+                            </option>
+
+                            <option value="status"
+                                    selected="@(Model.Sort == "status")">
+                                Follow-up Status
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <div class="mt-3">
+
+                    <button type="submit"
+                            class="btn btn-primary">
+
+                        <i class="bi bi-funnel me-1"></i>
+
+                        Apply Filters
+
+                    </button>
+
+
+                    <a asp-action="FollowUps"
+                       class="btn btn-outline-secondary ms-2">
+
+                        <i class="bi bi-arrow-counterclockwise me-1"></i>
+
+                        Reset
+
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         FOLLOW-UP TABLE
+         ===================================================== -->
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-white">
+
+            <div class="d-flex
+                justify-content-between
+                align-items-center">
+
+                <div>
+
+                    <h5 class="mb-1 fw-semibold">
+
+                        <i class="bi bi-calendar-check me-2"></i>
+
+                        Team Follow-ups
+
+                    </h5>
+
+                    <small class="text-muted">
+                        Follow-ups scheduled by your Sales Officers.
+                    </small>
+
+                </div>
+
+
+                <span class="badge bg-primary">
+
+                    @Model.TotalItems
+                    Follow-up@(Model.TotalItems == 1 ? "" : "s")
+
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="card-body p-0">
+
+            @if (Model.FollowUps == null ||
+                 !Model.FollowUps.Any())
+            {
+                <div class="text-center py-5">
+
+                    <i class="bi bi-calendar-x
+                    fs-1
+                    text-muted"></i>
+
+                    <h5 class="mt-3">
+                        No Follow-ups Found
+                    </h5>
+
+                    <p class="text-muted mb-0">
+                        No follow-ups match the selected criteria.
+                    </p>
+
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+
+                    <table class="table
+                        table-hover
+                        align-middle
+                        mb-0">
+
+                        <thead class="table-light">
+
+                            <tr>
+
+                                <th>
+                                    Lead
+                                </th>
+
+                                <th>
+                                    Sales Officer
+                                </th>
+
+                                <th>
+                                    Summary
+                                </th>
+
+                                <th>
+                                    Feedback Status
+                                </th>
+
+                                <th>
+                                    Submitted
+                                </th>
+
+                                <th>
+                                    Follow-up
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th class="text-center">
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            @foreach (var item in Model.FollowUps)
+                            {
+                                <tr>
+
+                                    <!-- Lead -->
+
+                                    <td>
+
+                                        <div class="fw-semibold">
+                                            @item.LeadName
+                                        </div>
+
+                                        <small class="text-muted">
+                                            Lead ID: @item.LeadId
+                                        </small>
+
+                                    </td>
+
+
+                                    <!-- Sales Officer -->
+
+                                    <td>
+                                        @item.SalesOfficerName
+                                    </td>
+
+
+                                    <!-- Summary -->
+
+                                    <td style="min-width: 220px;">
+
+                                        @(item.Summary.Length > 70
+                                            ? item.Summary.Substring(0, 70) + "..."
+                                            : item.Summary)
+
+                                    </td>
+
+
+                                    <!-- Feedback Status -->
+
+                                    <td>
+
+                                        <span class="badge bg-primary">
+                                            @item.FeedbackStatus
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- Submitted -->
+
+                                    <td>
+
+                                        <div class="fw-semibold">
+                                            @item.SubmittedAt.ToString(
+                                                "dd MMM yyyy")
+                                        </div>
+
+                                        <small class="text-muted">
+                                            @item.SubmittedAt.ToString(
+                                                "hh:mm tt")
+                                        </small>
+
+                                    </td>
+
+
+                                    <!-- Follow-up -->
+
+                                    <td>
+
+                                        <div class="fw-semibold">
+                                            @item.FollowUpDate.ToString(
+                                                "dd MMM yyyy")
+                                        </div>
+
+                                        <small class="text-muted">
+                                            @item.FollowUpDate.ToString(
+                                                "hh:mm tt")
+                                        </small>
+
+                                    </td>
+
+
+                                    <!-- Follow-up Status -->
+
+                                    <td>
+
+                                        @if (item.IsOverdue)
+                                        {
+                                            <span class="badge bg-danger">
+                                                <i class="bi bi-exclamation-circle me-1"></i>
+                                                Overdue
+                                            </span>
+                                        }
+                                        else if (item.IsDueToday)
+                                        {
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="bi bi-clock me-1"></i>
+                                                Due Today
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-calendar-check me-1"></i>
+                                                Upcoming
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- Action -->
+
+                                    <td class="text-center">
+
+                                        <a asp-action="FeedbackDetails"
+                                           asp-route-id="@item.FeedbackId"
+                                           class="btn btn-sm btn-outline-primary"
+                                           title="View Feedback">
+
+                                            <i class="bi bi-eye"></i>
+
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+
+        </div>
+
+
+        <!-- =====================================================
+             PAGINATION
+             ===================================================== -->
+        @if (Model.TotalItems > 0)
+        {
+            <div class="card-footer bg-white">
+
+                <div class="d-flex
+                    justify-content-between
+                    align-items-center">
+
+                    <small class="text-muted">
+
+                        Showing
+                        @(
+                            ((Model.Page - 1) * Model.PageSize) + 1
+                        )
+                        -
+                        @(
+                            Math.Min(
+                                Model.Page * Model.PageSize,
+                                Model.TotalItems)
+                        )
+                        of
+                        @Model.TotalItems
+
+                    </small>
+
+
+                    <div>
+
+                        @if (Model.Page > 1)
+                        {
+                            <a asp-action="FollowUps"
+                               asp-route-Search="@Model.Search"
+                               asp-route-FollowUpStatus="@Model.FollowUpStatus"
+                               asp-route-FeedbackStatus="@Model.FeedbackStatus"
+                               asp-route-Sort="@Model.Sort"
+                               asp-route-FromDate="@Model.FromDate?.ToString("yyyy-MM-dd")"
+                               asp-route-ToDate="@Model.ToDate?.ToString("yyyy-MM-dd")"
+                               asp-route-Page="@(Model.Page - 1)"
+                               asp-route-PageSize="@Model.PageSize"
+                               class="btn btn-sm btn-outline-secondary">
+
+                                <i class="bi bi-chevron-left"></i>
+
+                            </a>
+                        }
+
+
+                        <span class="btn btn-sm btn-primary mx-1">
+                            @Model.Page
+                        </span>
+
+
+                        @if (Model.Page < Model.TotalPages)
+                        {
+                            <a asp-action="FollowUps"
+                               asp-route-Search="@Model.Search"
+                               asp-route-FollowUpStatus="@Model.FollowUpStatus"
+                               asp-route-FeedbackStatus="@Model.FeedbackStatus"
+                               asp-route-Sort="@Model.Sort"
+                               asp-route-FromDate="@Model.FromDate?.ToString("yyyy-MM-dd")"
+                               asp-route-ToDate="@Model.ToDate?.ToString("yyyy-MM-dd")"
+                               asp-route-Page="@(Model.Page + 1)"
+                               asp-route-PageSize="@Model.PageSize"
+                               class="btn btn-sm btn-outline-secondary">
+
+                                <i class="bi bi-chevron-right"></i>
+
+                            </a>
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+        }
+
+    </div>
+
+</div>

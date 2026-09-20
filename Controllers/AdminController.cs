@@ -22,6 +22,8 @@ namespace CRMSystem.Controllers
         private readonly IFollowUpService _followUpService;
         private readonly ISalesOfficerPerformanceService _salesOfficerPerformanceService;
         private readonly IPerformanceExportService _performanceExportService;
+        private readonly ITargetService _targetService;
+        private readonly IAdminDashboardService _adminDashboardService;
 
         public AdminController(
             IAuthService authService,
@@ -29,7 +31,9 @@ namespace CRMSystem.Controllers
             IUserService userService,
             IFollowUpService followUpService,
             ISalesOfficerPerformanceService salesOfficerPerformanceService,
-            IPerformanceExportService performanceExportService)
+            IPerformanceExportService performanceExportService,
+            ITargetService targetService,
+            IAdminDashboardService adminDashboardService)
         {
             _authService = authService;
             _context = context;
@@ -37,6 +41,8 @@ namespace CRMSystem.Controllers
             _followUpService = followUpService;
             _salesOfficerPerformanceService = salesOfficerPerformanceService;
             _performanceExportService = performanceExportService;
+            _targetService = targetService;
+            _adminDashboardService = adminDashboardService;
         }
 
 
@@ -45,30 +51,14 @@ namespace CRMSystem.Controllers
         // Admin Dashboard
         // =====================================================
 
-        public IActionResult Index()
+        [HttpGet]
+        public async Task<IActionResult> Index()
         {
             ViewData["Title"] = "Admin Dashboard";
 
-            var model = new AdminDashboardViewModel
-            {
-                NewLeads = _context.Leads.Count(
-                    l => l.Status == LeadStatus.New),
-
-                AssignedLeads = _context.Leads.Count(
-                    l => l.Status == LeadStatus.Assigned),
-
-                AcceptedLeads = _context.Leads.Count(
-                    l => l.Status == LeadStatus.Accepted),
-
-                InProgressLeads = _context.Leads.Count(
-                    l => l.Status == LeadStatus.InProgress),
-
-                CompletedLeads = _context.Leads.Count(
-                    l => l.Status == LeadStatus.Completed),
-
-                RejectedLeads = _context.Leads.Count(
-                    l => l.Status == LeadStatus.Rejected)
-            };
+            var model =
+                await _adminDashboardService
+                    .GetDashboardAsync();
 
             return View(model);
         }
@@ -108,7 +98,9 @@ namespace CRMSystem.Controllers
             ViewData["Title"] = "Follow-ups";
             ViewData["Breadcrumb"] = "Follow-ups";
 
-            var model = await _followUpService.GetFollowUpsAsync(filter);
+            var model =
+                await _followUpService
+                    .GetFollowUpsAsync(filter);
 
             return View(model);
         }
@@ -120,12 +112,18 @@ namespace CRMSystem.Controllers
         // =====================================================
 
         [HttpGet]
-        public async Task<IActionResult> FollowUpDetails(long id)
+        public async Task<IActionResult> FollowUpDetails(
+            long id)
         {
-            ViewData["Title"] = "Follow-up Details";
-            ViewData["Breadcrumb"] = "Follow-up Details";
+            ViewData["Title"] =
+                "Follow-up Details";
 
-            var model = await _followUpService.GetFollowUpDetailsAsync(id);
+            ViewData["Breadcrumb"] =
+                "Follow-up Details";
+
+            var model =
+                await _followUpService
+                    .GetFollowUpDetailsAsync(id);
 
             if (model == null)
             {
@@ -145,15 +143,18 @@ namespace CRMSystem.Controllers
         public async Task<IActionResult> Performance(
             PerformanceFilterViewModel? filter)
         {
-            filter ??= new PerformanceFilterViewModel();
+            filter ??=
+                new PerformanceFilterViewModel();
 
             // -------------------------------------------------
             // Default Performance Range
             // -------------------------------------------------
 
-            if (string.IsNullOrWhiteSpace(filter.Range))
+            if (string.IsNullOrWhiteSpace(
+                filter.Range))
             {
-                filter.Range = "ThisMonth";
+                filter.Range =
+                    "ThisMonth";
             }
 
 
@@ -172,7 +173,8 @@ namespace CRMSystem.Controllers
                     TempData["Error"] =
                         "Please select both From Date and To Date.";
 
-                    return RedirectToAction(nameof(Performance));
+                    return RedirectToAction(
+                        nameof(Performance));
                 }
 
                 if (filter.FromDate.Value.Date >
@@ -181,7 +183,8 @@ namespace CRMSystem.Controllers
                     TempData["Error"] =
                         "From Date cannot be later than To Date.";
 
-                    return RedirectToAction(nameof(Performance));
+                    return RedirectToAction(
+                        nameof(Performance));
                 }
             }
 
@@ -217,12 +220,20 @@ namespace CRMSystem.Controllers
             // Send Additional Data to View
             // -------------------------------------------------
 
-            ViewData["PerformanceFilter"] = filter;
-            ViewData["TopPerformer"] = topPerformer;
-            ViewData["NeedsAttention"] = needsAttention;
+            ViewData["PerformanceFilter"] =
+                filter;
 
-            ViewData["Title"] = "Sales Officer Performance";
-            ViewData["Breadcrumb"] = "Performance";
+            ViewData["TopPerformer"] =
+                topPerformer;
+
+            ViewData["NeedsAttention"] =
+                needsAttention;
+
+            ViewData["Title"] =
+                "Sales Officer Performance";
+
+            ViewData["Breadcrumb"] =
+                "Performance";
 
 
             // -------------------------------------------------
@@ -290,12 +301,14 @@ namespace CRMSystem.Controllers
         // =====================================================
 
         [HttpGet]
-        public async Task<IActionResult> ExportPerformanceExcel(
-            PerformanceFilterViewModel filter)
+        public async Task<IActionResult>
+            ExportPerformanceExcel(
+                PerformanceFilterViewModel filter)
         {
             var file =
                 await _performanceExportService
-                    .ExportPerformanceToExcelAsync(filter);
+                    .ExportPerformanceToExcelAsync(
+                        filter);
 
             return File(
                 file,
@@ -310,17 +323,174 @@ namespace CRMSystem.Controllers
         // =====================================================
 
         [HttpGet]
-        public async Task<IActionResult> ExportPerformancePdf(
-            PerformanceFilterViewModel filter)
+        public async Task<IActionResult>
+            ExportPerformancePdf(
+                PerformanceFilterViewModel filter)
         {
             var file =
                 await _performanceExportService
-                    .ExportPerformanceToPdfAsync(filter);
+                    .ExportPerformanceToPdfAsync(
+                        filter);
 
             return File(
                 file,
                 "application/pdf",
                 "SalesOfficerPerformance.pdf");
+        }
+
+
+        // =====================================================
+        // GET: Admin/Targets
+        // Sales Manager Target Management
+        // =====================================================
+
+        [HttpGet]
+        public async Task<IActionResult> Targets()
+        {
+            ViewData["Title"] =
+                "Sales Target Management";
+
+            ViewData["Breadcrumb"] =
+                "Sales Targets";
+
+            var targets =
+                await _targetService
+                    .GetTargetAchievementsForAdminAsync();
+
+            return View(targets);
+        }
+
+
+        // =====================================================
+        // GET: Admin/CreateTarget
+        // Create Sales Manager Target
+        // =====================================================
+
+        [HttpGet]
+        public async Task<IActionResult> CreateTarget()
+        {
+            ViewData["Title"] =
+                "Create Sales Manager Target";
+
+            ViewData["Breadcrumb"] =
+                "Sales Targets / Create";
+
+            var model =
+                await _targetService
+                    .GetCreateTargetViewModelAsync();
+
+            return View(model);
+        }
+
+
+        // =====================================================
+        // POST: Admin/CreateTarget
+        // Create Sales Manager Target
+        // =====================================================
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateTarget(
+            CreateTargetViewModel model)
+        {
+            ViewData["Title"] =
+                "Create Sales Manager Target";
+
+            ViewData["Breadcrumb"] =
+                "Sales Targets / Create";
+
+
+            // -------------------------------------------------
+            // Model Validation
+            // -------------------------------------------------
+
+            if (!ModelState.IsValid)
+            {
+                var invalidModel =
+                    await _targetService
+                        .GetCreateTargetViewModelAsync();
+
+                invalidModel.UserId =
+                    model.UserId;
+
+                invalidModel.PeriodType =
+                    model.PeriodType;
+
+                invalidModel.TargetCount =
+                    model.TargetCount;
+
+                invalidModel.StartDate =
+                    model.StartDate;
+
+                invalidModel.EndDate =
+                    model.EndDate;
+
+                return View(invalidModel);
+            }
+
+
+            // -------------------------------------------------
+            // Current Admin User
+            // -------------------------------------------------
+
+            var currentAdminId =
+                _authService.GetCurrentUserId();
+
+            if (!currentAdminId.HasValue)
+            {
+                return Unauthorized();
+            }
+
+
+            // -------------------------------------------------
+            // Create Target
+            // -------------------------------------------------
+
+            var result =
+                await _targetService
+                    .CreateTargetAsync(
+                        model,
+                        currentAdminId.Value);
+
+
+            // -------------------------------------------------
+            // Handle Service Result
+            // -------------------------------------------------
+
+            if (!result.IsSuccess)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    result.Message);
+
+                var failedModel =
+                    await _targetService
+                        .GetCreateTargetViewModelAsync();
+
+                failedModel.UserId =
+                    model.UserId;
+
+                failedModel.PeriodType =
+                    model.PeriodType;
+
+                failedModel.TargetCount =
+                    model.TargetCount;
+
+                failedModel.StartDate =
+                    model.StartDate;
+
+                failedModel.EndDate =
+                    model.EndDate;
+
+                return View(failedModel);
+            }
+
+
+            TempData["Success"] =
+                result.Message;
+
+            return RedirectToAction(
+                nameof(Targets));
         }
     }
 }

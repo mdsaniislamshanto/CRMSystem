@@ -29,6 +29,26 @@ namespace CRMSystem.Models.ViewModels
         [Display(Name = "Role")]
         public long RoleId { get; set; }
 
+        // =====================================================
+        // Sales Manager Assignment
+        // Used by Team Lead
+        // =====================================================
+
+        [Display(Name = "Sales Manager")]
+        public long? SalesManagerId { get; set; }
+
+        // =====================================================
+        // Team Lead Assignment
+        // Used by Sales Officer
+        // =====================================================
+
+        [Display(Name = "Team Lead")]
+        public long? TeamLeadId { get; set; }
+
         public List<SelectListItem> Roles { get; set; } = new();
+
+        public List<SelectListItem> SalesManagers { get; set; } = new();
+
+        public List<SelectListItem> TeamLeads { get; set; } = new();
     }
 }

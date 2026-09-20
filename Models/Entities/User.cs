@@ -49,11 +49,44 @@ namespace CRMSystem.Models.Entities
         public DateTime? LastLoginAt { get; set; }
 
         public DateTime? LastPasswordChangedAt { get; set; }
+
         public bool IsActive { get; set; } = true;
 
         public bool NotificationsEnabled { get; set; } = true;
 
-        // Navigation Property
+        public bool AutoAssignmentEnabled { get; set; } = true;
+
+
+        // =====================================================
+        // Sales Manager Relationship
+        // =====================================================
+
+        public long? SalesManagerId { get; set; }
+
+        [ForeignKey(nameof(SalesManagerId))]
+        public User? SalesManager { get; set; }
+
+        public ICollection<User> SalesOfficers { get; set; }
+            = new List<User>();
+
+
+        // =====================================================
+        // Team Lead Relationship
+        // =====================================================
+
+        public long? TeamLeadId { get; set; }
+
+        [ForeignKey(nameof(TeamLeadId))]
+        public User? TeamLead { get; set; }
+
+        public ICollection<User> TeamLeadOfficers { get; set; }
+            = new List<User>();
+
+
+        // =====================================================
+        // Role
+        // =====================================================
+
         [ForeignKey(nameof(RoleId))]
         public Role? Role { get; set; }
     }

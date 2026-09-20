@@ -1,4 +1,5 @@
 ﻿using CRMSystem.Data;
+using CRMSystem.Enums;
 using CRMSystem.Models.ViewModels;
 using CRMSystem.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -18,98 +19,146 @@ namespace CRMSystem.Services
 
 
         // =========================================================
-        // Get All Sales Officers
+        // Get Sales Officers
+        // Sales Manager → Own Hierarchy Only
         // =========================================================
 
         public async Task<List<SalesOfficerListViewModel>>
-            GetSalesOfficersAsync()
+            GetSalesOfficersAsync(
+                long salesManagerId)
         {
-            var salesOfficers = await _context.Users
-                .AsNoTracking()
-                .Where(u =>
-                    u.Role != null &&
-                    u.Role.RoleKey == "SALES_OFFICER")
-                .Select(u => new
-                {
-                    u.UserId,
-                    u.EmployeeCode,
-                    u.FirstName,
-                    u.LastName,
-                    u.Email,
-                    u.PhoneNumber,
-                    u.ProfileImage,
-                    u.IsActive,
+            var salesOfficers =
+                await _context.Users
+                    .AsNoTracking()
+                    .Where(u =>
+                        u.IsActive &&
+                        !u.IsDeleted &&
 
-                    AssignedLeads = _context.LeadAssignments
-                        .Count(a =>
-                            a.SalesOfficerId == u.UserId),
+                        u.Role != null &&
+                        u.Role.RoleKey == "SALES_OFFICER" &&
 
-                    AcceptedLeads = _context.LeadAssignments
-                        .Count(a =>
-                            a.SalesOfficerId == u.UserId &&
-                            a.AcceptedAt != null),
+                        // =================================================
+                        // Sales Manager Hierarchy
+                        // Sales Officer
+                        //      ↓
+                        // Team Lead
+                        //      ↓
+                        // Sales Manager
+                        // =================================================
+                        u.TeamLead != null &&
+                        u.TeamLead.SalesManagerId ==
+                            salesManagerId)
+                    .Select(u => new
+                    {
+                        u.UserId,
+                        u.EmployeeCode,
+                        u.FirstName,
+                        u.LastName,
+                        u.Email,
+                        u.PhoneNumber,
+                        u.ProfileImage,
+                        u.IsActive,
 
-                    PendingAcceptance = _context.LeadAssignments
-                        .Count(a =>
-                            a.SalesOfficerId == u.UserId &&
-                            a.AcceptedAt == null),
+                        AssignedLeads =
+                            _context.LeadAssignments
+                                .Count(a =>
+                                    a.SalesOfficerId ==
+                                        u.UserId),
 
-                    CompletedLeads = _context.LeadAssignments
-                        .Count(a =>
-                            a.SalesOfficerId == u.UserId &&
-                            a.Lead != null &&
-                            a.Lead.Status.ToString() == "Completed"),
+                        AcceptedLeads =
+                            _context.LeadAssignments
+                                .Count(a =>
+                                    a.SalesOfficerId ==
+                                        u.UserId &&
+                                    a.AcceptedAt != null),
 
-                    TotalFeedbacks = _context.Feedbacks
-                        .Count(f =>
-                            f.LeadAssignment != null &&
-                            f.LeadAssignment.SalesOfficerId == u.UserId),
+                        PendingAcceptance =
+                            _context.LeadAssignments
+                                .Count(a =>
+                                    a.SalesOfficerId ==
+                                        u.UserId &&
+                                    a.AcceptedAt == null),
 
-                    OverdueFollowUps = _context.Feedbacks
-                        .Count(f =>
-                            f.LeadAssignment != null &&
-                            f.LeadAssignment.SalesOfficerId == u.UserId &&
-                            f.NextFollowUpDate.HasValue &&
-                            f.NextFollowUpDate.Value < DateTime.UtcNow &&
-                            !f.NextFeedbackSLAMissed)
-                })
-                .ToListAsync();
+                        CompletedLeads =
+                            _context.LeadAssignments
+                                .Count(a =>
+                                    a.SalesOfficerId ==
+                                        u.UserId &&
+                                    a.Lead != null &&
+                                    a.Lead.Status ==
+                                        LeadStatus.Completed),
+
+                        TotalFeedbacks =
+                            _context.Feedbacks
+                                .Count(f =>
+                                    f.LeadAssignment != null &&
+                                    f.LeadAssignment
+                                        .SalesOfficerId ==
+                                        u.UserId),
+
+                        OverdueFollowUps =
+                            _context.Feedbacks
+                                .Count(f =>
+                                    f.LeadAssignment != null &&
+                                    f.LeadAssignment
+                                        .SalesOfficerId ==
+                                        u.UserId &&
+                                    f.NextFollowUpDate.HasValue &&
+                                    f.NextFollowUpDate.Value <
+                                        DateTime.UtcNow &&
+                                    !f.NextFeedbackSLAMissed)
+                    })
+                    .ToListAsync();
 
 
-            // =====================================================
-            // Build ViewModel in memory
-            // =====================================================
+            // =========================================================
+            // Build ViewModel
+            // =========================================================
 
             return salesOfficers
-                .Select(u => new SalesOfficerListViewModel
-                {
-                    UserId = u.UserId,
+                .Select(u =>
+                    new SalesOfficerListViewModel
+                    {
+                        UserId =
+                            u.UserId,
 
-                    EmployeeCode = u.EmployeeCode,
+                        EmployeeCode =
+                            u.EmployeeCode,
 
-                    FullName =
-                        $"{u.FirstName} {u.LastName}".Trim(),
+                        FullName =
+                            $"{u.FirstName} {u.LastName}"
+                                .Trim(),
 
-                    Email = u.Email,
+                        Email =
+                            u.Email,
 
-                    PhoneNumber = u.PhoneNumber,
+                        PhoneNumber =
+                            u.PhoneNumber,
 
-                    ProfileImage = u.ProfileImage,
+                        ProfileImage =
+                            u.ProfileImage,
 
-                    IsActive = u.IsActive,
+                        IsActive =
+                            u.IsActive,
 
-                    AssignedLeads = u.AssignedLeads,
+                        AssignedLeads =
+                            u.AssignedLeads,
 
-                    AcceptedLeads = u.AcceptedLeads,
+                        AcceptedLeads =
+                            u.AcceptedLeads,
 
-                    PendingAcceptance = u.PendingAcceptance,
+                        PendingAcceptance =
+                            u.PendingAcceptance,
 
-                    CompletedLeads = u.CompletedLeads,
+                        CompletedLeads =
+                            u.CompletedLeads,
 
-                    TotalFeedbacks = u.TotalFeedbacks,
+                        TotalFeedbacks =
+                            u.TotalFeedbacks,
 
-                    OverdueFollowUps = u.OverdueFollowUps
-                })
+                        OverdueFollowUps =
+                            u.OverdueFollowUps
+                    })
                 .OrderBy(u => u.FullName)
                 .ToList();
         }

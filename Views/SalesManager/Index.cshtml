@@ -2,6 +2,19 @@
 @{
     ViewData["Title"] = "Sales Manager Dashboard";
     Layout = "_SalesManagerLayout";
+
+    // =====================================================
+    // Target Progress Calculation
+    // =====================================================
+
+    var targetProgress =
+        Model.TotalTarget > 0
+            ? (double)Model.TargetFulfilled /
+              Model.TotalTarget * 100
+            : 0;
+
+    var progressWidth =
+        Math.Min(targetProgress, 100);
 }
 
 <div class="container-fluid">
@@ -127,6 +140,164 @@
         </div>
 
     </div>
+
+
+    <!-- =====================================================
+         Target Overview
+         ===================================================== -->
+
+    <div class="card shadow-sm border-0 mt-4">
+
+        <div class="card-header bg-light">
+
+            <h5 class="mb-0">
+
+                <i class="bi bi-bullseye me-2"></i>
+
+                Target Overview
+
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="row g-4">
+
+                <!-- Total Target -->
+                <div class="col-md-4">
+
+                    <div class="border rounded p-3 h-100">
+
+                        <div class="d-flex align-items-center">
+
+                            <div class="me-3">
+
+                                <i class="bi bi-flag-fill fs-3 text-primary"></i>
+
+                            </div>
+
+                            <div>
+
+                                <small class="text-muted d-block">
+                                    Total Target
+                                </small>
+
+                                <h3 class="fw-bold mb-0">
+                                    @Model.TotalTarget
+                                </h3>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Target Fulfilled -->
+                <div class="col-md-4">
+
+                    <div class="border rounded p-3 h-100">
+
+                        <div class="d-flex align-items-center">
+
+                            <div class="me-3">
+
+                                <i class="bi bi-check-circle-fill fs-3 text-success"></i>
+
+                            </div>
+
+                            <div>
+
+                                <small class="text-muted d-block">
+                                    Target Fulfilled
+                                </small>
+
+                                <h3 class="fw-bold mb-0">
+                                    @Model.TargetFulfilled
+                                </h3>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Target Progress -->
+                <div class="col-md-4">
+
+                    <div class="border rounded p-3 h-100">
+
+                        <div class="d-flex align-items-center">
+
+                            <div class="me-3">
+
+                                <i class="bi bi-graph-up-arrow fs-3 text-info"></i>
+
+                            </div>
+
+                            <div>
+
+                                <small class="text-muted d-block">
+                                    Target Progress
+                                </small>
+
+                                <h3 class="fw-bold mb-0">
+                                    @targetProgress.ToString("0.##")%
+                                </h3>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Progress Bar -->
+
+            <div class="mt-4">
+
+                <div class="d-flex justify-content-between align-items-center mb-2">
+
+                    <span class="fw-semibold">
+                        Overall Achievement
+                    </span>
+
+                    <span class="text-muted">
+                        @Model.TargetFulfilled / @Model.TotalTarget
+                    </span>
+
+                </div>
+
+                <div class="progress"
+                     role="progressbar"
+                     aria-label="Sales Manager target progress"
+                     aria-valuenow="@progressWidth"
+                     aria-valuemin="0"
+                     aria-valuemax="100"
+                     style="height: 12px;">
+
+                    <div class="progress-bar bg-success"
+                         style="width: @progressWidth.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)%;">
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
 
     <!-- Today's Action Center -->
     <div class="card shadow-sm border-0 mt-4">
@@ -289,6 +460,7 @@
         </div>
 
     </div>
+
 
     <!-- Auto Assignment Status -->
     <div class="card shadow-sm border-0 mt-4">

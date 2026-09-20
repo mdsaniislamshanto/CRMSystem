@@ -22,7 +22,6 @@ namespace CRMSystem.Controllers
         // =====================================================
         // GET: /SalesManagerSettings
         // =====================================================
-
         [HttpGet]
         public async Task<IActionResult> Index()
         {
@@ -42,9 +41,10 @@ namespace CRMSystem.Controllers
                 return NotFound();
             }
 
-            var settings =
+            var autoAssignmentEnabled =
                 await _settingsService
-                    .GetSettingsAsync();
+                    .GetAutoAssignmentStatusAsync(
+                        userId.Value);
 
             var autoAssignmentRequests =
                 await _settingsService
@@ -54,7 +54,7 @@ namespace CRMSystem.Controllers
             ViewData["Title"] = "Settings";
 
             ViewBag.AutoAssignmentEnabled =
-                settings.AutoAssignmentEnabled;
+                autoAssignmentEnabled;
 
             ViewBag.AutoAssignmentRequests =
                 autoAssignmentRequests;

@@ -4,8 +4,35 @@
 
     loadRecentNotifications();
 
+
+    // ========================================================
+    // Refresh notifications whenever bell is opened
+    // ========================================================
+
+    const notificationBell =
+        document.getElementById("notificationBell");
+
+    if (notificationBell) {
+
+        notificationBell.addEventListener(
+            "click",
+            async function () {
+
+                await loadUnreadNotificationCount();
+
+                await loadRecentNotifications();
+
+            });
+    }
+
+
+    // ========================================================
+    // Mark All As Read
+    // ========================================================
+
     const markAllButton =
-        document.getElementById("notificationMarkAllBtn");
+        document.getElementById(
+            "notificationMarkAllBtn");
 
     if (markAllButton) {
 
@@ -14,6 +41,8 @@
             async function (event) {
 
                 event.preventDefault();
+
+                event.stopPropagation();
 
                 await markAllNotificationsAsRead();
 
@@ -186,7 +215,8 @@ function renderRecentNotifications(
 // Create Notification Element
 // ============================================================
 
-function createNotificationElement(notification) {
+function createNotificationElement(
+    notification) {
 
     const wrapper =
         document.createElement("div");
@@ -194,10 +224,12 @@ function createNotificationElement(notification) {
     wrapper.className =
         "notification-dropdown-item";
 
+
     if (!notification.isRead) {
 
         wrapper.classList.add(
             "notification-unread");
+
     }
 
 
@@ -205,6 +237,10 @@ function createNotificationElement(notification) {
         getNotificationIcon(
             notification.notificationType);
 
+
+    // ========================================================
+    // Convert UTC → Bangladesh Time
+    // ========================================================
 
     const createdAt =
         formatNotificationDate(
@@ -496,29 +532,50 @@ async function markAllNotificationsAsRead() {
 
 
 // ============================================================
-// Format Date
+// Format Notification Date
+// ============================================================
+// Backend sends an explicit UTC ISO timestamp ending with Z.
+// Example:
+// 2026-09-04T19:39:32.9314000Z
+//
+// We explicitly display it in Bangladesh timezone.
 // ============================================================
 
 function formatNotificationDate(
     dateString) {
 
+    if (!dateString) {
+        return "";
+    }
+
+
     const date =
         new Date(dateString);
 
-    if (Number.isNaN(date.getTime())) {
+
+    if (Number.isNaN(
+        date.getTime())) {
 
         return "";
-
     }
+
 
     return date.toLocaleString(
         "en-GB",
         {
+            timeZone: "Asia/Dhaka",
+
             day: "2-digit",
+
             month: "short",
+
             year: "numeric",
+
             hour: "2-digit",
-            minute: "2-digit"
+
+            minute: "2-digit",
+
+            hour12: true
         });
 }
 
