@@ -1,4 +1,4 @@
-﻿@model List<CRMSystem.Models.ViewModels.FeedbackHistoryViewModel>
+@model List<CRMSystem.Models.ViewModels.FeedbackHistoryViewModel>
 
 @{
     Layout = "~/Views/Shared/_SalesOfficerLayout.cshtml";
@@ -194,7 +194,7 @@
 
                                 <td class="text-center text-nowrap">
 
-                                    @feedback.SubmittedAt.ToString(
+                                    @feedback.SubmittedAt.ToBangladeshTime().ToString(
                                         "dd MMM yyyy hh:mm tt")
 
                                 </td>
@@ -203,7 +203,7 @@
 
                                     @if (feedback.NextFollowUpDate.HasValue)
                                     {
-                                        @feedback.NextFollowUpDate.Value.ToString(
+                                        @feedback.NextFollowUpDate.Value.ToBangladeshTime().ToString(
                                             "dd MMM yyyy")
                                     }
                                     else

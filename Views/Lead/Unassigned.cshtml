@@ -1,4 +1,4 @@
-﻿@model IEnumerable<CRMSystem.Models.ViewModels.UnassignedLeadViewModel>
+@model IEnumerable<CRMSystem.Models.ViewModels.UnassignedLeadViewModel>
 
 @{
     ViewData["Title"] = "Assign Lead";
@@ -165,7 +165,7 @@
                                     </td>
 
                                     <td>
-                                        @lead.CreatedAt.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")
+                                        @lead.CreatedAt.ToBangladeshTime().ToString("dd MMM yyyy, hh:mm tt")
                                     </td>
 
                                     <td>

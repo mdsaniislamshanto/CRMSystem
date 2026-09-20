@@ -1,4 +1,4 @@
-﻿@model IEnumerable<CRMSystem.Models.ViewModels.FeedbackHistoryViewModel>
+@model IEnumerable<CRMSystem.Models.ViewModels.FeedbackHistoryViewModel>
 
 @{
     ViewData["Title"] = "Feedback History";
@@ -214,7 +214,7 @@
                     {
                         <div class="fs-6 fw-semibold mt-2">
 
-                            @latestFeedback.SubmittedAt.ToString(
+                            @latestFeedback.SubmittedAt.ToBangladeshTime().ToString(
                                 "dd MMM yyyy hh:mm tt")
 
                         </div>
@@ -353,14 +353,14 @@
 
                                         <div class="fw-semibold">
 
-                                            @feedback.SubmittedAt.ToString(
+                                            @feedback.SubmittedAt.ToBangladeshTime().ToString(
                                                 "dd MMM yyyy")
 
                                         </div>
 
                                         <small class="text-muted">
 
-                                            @feedback.SubmittedAt.ToString(
+                                            @feedback.SubmittedAt.ToBangladeshTime().ToString(
                                                 "hh:mm tt")
 
                                         </small>
@@ -402,14 +402,14 @@
                                         {
                                             <div class="fw-semibold">
 
-                                                @feedback.NextFollowUpDate.Value.ToString(
+                                                @feedback.NextFollowUpDate.Value.ToBangladeshTime().ToString(
                                                     "dd MMM yyyy")
 
                                             </div>
 
                                             <small class="text-muted">
 
-                                                @feedback.NextFollowUpDate.Value.ToString(
+                                                @feedback.NextFollowUpDate.Value.ToBangladeshTime().ToString(
                                                     "hh:mm tt")
 
                                             </small>

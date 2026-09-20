@@ -1,4 +1,4 @@
-﻿@model CRMSystem.Models.ViewModels.FeedbackDetailsViewModel
+@model CRMSystem.Models.ViewModels.FeedbackDetailsViewModel
 
 @{
     Layout = "~/Views/Shared/_SalesOfficerLayout.cshtml";
@@ -302,7 +302,7 @@
 
                 <div class="form-control bg-light">
 
-                    @Model.SubmittedAt.ToString("dd MMM yyyy hh:mm tt")
+                    @Model.SubmittedAt.ToBangladeshTime().ToString("dd MMM yyyy hh:mm tt")
 
                 </div>
 
@@ -339,7 +339,7 @@
 
                     @if (Model.NextFollowUpDate.HasValue)
                     {
-                        @Model.NextFollowUpDate.Value.ToString("dd MMM yyyy")
+                        @Model.NextFollowUpDate.Value.ToBangladeshTime().ToString("dd MMM yyyy")
                     }
                     else
                     {

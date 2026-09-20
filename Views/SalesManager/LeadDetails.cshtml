@@ -1,4 +1,4 @@
-﻿@model CRMSystem.Models.ViewModels.LeadViewModel
+@model CRMSystem.Models.ViewModels.LeadViewModel
 
 @{
     ViewData["Title"] = "Lead Details";
@@ -518,6 +518,8 @@
 
     </div>
 
+    <!-- Gemini AI Lead Intelligence -->
+    <partial name="_AiLeadAnalysisCardPartial" model="Model" />
 
     <!-- =====================================================
          Main Lead Card
@@ -825,7 +827,7 @@
                     </span>
 
                     <p class="lead-info-value">
-                        @Model.FollowUpDate
+                        @(Model.FollowUpDate?.ToBangladeshTime().ToString("dd MMM yyyy, hh:mm tt") ?? "Not Scheduled")
                     </p>
 
                 </div>
@@ -874,7 +876,7 @@
                         </p>
 
                         <p class="lead-followup-value">
-                            @Model.FollowUpDate
+                            @(Model.FollowUpDate?.ToBangladeshTime().ToString("dd MMM yyyy, hh:mm tt") ?? "Not Scheduled")
                         </p>
 
                     </div>

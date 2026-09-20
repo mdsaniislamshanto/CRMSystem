@@ -21,18 +21,18 @@
     </div>
 
     <!-- Search & Filter Toolbar -->
-  <div class="card shadow-sm border-0 mb-4">
+    <div class="card shadow-sm border-0 mb-4">
 
-    <div class="card-body">
+        <div class="card-body">
 
             <form id="userSearchForm"
                   asp-action="Index"
                   method="get">
 
-            <div class="row g-3 align-items-center">
+                <div class="row g-3 align-items-center">
 
-                <!-- Search -->
-                <div class="col-lg-4">
+                    <!-- Search -->
+                    <div class="col-lg-4">
 
                         <input id="searchInput"
                                type="text"
@@ -41,51 +41,73 @@
                                class="form-control"
                                placeholder="Search by employee code, name or email..." />
 
-                </div>
+                    </div>
 
-                <!-- Role Filter -->
-                <div class="col-lg-2">
+                    <!-- Role Filter -->
+                    <div class="col-lg-2">
 
                         <select id="roleFilter"
+                                name="role"
                                 class="form-select">
 
                             <option value="">All Roles</option>
-                            <option value="Administrator">Administrator</option>
-                            <option value="Sales Officer">Sales Officer</option>
-                            <option value="Account">Account</option>
+
+                            <option value="Administrator">
+                                Administrator
+                            </option>
+
+                            <option value="Sales Manager">
+                                Sales Manager
+                            </option>
+
+                            <option value="Team Lead">
+                                Team Lead
+                            </option>
+
+                            <option value="Sales Officer">
+                                Sales Officer
+                            </option>
+
+                        
 
                         </select>
 
-                </div>
+                    </div>
 
-                <!-- Status Filter -->
-                <div class="col-lg-2">
+                    <!-- Status Filter -->
+                    <div class="col-lg-2">
 
                         <select id="statusFilter"
+                                name="status"
                                 class="form-select">
 
-                        <option selected>All Status</option>
-                        <option>Active</option>
-                        <option>Inactive</option>
+                            <option value="">All Status</option>
 
-                    </select>
+                            <option value="Active">
+                                Active
+                            </option>
 
-                </div>
+                            <option value="Inactive">
+                                Inactive
+                            </option>
 
+                        </select>
 
-                <!-- Add User Button -->
-                <div class="col-lg-4 text-lg-end">
+                    </div>
 
-                    <a asp-action="Create"
-                       class="btn btn-primary">
+                    <!-- Add User -->
+                    <div class="col-lg-4 text-lg-end">
 
-                        <i class="bi bi-plus-circle me-1"></i>
+                        <a asp-action="Create"
+                           class="btn btn-primary">
 
-                        Add User
+                            <i class="bi bi-plus-circle me-1"></i>
 
-                    </a>
+                            Add User
 
-                </div>
+                        </a>
+
+                    </div>
 
                 </div>
 

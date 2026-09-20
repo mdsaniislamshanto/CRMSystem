@@ -1,4 +1,4 @@
-﻿@model CRMSystem.Models.ViewModels.SalesOfficerDetailsViewModel
+@model CRMSystem.Models.ViewModels.SalesOfficerDetailsViewModel
 
 @{
     ViewData["Title"] = "Sales Officer Details";
@@ -596,7 +596,7 @@
 
 
                                     <td>
-                                        @lead.AssignedAt.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")
+                                        @lead.AssignedAt.ToBangladeshTime().ToString("dd MMM yyyy, hh:mm tt")
                                     </td>
 
 
@@ -604,7 +604,7 @@
 
                                         @if (lead.AcceptedAt.HasValue)
                                         {
-                                                @lead.AcceptedAt.Value.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")
+                                                @lead.AcceptedAt.Value.ToBangladeshTime().ToString("dd MMM yyyy, hh:mm tt")
                                         }
                                         else
                                         {
@@ -629,7 +629,7 @@
 
                                         @if (lead.NextFollowUpDate.HasValue)
                                         {
-                                                @lead.NextFollowUpDate.Value.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")
+                                                @lead.NextFollowUpDate.Value.ToBangladeshTime().ToString("dd MMM yyyy, hh:mm tt")
                                         }
                                         else
                                         {
@@ -743,7 +743,7 @@
 
                                     <td>
 
-                                        @feedback.SubmittedAt.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")
+                                        @feedback.SubmittedAt.ToBangladeshTime().ToString("dd MMM yyyy, hh:mm tt")
 
                                     </td>
 
@@ -761,7 +761,7 @@
 
                                         @if (feedback.NextFollowUpDate.HasValue)
                                         {
-                                            @feedback.NextFollowUpDate.Value.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")
+                                            @feedback.NextFollowUpDate.Value.ToBangladeshTime().ToString("dd MMM yyyy, hh:mm tt")
                                         }
                                         else
                                         {

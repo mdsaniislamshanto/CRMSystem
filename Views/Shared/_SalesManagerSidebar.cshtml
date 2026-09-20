@@ -1,4 +1,4 @@
-﻿@{
+@{
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
 }
@@ -43,7 +43,8 @@
         <li>
 
             <a asp-controller="SalesManager"
-               asp-action="LeadQueue">
+               asp-action="LeadQueue"
+               class="@(currentController == "SalesManager" && (currentAction == "LeadQueue" || currentAction == "LeadDetails" || currentAction == "EditLead" || currentAction == "ReassignLead") ? "active" : "")">
 
                 <i class="bi bi-list-task"></i>
 
@@ -74,7 +75,8 @@
         <li>
 
             <a asp-controller="SalesManager"
-               asp-action="CreateLead">
+               asp-action="CreateLead"
+               class="@(currentController == "SalesManager" && currentAction == "CreateLead" ? "active" : "")">
 
                 <i class="bi bi-plus-circle-fill"></i>
 
@@ -87,7 +89,8 @@
         <li>
 
             <a asp-controller="SalesManager"
-               asp-action="FollowUps">
+               asp-action="FollowUps"
+               class="@(currentController == "SalesManager" && (currentAction == "FollowUps" || currentAction == "FollowUpDetails") ? "active" : "")">
 
                 <i class="bi bi-telephone-forward-fill"></i>
 
@@ -101,10 +104,7 @@
 
             <a asp-controller="SalesManager"
                asp-action="UnassignedLeads"
-               class="@(currentController == "SalesManager" &&
-                                              currentAction == "UnassignedLeads"
-                                              ? "active"
-                                              : "")">
+               class="@(currentController == "SalesManager" && (currentAction == "UnassignedLeads" || currentAction == "AssignLead") ? "active" : "")">
 
                 <i class="bi bi-person-check-fill"></i>
 
@@ -117,7 +117,8 @@
         <li>
 
             <a asp-controller="SalesManager"
-               asp-action="ArchivedLeads">
+               asp-action="ArchivedLeads"
+               class="@(currentController == "SalesManager" && (currentAction == "ArchivedLeads" || currentAction == "ArchivedLeadDetails") ? "active" : "")">
 
                 <i class="bi bi-archive-fill"></i>
 
@@ -139,7 +140,7 @@
 
             <a asp-controller="SalesManager"
                asp-action="SalesOfficers"
-               class="@(currentController == "SalesManager" && currentAction == "SalesOfficers" ? "active" : "")">
+               class="@(currentController == "SalesManager" && (currentAction == "SalesOfficers" || currentAction == "SalesOfficerDetails") ? "active" : "")">
 
                 <i class="bi bi-people-fill"></i>
 
@@ -154,7 +155,7 @@
 
             <a asp-controller="SalesManager"
                asp-action="TeamLeadTargets"
-               class="@(currentController == "SalesManager" && currentAction == "TeamLeadTargets" ? "active" : "")">
+               class="@(currentController == "SalesManager" && (currentAction == "TeamLeadTargets" || currentAction == "CreateTeamLeadTarget") ? "active" : "")">
 
                 <i class="bi bi-bullseye"></i>
 

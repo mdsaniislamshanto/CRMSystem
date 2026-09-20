@@ -1,4 +1,4 @@
-﻿using CRMSystem.Data;
+using CRMSystem.Data;
 using CRMSystem.Models.ViewModels;
 using CRMSystem.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -340,7 +340,28 @@ namespace CRMSystem.Services
                             followUpStatus,
 
                         TimelinessStatus =
-                            timelinessStatus
+                            timelinessStatus,
+
+                        AiAnalyzed =
+                            feedback.AiAnalyzedAt.HasValue,
+
+                        AiCustomerInterested =
+                            feedback.AiCustomerInterested,
+
+                        AiBuyingIntent =
+                            feedback.AiBuyingIntent,
+
+                        AiSentiment =
+                            feedback.AiSentiment,
+
+                        AiSiteVisitInterested =
+                            feedback.AiSiteVisitInterested,
+
+                        AiSummary =
+                            feedback.AiSummary,
+
+                        ProofImage =
+                            feedback.ProofImage
                     });
             }
 

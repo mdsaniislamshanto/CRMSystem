@@ -1,4 +1,4 @@
-﻿@model CRMSystem.Models.ViewModels.SalesManagerFollowUpDetailsViewModel
+@model CRMSystem.Models.ViewModels.SalesManagerFollowUpDetailsViewModel
 
 @{
     ViewData["Title"] = "Follow-up Details";
@@ -597,13 +597,13 @@
 
                                             <div class="feedback-date">
 
-                                                @feedback.SubmittedAt.ToLocalTime().ToString("dd MMM yyyy")
+                                                @feedback.SubmittedAt.ToBangladeshTime().ToString("dd MMM yyyy")
 
                                             </div>
 
                                             <div class="feedback-time">
 
-                                                @feedback.SubmittedAt.ToLocalTime().ToString("hh:mm tt")
+                                                @feedback.SubmittedAt.ToBangladeshTime().ToString("hh:mm tt")
 
                                             </div>
 
@@ -624,13 +624,13 @@
                                             {
                                                 <div class="feedback-date">
 
-                                                    @feedback.NextFollowUpDate.Value.ToLocalTime().ToString("dd MMM yyyy")
+                                                    @feedback.NextFollowUpDate.Value.ToBangladeshTime().ToString("dd MMM yyyy")
 
                                                 </div>
 
                                                 <div class="feedback-time">
 
-                                                    @feedback.NextFollowUpDate.Value.ToLocalTime().ToString("hh:mm tt")
+                                                    @feedback.NextFollowUpDate.Value.ToBangladeshTime().ToString("hh:mm tt")
 
                                                 </div>
                                             }

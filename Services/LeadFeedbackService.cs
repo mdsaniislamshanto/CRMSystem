@@ -1,4 +1,4 @@
-﻿using CRMSystem.Data;
+using CRMSystem.Data;
 using CRMSystem.Enums;
 using CRMSystem.Models.Entities;
 using CRMSystem.Models.ViewModels;
@@ -12,6 +12,7 @@ namespace CRMSystem.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _environment;
+        private readonly IGeminiFollowUpAnalysisService _geminiService;
  
 
         // Allowed file extensions and size limits
@@ -38,10 +39,12 @@ namespace CRMSystem.Services
 
         public LeadFeedbackService(
             ApplicationDbContext context,
-            IWebHostEnvironment environment)
+            IWebHostEnvironment environment,
+            IGeminiFollowUpAnalysisService geminiService)
         {
             _context = context;
             _environment = environment;
+            _geminiService = geminiService;
         }
 
         public async Task SubmitFeedbackAsync(
@@ -221,6 +224,18 @@ namespace CRMSystem.Services
             // =====================================================
 
             await _context.SaveChangesAsync();
+
+            // =====================================================
+            // 14. Trigger Gemini AI Analysis (Safe / Non-blocking)
+            // =====================================================
+            try
+            {
+                await _geminiService.AnalyzeFeedbackAsync(feedback.FeedbackId);
+            }
+            catch
+            {
+                // Fallback: AI analysis failure should not impede feedback submission
+            }
         }
 
 
@@ -417,7 +432,23 @@ namespace CRMSystem.Services
 
                     NextFollowUpDate = f.NextFollowUpDate!.Value,
 
-                    SubmittedAt = f.SubmittedAt
+                    SubmittedAt = f.SubmittedAt,
+
+                    Summary = f.Summary,
+
+                    AiAnalyzed = f.AiAnalyzedAt.HasValue,
+
+                    AiCustomerInterested = f.AiCustomerInterested,
+
+                    AiBuyingIntent = f.AiBuyingIntent,
+
+                    AiSentiment = f.AiSentiment,
+
+                    AiSiteVisitInterested = f.AiSiteVisitInterested,
+
+                    AiSummary = f.AiSummary,
+
+                    ProofImage = f.ProofImage
                 })
                 .OrderBy(f => f.NextFollowUpDate)
                 .ToListAsync();

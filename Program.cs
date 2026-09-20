@@ -22,6 +22,13 @@ builder.Services.Configure<EmailSettings>(
 builder.Services.Configure<GoogleFormsSettings>(
     builder.Configuration.GetSection("GoogleForms"));
 
+// Configure Gemini AI Settings
+builder.Services.Configure<GeminiSettings>(
+    builder.Configuration.GetSection("GeminiSettings"));
+
+// Register Gemini AI Analysis Service with HttpClient
+builder.Services.AddHttpClient<IGeminiFollowUpAnalysisService, GeminiFollowUpAnalysisService>();
+
 // Add MVC services
 builder.Services.AddControllersWithViews();
 

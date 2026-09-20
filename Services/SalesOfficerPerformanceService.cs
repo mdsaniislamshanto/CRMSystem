@@ -94,31 +94,34 @@ namespace CRMSystem.Services
             // =================================================
 
             var assignments =
-                await _context.LeadAssignments
-                    .AsNoTracking()
-                    .Where(a =>
-                        salesOfficerIds.Contains(
-                            a.SalesOfficerId) &&
+     await _context.LeadAssignments
+         .AsNoTracking()
+         .Where(a =>
+             salesOfficerIds.Contains(
+                 a.SalesOfficerId) &&
 
-                        a.AssignedAt >= fromDate &&
+             a.IsActive &&
 
-                        a.AssignedAt < toDateExclusive)
-                    .Select(a => new
-                    {
-                        a.AssignmentId,
-                        a.SalesOfficerId,
-                        a.AssignedAt,
-                        a.AcceptedAt,
-                        a.AcceptanceSLAMissed,
-                        a.FirstFeedbackSLAMissed,
+             !a.IsDeleted &&
 
-                        LeadStatus =
-                            a.Lead != null
-                                ? a.Lead.Status
-                                : default
-                    })
-                    .ToListAsync();
+             a.AssignedAt >= fromDate &&
 
+             a.AssignedAt < toDateExclusive)
+         .Select(a => new
+         {
+             a.AssignmentId,
+             a.SalesOfficerId,
+             a.AssignedAt,
+             a.AcceptedAt,
+             a.AcceptanceSLAMissed,
+             a.FirstFeedbackSLAMissed,
+
+             LeadStatus =
+                 a.Lead != null
+                     ? a.Lead.Status
+                     : default
+         })
+         .ToListAsync();
 
             // =================================================
             // 5. Load Feedbacks

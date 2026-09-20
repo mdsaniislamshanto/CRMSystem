@@ -1,4 +1,4 @@
-﻿using CRMSystem.Enums;
+using CRMSystem.Enums;
 
 namespace CRMSystem.Models.ViewModels
 {
@@ -61,5 +61,20 @@ namespace CRMSystem.Models.ViewModels
         public string? ArchivedByName { get; set; }
 
         public DateTime? LastContactDate { get; set; }
+
+        // ==========================================
+        // Gemini AI Lead Journey Analysis
+        // ==========================================
+        public bool AiAnalyzed { get; set; }
+
+        public string? AiBuyingDecision { get; set; }
+
+        public string? AiInterestLevel { get; set; }
+
+        public string? AiLeadAuthenticity { get; set; }
+
+        public string? AiSynthesisSummary { get; set; }
+
+        public DateTime? AiAnalyzedAt { get; set; }
     }
 }

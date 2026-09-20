@@ -1,4 +1,4 @@
-﻿using CRMSystem.Constants;
+using CRMSystem.Constants;
 using CRMSystem.Enums;
 using CRMSystem.Models.ViewModels;
 using CRMSystem.Services;
@@ -14,7 +14,6 @@ namespace CRMSystem.Controllers
         private readonly ISalesManagerDashboardService _dashboardService;
         private readonly ILeadService _leadService;
         private readonly ISettingsService _settingsService;
-        private readonly ILeadCaptureService _leadCaptureService;
         private readonly IReportService _reportService;
         private readonly ISalesOfficerServiceForSalesManager _salesOfficerServiceForSalesManager;
         private readonly ISalesOfficerPerformanceService _salesOfficerPerformanceService;
@@ -26,7 +25,6 @@ namespace CRMSystem.Controllers
             ISalesManagerDashboardService dashboardService,
             ILeadService leadService,
             ISettingsService settingsService,
-            ILeadCaptureService leadCaptureService,
             IReportService reportService,
             ISalesOfficerServiceForSalesManager salesOfficerServiceForSalesManager,
             ISalesOfficerPerformanceService salesOfficerPerformanceService,
@@ -37,7 +35,6 @@ namespace CRMSystem.Controllers
             _dashboardService = dashboardService;
             _leadService = leadService;
             _settingsService = settingsService;
-            _leadCaptureService = leadCaptureService;
             _reportService = reportService;
             _salesOfficerServiceForSalesManager =
                 salesOfficerServiceForSalesManager;
@@ -396,10 +393,9 @@ namespace CRMSystem.Controllers
             ViewData["Breadcrumb"] =
                 "API Leads";
 
-            return View(
-                "~/Views/Lead/ApiLeads.cshtml",
-                model);
+            return View(model);
         }
+
         //// =========================================================
         //// API Leads - For Sales Manager
         //// =========================================================
@@ -563,6 +559,19 @@ namespace CRMSystem.Controllers
 
             if (lead == null)
             {
+                var archivedLead =
+                    await _leadService
+                        .GetArchivedLeadForSalesManagerAsync(
+                            id,
+                            salesManagerId.Value);
+
+                if (archivedLead != null)
+                {
+                    return RedirectToAction(
+                        nameof(ArchivedLeadDetails),
+                        new { id });
+                }
+
                 return NotFound();
             }
 
@@ -776,58 +785,6 @@ namespace CRMSystem.Controllers
 
             TempData["Success"] =
                 "Lead created successfully.";
-
-            return RedirectToAction(
-                nameof(LeadQueue));
-        }
-
-        // ==========================
-        // Generate Demo Lead
-        // ==========================
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> GenerateDemoLead()
-        {
-            var model =
-                new AutoLeadCreateViewModel
-                {
-                    LeadName =
-                        "Demo Customer",
-
-                    CompanyName =
-                        "Facebook Demo Ltd.",
-
-                    Email =
-                        "demo@example.com",
-
-                    Phone =
-                        "01712345678",
-
-                    Profession =
-                        "Business Owner",
-
-                    Address =
-                        "Dhaka",
-
-                    Source =
-                        LeadSource.Facebook,
-
-                    Priority =
-                        LeadPriority.Medium,
-
-                    Description =
-                        "This is a simulated Facebook Lead."
-                };
-
-            await _leadCaptureService
-                .CaptureLeadAsync(
-                    model,
-                    LeadCaptureSource.FacebookLeadAds,
-                    "FB-DEMO-001",
-                    null);
-
-            TempData["Success"] =
-                "Demo Lead generated successfully.";
 
             return RedirectToAction(
                 nameof(LeadQueue));

@@ -27,7 +27,7 @@ namespace CRMSystem.Models.ViewModels
         [StringLength(300)]
         public string? Address { get; set; }
 
-        public LeadSource Source { get; set; }
+        public LeadSource Source { get; set; } = LeadSource.GoogleForm;
 
         [StringLength(200)]
         public string? SourceReferenceId { get; set; }

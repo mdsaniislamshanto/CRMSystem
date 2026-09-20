@@ -1,4 +1,4 @@
-﻿using CRMSystem.Enums;
+using CRMSystem.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -34,6 +34,25 @@ namespace CRMSystem.Models.Entities
         // ==============================
 
         public bool NextFeedbackSLAMissed { get; set; } = false;
+
+        // ==============================
+        // Gemini AI Follow-up Analysis
+        // ==============================
+
+        public bool? AiCustomerInterested { get; set; }
+
+        [StringLength(50)]
+        public string? AiBuyingIntent { get; set; }
+
+        [StringLength(50)]
+        public string? AiSentiment { get; set; }
+
+        public bool? AiSiteVisitInterested { get; set; }
+
+        [StringLength(2000)]
+        public string? AiSummary { get; set; }
+
+        public DateTime? AiAnalyzedAt { get; set; }
 
 
         [ForeignKey(nameof(AssignmentId))]

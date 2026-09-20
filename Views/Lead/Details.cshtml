@@ -1,4 +1,4 @@
-﻿@model CRMSystem.Models.ViewModels.LeadViewModel
+@model CRMSystem.Models.ViewModels.LeadViewModel
 
 @{
     ViewData["Title"] = "Lead Details";
@@ -32,6 +32,9 @@
         </div>
 
     </div>
+
+    <!-- Gemini AI Lead Intelligence -->
+    <partial name="_AiLeadAnalysisCardPartial" model="Model" />
 
     <div class="card shadow-sm">
 
@@ -139,7 +142,7 @@
 
                     <label class="fw-semibold">Follow Up Date</label>
 
-                    <p>@Model.FollowUpDate?.ToString("dd MMM yyyy")</p>
+                    <p>@(Model.FollowUpDate?.ToBangladeshTime().ToString("dd MMM yyyy") ?? "—")</p>
 
                 </div>
 

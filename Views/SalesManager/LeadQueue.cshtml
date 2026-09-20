@@ -1,4 +1,4 @@
-﻿@model IEnumerable<CRMSystem.Models.ViewModels.LeadViewModel>
+@model IEnumerable<CRMSystem.Models.ViewModels.LeadViewModel>
 
 @{
     ViewData["Title"] = "Lead Queue";
@@ -690,24 +690,6 @@
 
 
         <div class="lead-actions">
-
-            <form asp-action="GenerateDemoLead"
-                  method="post"
-                  class="d-inline">
-
-                @Html.AntiForgeryToken()
-
-                <button type="submit"
-                        class="btn btn-outline-success">
-
-                    <i class="bi bi-lightning-charge-fill me-1"></i>
-
-                    Generate Demo Lead
-
-                </button>
-
-            </form>
-
 
             <a asp-action="CreateLead"
                class="btn btn-primary">
@@ -1635,11 +1617,11 @@
                                         <div class="assignment-time">
 
                                             <div>
-                                                @lead.AssignedAt.Value.ToLocalTime().ToString("dd MMM yyyy")
+                                                @lead.AssignedAt.Value.ToBangladeshTime().ToString("dd MMM yyyy")
                                             </div>
 
                                             <div>
-                                                @lead.AssignedAt.Value.ToLocalTime().ToString("hh:mm tt")
+                                                @lead.AssignedAt.Value.ToBangladeshTime().ToString("hh:mm tt")
                                             </div>
 
                                         </div>

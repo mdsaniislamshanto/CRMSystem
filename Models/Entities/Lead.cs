@@ -1,4 +1,4 @@
-﻿using CRMSystem.Enums;
+using CRMSystem.Enums;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -86,5 +86,22 @@ namespace CRMSystem.Models.Entities
 
         [ForeignKey(nameof(SalesManagerId))]
         public User? SalesManager { get; set; }
+
+        // =====================================================
+        // Gemini AI Lead Journey Analysis
+        // =====================================================
+        [StringLength(50)]
+        public string? AiBuyingDecision { get; set; }
+
+        [StringLength(50)]
+        public string? AiInterestLevel { get; set; }
+
+        [StringLength(50)]
+        public string? AiLeadAuthenticity { get; set; }
+
+        [StringLength(3000)]
+        public string? AiSynthesisSummary { get; set; }
+
+        public DateTime? AiAnalyzedAt { get; set; }
     }
 }

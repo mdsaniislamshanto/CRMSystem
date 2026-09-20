@@ -1,0 +1,403 @@
+<!-- =====================================================
+     Gemini AI Follow-up Analysis Modal Component
+     ===================================================== -->
+
+<style>
+    .ai-modal-header {
+        background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+        color: #fff;
+        border-top-left-radius: calc(0.5rem - 1px);
+        border-top-right-radius: calc(0.5rem - 1px);
+        padding: 1.25rem 1.5rem;
+    }
+
+    .ai-gemini-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        background: rgba(255, 255, 255, 0.18);
+        color: #e0e7ff;
+        font-size: 0.72rem;
+        font-weight: 600;
+        padding: 0.2rem 0.6rem;
+        border-radius: 9999px;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+    }
+
+    .ai-metric-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 0.9rem 1rem;
+        height: 100%;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .ai-metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .ai-metric-label {
+        font-size: 0.73rem;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 0.35rem;
+    }
+
+    .ai-metric-value {
+        font-size: 0.92rem;
+        font-weight: 700;
+    }
+
+    .ai-summary-box {
+        background: #f0fdf4;
+        border-left: 4px solid #16a34a;
+        border-radius: 8px;
+        padding: 1rem 1.15rem;
+        color: #14532d;
+        font-size: 0.88rem;
+        line-height: 1.55;
+    }
+
+    .ai-image-preview {
+        max-height: 160px;
+        max-width: 100%;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        cursor: pointer;
+    }
+</style>
+
+<div class="modal fade" id="geminiAiModal" tabindex="-1" aria-labelledby="geminiAiModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content shadow-lg border-0">
+            <!-- Modal Header -->
+            <div class="modal-header ai-modal-header border-0">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="rounded-circle p-2 bg-white bg-opacity-10 text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <i class="bi bi-robot fs-5"></i>
+                    </div>
+                    <div>
+                        <div class="d-flex align-items-center gap-2">
+                            <h5 class="modal-title fw-bold text-white mb-0" id="geminiAiModalLabel">AI Follow-up Assessment</h5>
+                            <span class="ai-gemini-pill"><i class="bi bi-sparkles"></i> Gemini 3.5 Flash Lite</span>
+                        </div>
+                        <small class="text-white-50" id="aiModalSubtitle">Sales Officer Follow-up Intelligence</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body p-4">
+                <!-- Loading State -->
+                <div id="aiModalLoading" class="text-center py-5 d-none">
+                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="mt-3 fw-semibold text-muted">Gemini AI is analyzing customer intent and follow-up data...</div>
+                    <small class="text-secondary">Evaluating purchase likelihood, sentiment & site visit interest</small>
+                </div>
+
+                <!-- Error State -->
+                <div id="aiModalError" class="alert alert-danger d-none my-3">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <span id="aiModalErrorMessage">Unable to complete AI analysis.</span>
+                </div>
+
+                <!-- Content Body -->
+                <div id="aiModalContent">
+                    <!-- 4 Key Insights Grid -->
+                    <div class="row g-3 mb-4">
+                        <!-- 1. Customer Interest -->
+                        <div class="col-sm-6 col-md-3">
+                            <div class="ai-metric-card">
+                                <div class="ai-metric-label"><i class="bi bi-person-check me-1"></i> Customer Interest</div>
+                                <div id="aiCustomerInterestedVal" class="ai-metric-value">
+                                    <span class="badge bg-secondary">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Purchase Likelihood (Kinbe Kina) -->
+                        <div class="col-sm-6 col-md-3">
+                            <div class="ai-metric-card">
+                                <div class="ai-metric-label"><i class="bi bi-cart-check me-1"></i> Buying Intent</div>
+                                <div id="aiBuyingIntentVal" class="ai-metric-value">
+                                    <span class="badge bg-secondary">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. Sentiment -->
+                        <div class="col-sm-6 col-md-3">
+                            <div class="ai-metric-card">
+                                <div class="ai-metric-label"><i class="bi bi-emoji-smile me-1"></i> Sentiment</div>
+                                <div id="aiSentimentVal" class="ai-metric-value">
+                                    <span class="badge bg-secondary">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. Site Visit Intent -->
+                        <div class="col-sm-6 col-md-3">
+                            <div class="ai-metric-card">
+                                <div class="ai-metric-label"><i class="bi bi-geo-alt me-1"></i> Site Visit</div>
+                                <div id="aiSiteVisitVal" class="ai-metric-value">
+                                    <span class="badge bg-secondary">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Executive Summary -->
+                    <div class="mb-4">
+                        <label class="fw-bold text-dark mb-2 d-flex align-items-center gap-2">
+                            <i class="bi bi-chat-square-quote-fill text-primary"></i>
+                            Executive AI Assessment & Insights:
+                        </label>
+                        <div class="ai-summary-box">
+                            <span id="aiSummaryVal">No assessment generated yet.</span>
+                        </div>
+                    </div>
+
+                    <!-- Proof Image Analysis (if attached) -->
+                    <div id="aiImageSection" class="p-3 bg-light rounded-3 border d-none">
+                        <label class="fw-bold text-secondary small text-uppercase mb-2 d-flex align-items-center gap-1">
+                            <i class="bi bi-image text-primary"></i> Attached Proof Document / Photo:
+                        </label>
+                        <div class="d-flex align-items-center gap-3">
+                            <a id="aiImageLink" href="#" target="_blank">
+                                <img id="aiImagePreview" src="" alt="Proof Document" class="ai-image-preview shadow-sm" />
+                            </a>
+                            <div>
+                                <small class="text-muted d-block mb-1">This image was processed by Gemini Multimodal Vision alongside the follow-up text notes.</small>
+                                <a id="aiImageLinkBtn" href="#" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-box-arrow-up-right me-1"></i> View Full Image
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timestamp -->
+                    <div class="mt-3 text-end">
+                        <small class="text-muted">
+                            <i class="bi bi-clock-history me-1"></i> Last analyzed: <span id="aiAnalyzedAtVal" class="fw-semibold">Just now</span>
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="modal-footer bg-light border-0 px-4 py-3 d-flex justify-content-between">
+                <button type="button" class="btn btn-outline-primary btn-sm" id="btnReanalyzeAi" onclick="reanalyzeCurrentFeedback()">
+                    <i class="bi bi-arrow-clockwise me-1"></i> Re-analyze with Gemini
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentFeedbackId = 0;
+
+    function renderAiBadges(data) {
+        // Customer Interested
+        const interestedEl = document.getElementById('aiCustomerInterestedVal');
+        if (data.isCustomerInterested) {
+            interestedEl.innerHTML = '<span class="badge bg-success"><i class="bi bi-check-circle-fill me-1"></i>Interested</span>';
+        } else {
+            interestedEl.innerHTML = '<span class="badge bg-danger"><i class="bi bi-x-circle-fill me-1"></i>Not Interested</span>';
+        }
+
+        // Buying Intent (Kinbe Kina)
+        const intentEl = document.getElementById('aiBuyingIntentVal');
+        if (data.buyingIntent === 'High') {
+            intentEl.innerHTML = '<span class="badge bg-success-subtle text-success border border-success"><i class="bi bi-graph-up-arrow me-1"></i>High Probability</span>';
+        } else if (data.buyingIntent === 'Low') {
+            intentEl.innerHTML = '<span class="badge bg-danger-subtle text-danger border border-danger"><i class="bi bi-graph-down-arrow me-1"></i>Low Probability</span>';
+        } else {
+            intentEl.innerHTML = '<span class="badge bg-warning-subtle text-warning border border-warning"><i class="bi bi-dash-circle me-1"></i>Moderate Intent</span>';
+        }
+
+        // Sentiment
+        const sentimentEl = document.getElementById('aiSentimentVal');
+        if (data.sentiment === 'Positive') {
+            sentimentEl.innerHTML = '<span class="badge bg-success"><i class="bi bi-emoji-smile-fill me-1"></i>Positive</span>';
+        } else if (data.sentiment === 'Negative') {
+            sentimentEl.innerHTML = '<span class="badge bg-danger"><i class="bi bi-emoji-frown-fill me-1"></i>Negative</span>';
+        } else {
+            sentimentEl.innerHTML = '<span class="badge bg-secondary"><i class="bi bi-emoji-neutral-fill me-1"></i>Neutral</span>';
+        }
+
+        // Site Visit
+        const siteVisitEl = document.getElementById('aiSiteVisitVal');
+        if (data.siteVisitInterested) {
+            siteVisitEl.innerHTML = '<span class="badge bg-primary"><i class="bi bi-geo-alt-fill me-1"></i>Interested</span>';
+        } else {
+            siteVisitEl.innerHTML = '<span class="badge bg-light text-secondary border"><i class="bi bi-dash me-1"></i>Not Interested</span>';
+        }
+
+        // AI Summary
+        document.getElementById('aiSummaryVal').innerText = data.aiSummary || 'Analysis completed.';
+
+        // Image Section
+        const imageSection = document.getElementById('aiImageSection');
+        if (data.hasImage && data.proofImageUrl) {
+            imageSection.classList.remove('d-none');
+            document.getElementById('aiImagePreview').src = data.proofImageUrl;
+            document.getElementById('aiImageLink').href = data.proofImageUrl;
+            document.getElementById('aiImageLinkBtn').href = data.proofImageUrl;
+        } else {
+            imageSection.classList.add('d-none');
+        }
+
+        // Analyzed At
+        if (data.analyzedAt) {
+            const dateObj = new Date(data.analyzedAt);
+            document.getElementById('aiAnalyzedAtVal').innerText = dateObj.toLocaleString();
+        } else {
+            document.getElementById('aiAnalyzedAtVal').innerText = 'Just now';
+        }
+    }
+
+    function updateRowInTable(feedbackId, data) {
+        const rowCell = document.getElementById(`ai-cell-${feedbackId}`);
+        if (!rowCell) return;
+
+        let intentBadge = '<span class="badge bg-warning-subtle text-dark border">Moderate</span>';
+        if (data.buyingIntent === 'High') {
+            intentBadge = '<span class="badge bg-success-subtle text-success border border-success">High Buy</span>';
+        } else if (data.buyingIntent === 'Low') {
+            intentBadge = '<span class="badge bg-danger-subtle text-danger border border-danger">Low Buy</span>';
+        }
+
+        let interestBadge = data.isCustomerInterested 
+            ? '<span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Interested</span>'
+            : '<span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Not Interested</span>';
+
+        let siteBadge = data.siteVisitInterested
+            ? '<span class="badge bg-primary-subtle text-primary border border-primary"><i class="bi bi-geo-alt me-1"></i>Site Visit</span>'
+            : '';
+
+        rowCell.innerHTML = `
+            <div class="d-flex flex-column gap-1 align-items-start">
+                <div class="d-flex flex-wrap gap-1">
+                    ${interestBadge}
+                    ${intentBadge}
+                    ${siteBadge}
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2 mt-1" style="font-size: 0.75rem;" onclick="openAiAnalysisModal(${feedbackId})">
+                    <i class="bi bi-sparkles me-1"></i> AI Details
+                </button>
+            </div>
+        `;
+    }
+
+    function openAiAnalysisModal(feedbackId) {
+        currentFeedbackId = feedbackId;
+        const modalEl = document.getElementById('geminiAiModal');
+        const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+
+        document.getElementById('aiModalError').classList.add('d-none');
+        document.getElementById('aiModalContent').classList.add('d-none');
+        document.getElementById('aiModalLoading').classList.remove('d-none');
+
+        modalInstance.show();
+
+        fetch(`/api/aianalysis/details/${feedbackId}`)
+            .then(res => {
+                if (!res.ok) throw new Error(`Server returned ${res.status}`);
+                return res.json();
+            })
+            .then(data => {
+                document.getElementById('aiModalLoading').classList.add('d-none');
+                if (data && data.isSuccess) {
+                    renderAiBadges(data);
+                    document.getElementById('aiModalContent').classList.remove('d-none');
+                    updateRowInTable(feedbackId, data);
+                } else {
+                    document.getElementById('aiModalError').classList.remove('d-none');
+                    document.getElementById('aiModalErrorMessage').innerText = data.errorMessage || 'AI Analysis could not be retrieved.';
+                }
+            })
+            .catch(err => {
+                document.getElementById('aiModalLoading').classList.add('d-none');
+                document.getElementById('aiModalError').classList.remove('d-none');
+                document.getElementById('aiModalErrorMessage').innerText = err.message || 'Error communicating with AI service.';
+            });
+    }
+
+    function reanalyzeCurrentFeedback() {
+        if (!currentFeedbackId) return;
+
+        const btn = document.getElementById('btnReanalyzeAi');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Re-evaluating...';
+
+        document.getElementById('aiModalError').classList.add('d-none');
+
+        fetch(`/api/aianalysis/analyze/${currentFeedbackId}?force=true`, { method: 'POST' })
+            .then(res => {
+                if (!res.ok) throw new Error(`Server returned ${res.status}`);
+                return res.json();
+            })
+            .then(data => {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+
+                if (data && data.isSuccess) {
+                    renderAiBadges(data);
+                    updateRowInTable(currentFeedbackId, data);
+                } else {
+                    document.getElementById('aiModalError').classList.remove('d-none');
+                    document.getElementById('aiModalErrorMessage').innerText = data.errorMessage || 'Re-analysis failed.';
+                }
+            })
+            .catch(err => {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                document.getElementById('aiModalError').classList.remove('d-none');
+                document.getElementById('aiModalErrorMessage').innerText = err.message || 'Error contacting AI service.';
+            });
+    }
+
+    function analyzeFromTable(feedbackId, btnEl) {
+        if (btnEl) {
+            btnEl.disabled = true;
+            btnEl.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Analyzing...';
+        }
+
+        fetch(`/api/aianalysis/analyze/${feedbackId}`, { method: 'POST' })
+            .then(res => {
+                if (!res.ok) throw new Error(`Server returned ${res.status}`);
+                return res.json();
+            })
+            .then(data => {
+                if (data && data.isSuccess) {
+                    updateRowInTable(feedbackId, data);
+                    openAiAnalysisModal(feedbackId);
+                } else {
+                    alert(data.errorMessage || 'AI Analysis failed.');
+                    if (btnEl) {
+                        btnEl.disabled = false;
+                        btnEl.innerHTML = '<i class="bi bi-stars text-primary me-1"></i> Analyze with AI';
+                    }
+                }
+            })
+            .catch(err => {
+                alert('Failed to analyze with AI: ' + err.message);
+                if (btnEl) {
+                    btnEl.disabled = false;
+                    btnEl.innerHTML = '<i class="bi bi-stars text-primary me-1"></i> Analyze with AI';
+                }
+            });
+    }
+</script>

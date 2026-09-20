@@ -4,8 +4,7 @@
 
 @{
     ViewData["Title"] = "API Leads";
-
-    Layout = "_AdminLayout";
+    Layout = "_SalesManagerLayout";
 }
 
 
@@ -44,7 +43,7 @@
 
         <div class="card-body p-4">
 
-            <form asp-controller="Lead"
+            <form asp-controller="SalesManager"
                   asp-action="ApiLeads"
                   method="get">
 
@@ -166,7 +165,7 @@
 
                     <div class="col-xl-2 col-lg-2">
 
-                        <a asp-controller="Lead"
+                        <a asp-controller="SalesManager"
                            asp-action="ApiLeads"
                            class="btn btn-outline-secondary w-100">
 
@@ -638,8 +637,8 @@
 
                                             <!-- Details -->
 
-                                            <a asp-controller="Lead"
-                                               asp-action="Details"
+                                            <a asp-controller="SalesManager"
+                                               asp-action="LeadDetails"
                                                asp-route-id="@lead.LeadId"
                                                class="btn btn-sm btn-outline-primary"
                                                title="View Lead">
@@ -651,8 +650,8 @@
 
                                             <!-- Edit -->
 
-                                            <a asp-controller="Lead"
-                                               asp-action="Edit"
+                                            <a asp-controller="SalesManager"
+                                               asp-action="EditLead"
                                                asp-route-id="@lead.LeadId"
                                                class="btn btn-sm btn-outline-secondary"
                                                title="Edit Lead">
@@ -666,8 +665,8 @@
                                             @if (lead.Status == LeadStatus.New ||
                                                                                              lead.Status == LeadStatus.Rejected)
                                             {
-                                                <a asp-controller="Lead"
-                                                   asp-action="Assign"
+                                                <a asp-controller="SalesManager"
+                                                   asp-action="AssignLead"
                                                    asp-route-id="@lead.LeadId"
                                                    class="btn btn-sm btn-outline-success"
                                                    title="Assign Lead">
@@ -678,8 +677,8 @@
                                             }
                                             else
                                             {
-                                                <a asp-controller="Lead"
-                                                   asp-action="Assign"
+                                                <a asp-controller="SalesManager"
+                                                   asp-action="AssignLead"
                                                    asp-route-id="@lead.LeadId"
                                                    class="btn btn-sm btn-outline-warning"
                                                    title="Reassign Lead">

@@ -1,4 +1,4 @@
-﻿@model CRMSystem.Models.ViewModels.AdminApprovalViewModel
+@model CRMSystem.Models.ViewModels.AdminApprovalViewModel
 
 @{
     ViewData["Title"] = "Approval Requests";
@@ -238,7 +238,7 @@
 
                                     <td>
 
-                                        @request.RequestedAt.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")
+                                        @request.RequestedAt.ToBangladeshTime().ToString("dd MMM yyyy, hh:mm tt")
 
                                     </td>
 
@@ -462,7 +462,7 @@
                                     <td>
 
                                         @request.RequestedAt
-                                        .ToLocalTime()
+                                        .ToBangladeshTime()
                                         .ToString(
                                         "dd MMM yyyy, hh:mm tt")
 

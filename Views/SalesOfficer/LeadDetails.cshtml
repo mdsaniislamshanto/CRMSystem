@@ -1,0 +1,136 @@
+@model CRMSystem.Models.ViewModels.LeadViewModel
+
+@{
+    Layout = "~/Views/Shared/_SalesOfficerLayout.cshtml";
+    ViewData["Title"] = "Lead Details";
+    ViewData["Breadcrumb"] = "Lead Details";
+}
+
+<div class="container-fluid py-4">
+
+    <!-- =====================================================
+         PAGE HEADER
+         ===================================================== -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold mb-1">
+                @Model.LeadName
+            </h2>
+            <p class="text-muted mb-0">
+                <span class="badge bg-secondary me-2">@Model.LeadCode</span>
+                View comprehensive lead profile and AI predictive analysis.
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a asp-action="MyAssignedLeads" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Back to My Assigned Leads
+            </a>
+        </div>
+    </div>
+
+    <!-- =====================================================
+         GEMINI AI LEAD INTELLIGENCE
+         ===================================================== -->
+    <partial name="_AiLeadAnalysisCardPartial" model="Model" />
+
+    <!-- =====================================================
+         LEAD INFORMATION CARD
+         ===================================================== -->
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px; overflow: hidden;">
+        <div class="card-header bg-white py-3 px-4 border-bottom">
+            <h5 class="mb-0 fw-semibold text-dark">
+                <i class="bi bi-person-lines-fill text-primary me-2"></i> Lead Profile
+            </h5>
+        </div>
+
+        <div class="card-body p-4">
+            <div class="row g-3">
+                <div class="col-md-6 col-lg-4">
+                    <label class="text-muted small fw-semibold text-uppercase">Lead Code</label>
+                    <p class="fw-semibold mb-0 text-dark">@Model.LeadCode</p>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <label class="text-muted small fw-semibold text-uppercase">Company Name</label>
+                    <p class="fw-semibold mb-0 text-dark">@(string.IsNullOrWhiteSpace(Model.CompanyName) ? "—" : Model.CompanyName)</p>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <label class="text-muted small fw-semibold text-uppercase">Lead Name</label>
+                    <p class="fw-semibold mb-0 text-dark">@Model.LeadName</p>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <label class="text-muted small fw-semibold text-uppercase">Profession</label>
+                    <p class="fw-semibold mb-0 text-dark">@(string.IsNullOrWhiteSpace(Model.Profession) ? "—" : Model.Profession)</p>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <label class="text-muted small fw-semibold text-uppercase">Email</label>
+                    <p class="fw-semibold mb-0 text-dark">
+                        @if (!string.IsNullOrWhiteSpace(Model.Email))
+                        {
+                            <a href="mailto:@Model.Email" class="text-decoration-none text-primary">
+                                <i class="bi bi-envelope me-1"></i>@Model.Email
+                            </a>
+                        }
+                        else
+                        {
+                            <span>—</span>
+                        }
+                    </p>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <label class="text-muted small fw-semibold text-uppercase">Phone</label>
+                    <p class="fw-semibold mb-0 text-dark">
+                        @if (!string.IsNullOrWhiteSpace(Model.Phone))
+                        {
+                            <a href="tel:@Model.Phone" class="text-decoration-none text-primary">
+                                <i class="bi bi-telephone me-1"></i>@Model.Phone
+                            </a>
+                        }
+                        else
+                        {
+                            <span>—</span>
+                        }
+                    </p>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <label class="text-muted small fw-semibold text-uppercase">Address</label>
+                    <p class="fw-semibold mb-0 text-dark">@(string.IsNullOrWhiteSpace(Model.Address) ? "—" : Model.Address)</p>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <label class="text-muted small fw-semibold text-uppercase">Source</label>
+                    <p class="fw-semibold mb-0 text-dark">@Model.Source</p>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <label class="text-muted small fw-semibold text-uppercase">Priority</label>
+                    <p class="fw-semibold mb-0 text-dark">@Model.Priority</p>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <label class="text-muted small fw-semibold text-uppercase">Status</label>
+                    <p class="fw-semibold mb-0 text-dark">@Model.Status</p>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <label class="text-muted small fw-semibold text-uppercase">Next Follow Up Date</label>
+                    <p class="fw-semibold mb-0 text-dark">@(Model.FollowUpDate?.ToBangladeshTime().ToString("dd MMM yyyy") ?? "—")</p>
+                </div>
+
+                <div class="col-12">
+                    <label class="text-muted small fw-semibold text-uppercase">Description / Initial Notes</label>
+                    <div class="p-3 rounded bg-light mt-1 text-dark" style="font-size: 0.9rem; line-height: 1.5;">
+                        @(string.IsNullOrWhiteSpace(Model.Description) ? "No initial description provided." : Model.Description)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

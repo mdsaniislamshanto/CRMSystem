@@ -95,9 +95,8 @@ namespace CRMSystem.Services.Interfaces
                 LeadSource? source = null,
                 LeadStatus? status = null);
 
-
-        Task<List<UnassignedLeadViewModel>>
-    GetUnassignedLeadsForSalesManagerAsync(
+        //for sales manager to view unassigned leads
+        Task<List<UnassignedLeadViewModel>>GetUnassignedLeadsForSalesManagerAsync(
         long salesManagerId,
         string? search = null,
         LeadSource? source = null,

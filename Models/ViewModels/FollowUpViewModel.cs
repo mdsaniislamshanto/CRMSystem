@@ -1,4 +1,4 @@
-﻿namespace CRMSystem.Models.ViewModels
+namespace CRMSystem.Models.ViewModels
 {
     public class FollowUpViewModel
     {
@@ -28,8 +28,16 @@
 
         public string FollowUpStatus { get; set; } = string.Empty;
 
- 
         // Timeliness Tracking
         public string TimelinessStatus { get; set; } = string.Empty;
+
+        // Gemini AI Analysis
+        public bool AiAnalyzed { get; set; }
+        public bool? AiCustomerInterested { get; set; }
+        public string? AiBuyingIntent { get; set; }
+        public string? AiSentiment { get; set; }
+        public bool? AiSiteVisitInterested { get; set; }
+        public string? AiSummary { get; set; }
+        public string? ProofImage { get; set; }
     }
 }

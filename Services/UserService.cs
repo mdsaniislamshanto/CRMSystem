@@ -774,8 +774,10 @@ namespace CRMSystem.Services
                 .Include(u => u.Role)
                 .AsQueryable();
 
+            // =====================================================
+            // Search by Employee Code / Name / Email
+            // =====================================================
 
-            // Filter by name / employee code / email
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
                 searchTerm = searchTerm.Trim();
@@ -795,26 +797,38 @@ namespace CRMSystem.Services
                     u.Email.Contains(searchTerm));
             }
 
+            // =====================================================
+            // Filter by Role
+            // =====================================================
 
-            // Filter by role
-            if (!string.IsNullOrWhiteSpace(role))
+            if (!string.IsNullOrWhiteSpace(role) &&
+                role != "All")
             {
                 query = query.Where(u =>
                     u.Role != null &&
                     u.Role.RoleName == role);
             }
 
+            // =====================================================
+            // Filter by Status
+            // =====================================================
 
-            // Filter by status
-            if (!string.IsNullOrWhiteSpace(status))
+            if (!string.IsNullOrWhiteSpace(status) &&
+                status != "All")
             {
-                bool isActive =
-                    status == "Active";
-
-                query = query.Where(u =>
-                    u.IsActive == isActive);
+                if (status == "Active")
+                {
+                    query = query.Where(u => u.IsActive);
+                }
+                else if (status == "Inactive")
+                {
+                    query = query.Where(u => !u.IsActive);
+                }
             }
 
+            // =====================================================
+            // Execute Query
+            // =====================================================
 
             return await query
                 .OrderBy(u => u.FirstName)

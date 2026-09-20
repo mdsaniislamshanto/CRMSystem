@@ -1,4 +1,4 @@
-﻿using CRMSystem.Constants;
+using CRMSystem.Constants;
 using CRMSystem.Data;
 using CRMSystem.Enums;
 using CRMSystem.Models.ViewModels;
@@ -664,6 +664,24 @@ namespace CRMSystem.Services
 
                             FollowUpDate =
                                 a.Lead.FollowUpDate,
+
+                            AiAnalyzed =
+                                a.Lead.AiAnalyzedAt.HasValue,
+
+                            AiBuyingDecision =
+                                a.Lead.AiBuyingDecision,
+
+                            AiInterestLevel =
+                                a.Lead.AiInterestLevel,
+
+                            AiLeadAuthenticity =
+                                a.Lead.AiLeadAuthenticity,
+
+                            AiSynthesisSummary =
+                                a.Lead.AiSynthesisSummary,
+
+                            AiAnalyzedAt =
+                                a.Lead.AiAnalyzedAt,
 
                             AssignedOfficerName =
                                 a.SalesOfficer != null
@@ -1546,7 +1564,28 @@ namespace CRMSystem.Services
                                 f.SubmittedAt,
 
                             FollowUpDate =
-                                f.NextFollowUpDate!.Value
+                                f.NextFollowUpDate!.Value,
+
+                            AiAnalyzed =
+                                f.AiAnalyzedAt.HasValue,
+
+                            AiCustomerInterested =
+                                f.AiCustomerInterested,
+
+                            AiBuyingIntent =
+                                f.AiBuyingIntent,
+
+                            AiSentiment =
+                                f.AiSentiment,
+
+                            AiSiteVisitInterested =
+                                f.AiSiteVisitInterested,
+
+                            AiSummary =
+                                f.AiSummary,
+
+                            ProofImage =
+                                f.ProofImage
                         })
                     .ToListAsync();
 

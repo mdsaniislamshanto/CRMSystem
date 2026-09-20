@@ -1,4 +1,4 @@
-﻿@model List<CRMSystem.Models.ViewModels.MyAssignedLeadViewModel>
+@model List<CRMSystem.Models.ViewModels.MyAssignedLeadViewModel>
 
 @{
     Layout = "~/Views/Shared/_SalesOfficerLayout.cshtml";
@@ -327,12 +327,12 @@
                                     <td>
 
                                         <div>
-                                            @lead.AssignedAt.ToLocalTime().ToString("dd MMM yyyy")
+                                            @lead.AssignedAt.ToBangladeshTime().ToString("dd MMM yyyy")
                                         </div>
 
                                         <small class="text-muted">
 
-                                            @lead.AssignedAt.ToLocalTime().ToString("hh:mm tt")
+                                            @lead.AssignedAt.ToBangladeshTime().ToString("hh:mm tt")
 
                                         </small>
 
@@ -391,6 +391,13 @@
                                     <!-- Action -->
 
                                     <td class="text-center">
+
+                                        <a asp-action="LeadDetails"
+                                           asp-route-id="@lead.LeadId"
+                                           class="btn btn-outline-info btn-sm px-2 me-1"
+                                           title="View Lead Details">
+                                            <i class="bi bi-eye me-1"></i> Details
+                                        </a>
 
                                         @if (lead.AssignmentStatus ==
                                             CRMSystem.Enums.AssignmentStatus.Pending)
@@ -559,7 +566,7 @@
                                 </td>
 
                                 <td class="text-center">
-                                    @lead.AssignedAt.ToString("dd MMM yyyy hh:mm tt")
+                                    @lead.AssignedAt.ToBangladeshTime().ToString("dd MMM yyyy hh:mm tt")
                                 </td>
 
                                 <td class="text-center">

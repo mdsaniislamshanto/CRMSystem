@@ -1,4 +1,4 @@
-﻿@model IEnumerable<CRMSystem.Models.ViewModels.UserViewModel>
+@model IEnumerable<CRMSystem.Models.ViewModels.UserViewModel>
 
 @{
     ViewData["Title"] = "Sales Officers";
@@ -177,7 +177,7 @@
 
                                 var lastLoginText = officer.LastLoginAt.HasValue
                                     ? officer.LastLoginAt.Value
-                                        .ToLocalTime()
+                                        .ToBangladeshTime()
                                         .ToString("dd MMM yyyy, hh:mm tt")
                                     : "Never";
 

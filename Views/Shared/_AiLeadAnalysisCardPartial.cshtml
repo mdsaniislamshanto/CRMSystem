@@ -1,0 +1,380 @@
+@model CRMSystem.Models.ViewModels.LeadViewModel
+
+@{
+    string GetBuyingBadgeClass(string? decision)
+    {
+        if (string.IsNullOrEmpty(decision)) return "bg-secondary";
+        var lower = decision.ToLowerInvariant();
+        if (lower.Contains("will buy") || lower.Contains("definite")) return "bg-success text-white";
+        if (lower.Contains("likely")) return "bg-primary text-white";
+        if (lower.Contains("unlikely")) return "bg-warning text-dark";
+        if (lower.Contains("not") || lower.Contains("will not")) return "bg-danger text-white";
+        return "bg-info text-dark";
+    }
+
+    string GetInterestBadgeClass(string? interest)
+    {
+        if (string.IsNullOrEmpty(interest)) return "bg-secondary";
+        var lower = interest.ToLowerInvariant();
+        if (lower.Contains("high")) return "bg-success text-white";
+        if (lower.Contains("medium")) return "bg-info text-dark";
+        if (lower.Contains("low")) return "bg-warning text-dark";
+        if (lower.Contains("zero") || lower.Contains("none")) return "bg-danger text-white";
+        return "bg-secondary text-white";
+    }
+
+    string GetAuthenticityBadgeClass(string? auth)
+    {
+        if (string.IsNullOrEmpty(auth)) return "bg-secondary";
+        var lower = auth.ToLowerInvariant();
+        if (lower.Contains("genuine")) return "bg-success text-white";
+        if (lower.Contains("suspicious") || lower.Contains("fake")) return "bg-danger text-white";
+        if (lower.Contains("invalid") || lower.Contains("unresponsive")) return "bg-warning text-dark";
+        return "bg-secondary text-white";
+    }
+
+    string GetAuthenticityIcon(string? auth)
+    {
+        if (string.IsNullOrEmpty(auth)) return "bi-shield";
+        var lower = auth.ToLowerInvariant();
+        if (lower.Contains("genuine")) return "bi-patch-check-fill";
+        if (lower.Contains("suspicious") || lower.Contains("fake")) return "bi-shield-fill-x";
+        return "bi-shield-exclamation";
+    }
+}
+
+<div class="card border-0 shadow-sm mb-4 ai-lead-card" id="aiLeadCard-@Model.LeadId" style="border-radius: 12px; overflow: hidden; background: #ffffff;">
+    <div class="card-header py-2 px-4 d-flex justify-content-end align-items-center flex-wrap gap-2" 
+         style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #ffffff;">
+        <div>
+            <button type="button" 
+                    class="btn btn-sm px-3 py-1 fw-semibold d-inline-flex align-items-center gap-2 btn-ai-trigger" 
+                    id="btnAnalyzeLead-@Model.LeadId"
+                    onclick="triggerLeadAiAnalysis(@Model.LeadId, @(Model.AiAnalyzed ? "true" : "false"))"
+                    style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: #ffffff; border: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);">
+                <i class="bi bi-arrow-repeat fs-6" id="aiBtnIcon-@Model.LeadId"></i>
+                <span id="aiBtnText-@Model.LeadId">@(Model.AiAnalyzed ? "Re-analyze with AI" : "Analyze Lead with AI")</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="card-body p-4" id="aiLeadContent-@Model.LeadId">
+        @if (Model.AiAnalyzed)
+        {
+            <div class="row g-3 mb-4">
+                <!-- 1. Customer Buying Likelihood -->
+                <div class="col-md-4">
+                    <div class="p-3 h-100 rounded-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-muted small fw-semibold text-uppercase" style="letter-spacing: 0.04em; font-size: 0.72rem;">
+                                <i class="bi bi-cart-check me-1 text-primary"></i> Buying Decision
+                            </span>
+                            <span class="badge px-2 py-1 rounded-pill @GetBuyingBadgeClass(Model.AiBuyingDecision)" id="aiBadgeBuying-@Model.LeadId" style="font-size: 0.8rem;">
+                                @(Model.AiBuyingDecision ?? "Pending Analysis")
+                            </span>
+                        </div>
+                        <div class="fw-bold" style="font-size: 1rem; color: #1e293b;" id="aiValBuying-@Model.LeadId">
+                            @(Model.AiBuyingDecision ?? "Not Available")
+                        </div>
+                        <small class="text-muted" style="font-size: 0.75rem;">Likelihood customer will make a purchase</small>
+                    </div>
+                </div>
+
+                <!-- 2. Customer Interest Level -->
+                <div class="col-md-4">
+                    <div class="p-3 h-100 rounded-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-muted small fw-semibold text-uppercase" style="letter-spacing: 0.04em; font-size: 0.72rem;">
+                                <i class="bi bi-lightning-charge me-1 text-warning"></i> Customer Interest
+                            </span>
+                            <span class="badge px-2 py-1 rounded-pill @GetInterestBadgeClass(Model.AiInterestLevel)" id="aiBadgeInterest-@Model.LeadId" style="font-size: 0.8rem;">
+                                @(Model.AiInterestLevel ?? "Pending Analysis")
+                            </span>
+                        </div>
+                        <div class="fw-bold" style="font-size: 1rem; color: #1e293b;" id="aiValInterest-@Model.LeadId">
+                            @(Model.AiInterestLevel ?? "Not Available")
+                        </div>
+                        <small class="text-muted" style="font-size: 0.75rem;">Level of engagement & product interest</small>
+                    </div>
+                </div>
+
+                <!-- 3. Lead Authenticity (Fake / Genuine) -->
+                <div class="col-md-4">
+                    <div class="p-3 h-100 rounded-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-muted small fw-semibold text-uppercase" style="letter-spacing: 0.04em; font-size: 0.72rem;">
+                                <i class="bi @GetAuthenticityIcon(Model.AiLeadAuthenticity) me-1" id="aiIconAuth-@Model.LeadId" style="color: #0ea5e9;"></i> Authenticity
+                            </span>
+                            <span class="badge px-2 py-1 rounded-pill @GetAuthenticityBadgeClass(Model.AiLeadAuthenticity)" id="aiBadgeAuth-@Model.LeadId" style="font-size: 0.8rem;">
+                                @(Model.AiLeadAuthenticity ?? "Pending Analysis")
+                            </span>
+                        </div>
+                        <div class="fw-bold" style="font-size: 1rem; color: #1e293b;" id="aiValAuth-@Model.LeadId">
+                            @(Model.AiLeadAuthenticity ?? "Not Available")
+                        </div>
+                        <small class="text-muted" style="font-size: 0.75rem;">Genuine lead vs fake / unreachable check</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Synthesis Narrative -->
+            <div class="p-3 rounded-3" style="background: #f1f5f9; border-left: 4px solid #3b82f6;">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="fw-bold text-dark d-flex align-items-center gap-2" style="font-size: 0.92rem;">
+                        <i class="bi bi-chat-square-quote-fill text-primary"></i> Cumulative AI Synthesis & Sales Strategy
+                    </span>
+                    @if (Model.AiAnalyzedAt.HasValue)
+                    {
+                        <small class="text-muted" id="aiAnalyzedTime-@Model.LeadId" style="font-size: 0.75rem;">
+                            Analyzed: @Model.AiAnalyzedAt.Value.ToBangladeshTime().ToString("dd MMM yyyy, hh:mm tt")
+                        </small>
+                    }
+                </div>
+                <p class="mb-0 text-secondary" style="font-size: 0.88rem; line-height: 1.6; white-space: pre-line;" id="aiSummaryText-@Model.LeadId">
+                    @Model.AiSynthesisSummary
+                </p>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-4" id="aiEmptyState-@Model.LeadId">
+                <div class="mb-3">
+                    <div style="width: 56px; height: 56px; margin: 0 auto; background: #eff6ff; border-radius: 50%;" class="d-flex align-items-center justify-content-center">
+                        <i class="bi bi-cpu fs-3 text-primary"></i>
+                    </div>
+                </div>
+                <h6 class="fw-bold mb-1" style="color: #1e293b;">No AI Analysis Available Yet</h6>
+                <p class="text-muted small mb-3" style="max-width: 520px; margin: 0 auto;">
+                    Run Gemini AI analysis to evaluate all recorded follow-ups, additional notes, and customer interactions to determine buying likelihood, interest score, and authenticity.
+                </p>
+                <button type="button" 
+                        class="btn btn-primary btn-sm px-4 py-2 fw-semibold"
+                        onclick="triggerLeadAiAnalysis(@Model.LeadId, false)">
+                    <i class="bi bi-stars me-1"></i> Analyze This Lead Now
+                </button>
+            </div>
+        }
+
+        <!-- Live Loading Indicator (Hidden initially) -->
+        <div id="aiLoadingIndicator-@Model.LeadId" class="d-none text-center py-5">
+            <div class="spinner-border text-primary mb-3" role="status" style="width: 2.5rem; height: 2.5rem;">
+                <span class="visually-hidden">Analyzing...</span>
+            </div>
+            <h6 class="fw-bold text-dark mb-1">Synthesizing Follow-ups with Gemini AI...</h6>
+            <p class="text-muted small mb-0">Analyzing customer sentiment, buying likelihood, objections, and lead authenticity.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    if (typeof triggerLeadAiAnalysis === 'undefined') {
+        function triggerLeadAiAnalysis(leadId, forceReanalysis) {
+            const card = document.getElementById('aiLeadCard-' + leadId);
+            const content = document.getElementById('aiLeadContent-' + leadId);
+            const btn = document.getElementById('btnAnalyzeLead-' + leadId);
+            const btnText = document.getElementById('aiBtnText-' + leadId);
+            const btnIcon = document.getElementById('aiBtnIcon-' + leadId);
+            const loading = document.getElementById('aiLoadingIndicator-' + leadId);
+
+            if (!card || !content) return;
+
+            if (btn) btn.disabled = true;
+            if (btnIcon) btnIcon.classList.add('spin-animation');
+            if (btnText) btnText.innerText = 'Analyzing...';
+
+            if (loading) loading.classList.remove('d-none');
+
+            // Hide other content children during analysis
+            Array.from(content.children).forEach(el => {
+                if (el !== loading) el.classList.add('d-none');
+            });
+
+            const url = '/api/AiAnalysis/analyze-lead/' + leadId + (forceReanalysis ? '?force=true' : '');
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.isSuccess || data.IsSuccess) {
+                    const result = data.data || data.Data || data;
+                    renderAiAnalysisResult(leadId, result);
+                } else {
+                    const errMsg = data.errorMessage || data.ErrorMessage || 'Failed to analyze lead.';
+                    alert('AI Analysis Error: ' + errMsg);
+                    // Revert display
+                    if (loading) loading.classList.add('d-none');
+                    Array.from(content.children).forEach(el => {
+                        if (el !== loading) el.classList.remove('d-none');
+                    });
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('An error occurred while connecting to the AI analysis service.');
+                if (loading) loading.classList.add('d-none');
+                Array.from(content.children).forEach(el => {
+                    if (el !== loading) el.classList.remove('d-none');
+                });
+            })
+            .finally(() => {
+                if (btn) btn.disabled = false;
+                if (btnIcon) btnIcon.classList.remove('spin-animation');
+                if (btnText) btnText.innerText = 'Re-analyze with AI';
+            });
+        }
+
+        function renderAiAnalysisResult(leadId, result) {
+            const content = document.getElementById('aiLeadContent-' + leadId);
+            if (!content) return;
+
+            const buying = result.buyingDecision || result.BuyingDecision || 'Likely to Buy';
+            const interest = result.interestLevel || result.InterestLevel || 'Medium';
+            const auth = result.leadAuthenticity || result.LeadAuthenticity || 'Genuine Lead';
+            const summary = result.synthesisSummary || result.SynthesisSummary || '';
+            const analyzedAt = result.analyzedAt || result.AnalyzedAt || new Date().toISOString();
+
+            const dateStr = new Date(analyzedAt).toLocaleString("en-GB", {
+                timeZone: "Asia/Dhaka",
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true
+            });
+
+            const getBuyingBadge = (b) => {
+                const l = (b || '').toLowerCase();
+                if (l.includes('will buy') || l.includes('definite')) return 'bg-success text-white';
+                if (l.includes('likely')) return 'bg-primary text-white';
+                if (l.includes('unlikely')) return 'bg-warning text-dark';
+                if (l.includes('not') || l.includes('will not')) return 'bg-danger text-white';
+                return 'bg-info text-dark';
+            };
+
+            const getInterestBadge = (i) => {
+                const l = (i || '').toLowerCase();
+                if (l.includes('high')) return 'bg-success text-white';
+                if (l.includes('medium')) return 'bg-info text-dark';
+                if (l.includes('low')) return 'bg-warning text-dark';
+                if (l.includes('zero') || l.includes('none')) return 'bg-danger text-white';
+                return 'bg-secondary text-white';
+            };
+
+            const getAuthBadge = (a) => {
+                const l = (a || '').toLowerCase();
+                if (l.includes('genuine')) return 'bg-success text-white';
+                if (l.includes('suspicious') || l.includes('fake')) return 'bg-danger text-white';
+                if (l.includes('invalid') || l.includes('unresponsive')) return 'bg-warning text-dark';
+                return 'bg-secondary text-white';
+            };
+
+            const getAuthIcon = (a) => {
+                const l = (a || '').toLowerCase();
+                if (l.includes('genuine')) return 'bi-patch-check-fill';
+                if (l.includes('suspicious') || l.includes('fake')) return 'bi-shield-fill-x';
+                return 'bi-shield-exclamation';
+            };
+
+            content.innerHTML = `
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="p-3 h-100 rounded-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="text-muted small fw-semibold text-uppercase" style="letter-spacing: 0.04em; font-size: 0.72rem;">
+                                    <i class="bi bi-cart-check me-1 text-primary"></i> Buying Decision
+                                </span>
+                                <span class="badge px-2 py-1 rounded-pill ${getBuyingBadge(buying)}" style="font-size: 0.8rem;">
+                                    ${escapeHtml(buying)}
+                                </span>
+                            </div>
+                            <div class="fw-bold" style="font-size: 1rem; color: #1e293b;">
+                                ${escapeHtml(buying)}
+                            </div>
+                            <small class="text-muted" style="font-size: 0.75rem;">Likelihood customer will make a purchase</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 h-100 rounded-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="text-muted small fw-semibold text-uppercase" style="letter-spacing: 0.04em; font-size: 0.72rem;">
+                                    <i class="bi bi-lightning-charge me-1 text-warning"></i> Customer Interest
+                                </span>
+                                <span class="badge px-2 py-1 rounded-pill ${getInterestBadge(interest)}" style="font-size: 0.8rem;">
+                                    ${escapeHtml(interest)}
+                                </span>
+                            </div>
+                            <div class="fw-bold" style="font-size: 1rem; color: #1e293b;">
+                                ${escapeHtml(interest)}
+                            </div>
+                            <small class="text-muted" style="font-size: 0.75rem;">Level of engagement & product interest</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 h-100 rounded-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="text-muted small fw-semibold text-uppercase" style="letter-spacing: 0.04em; font-size: 0.72rem;">
+                                    <i class="bi ${getAuthIcon(auth)} me-1" style="color: #0ea5e9;"></i> Authenticity
+                                </span>
+                                <span class="badge px-2 py-1 rounded-pill ${getAuthBadge(auth)}" style="font-size: 0.8rem;">
+                                    ${escapeHtml(auth)}
+                                </span>
+                            </div>
+                            <div class="fw-bold" style="font-size: 1rem; color: #1e293b;">
+                                ${escapeHtml(auth)}
+                            </div>
+                            <small class="text-muted" style="font-size: 0.75rem;">Genuine lead vs fake / unreachable check</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-3 rounded-3" style="background: #f1f5f9; border-left: 4px solid #3b82f6;">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="fw-bold text-dark d-flex align-items-center gap-2" style="font-size: 0.92rem;">
+                            <i class="bi bi-chat-square-quote-fill text-primary"></i> Cumulative AI Synthesis & Sales Strategy
+                        </span>
+                        <small class="text-muted" style="font-size: 0.75rem;">
+                            Analyzed: ${dateStr}
+                        </small>
+                    </div>
+                    <p class="mb-0 text-secondary" style="font-size: 0.88rem; line-height: 1.6; white-space: pre-line;">
+                        ${escapeHtml(summary)}
+                    </p>
+                </div>
+
+                <div id="aiLoadingIndicator-${leadId}" class="d-none text-center py-5">
+                    <div class="spinner-border text-primary mb-3" role="status" style="width: 2.5rem; height: 2.5rem;">
+                        <span class="visually-hidden">Analyzing...</span>
+                    </div>
+                    <h6 class="fw-bold text-dark mb-1">Synthesizing Follow-ups with Gemini AI...</h6>
+                    <p class="text-muted small mb-0">Analyzing customer sentiment, buying likelihood, objections, and lead authenticity.</p>
+                </div>
+            `;
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    }
+</script>
+
+<style>
+    @@keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .spin-animation {
+        display: inline-block;
+        animation: spin 1s linear infinite;
+    }
+</style>

@@ -1,4 +1,4 @@
-﻿@model CRMSystem.Models.ViewModels.LeadViewModel
+@model CRMSystem.Models.ViewModels.LeadViewModel
 
 @{
     ViewData["Title"] = "Archived Lead Details";
@@ -424,6 +424,8 @@
 
     </div>
 
+    <!-- Gemini AI Lead Intelligence -->
+    <partial name="_AiLeadAnalysisCardPartial" model="Model" />
 
     <!-- =====================================================
          ARCHIVE INFORMATION
@@ -462,7 +464,7 @@
                         <div class="archive-meta-value">
 
                             @Model.ArchivedAt.Value
-                            .ToLocalTime()
+                            .ToBangladeshTime()
                             .ToString("dd MMM yyyy")
 
                         </div>
@@ -470,7 +472,7 @@
                         <div class="archive-meta-time">
 
                             @Model.ArchivedAt.Value
-                            .ToLocalTime()
+                            .ToBangladeshTime()
                             .ToString("hh:mm tt")
 
                         </div>
@@ -830,7 +832,7 @@
 
                             @(Model.FollowUpDate.HasValue
                                 ? Model.FollowUpDate.Value
-                                    .ToLocalTime()
+                                    .ToBangladeshTime()
                                     .ToString("dd MMM yyyy, hh:mm tt")
                                 : "Not scheduled")
 

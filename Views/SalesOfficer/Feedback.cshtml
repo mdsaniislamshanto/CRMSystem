@@ -1,4 +1,4 @@
-﻿@model List<CRMSystem.Models.ViewModels.SalesOfficerCurrentFeedbackViewModel>
+@model List<CRMSystem.Models.ViewModels.SalesOfficerCurrentFeedbackViewModel>
 
 @{
     ViewData["Title"] = "Feedback";
@@ -352,7 +352,7 @@
                                             @(
                                                 item.SubmittedAt
                                                     .Value
-                                                    .ToLocalTime()
+                                                    .ToBangladeshTime()
                                                     .ToString(
                                                         "dd MMM yyyy hh:mm tt")
                                             )
@@ -380,6 +380,7 @@
                                             @(
                                                 item.NextFollowUpDate
                                                     .Value
+                                                    .ToBangladeshTime()
                                                     .ToString(
                                                         "dd MMM yyyy")
                                             )

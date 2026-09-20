@@ -1,4 +1,5 @@
-﻿@using CRMSystem.Constants
+@using CRMSystem
+@using CRMSystem.Constants
 @using CRMSystem.Enums
 
 @model List<CRMSystem.Models.ViewModels.NotificationViewModel>
@@ -9,354 +10,759 @@
     // =====================================================
     // Select Layout According to Logged-in User Role
     // =====================================================
-
-    var roleKey =
-        Context.Session.GetString(SessionKeys.RoleKey);
+    var roleKey = Context.Session.GetString(SessionKeys.RoleKey);
 
     switch (roleKey)
     {
         case RoleKeys.Admin:
-
             Layout = "_AdminLayout";
-
             break;
 
         case RoleKeys.SalesManager:
-
             Layout = "_SalesManagerLayout";
+            break;
 
+        case RoleKeys.TeamLead:
+            Layout = "_TeamLeadLayout";
             break;
 
         case RoleKeys.SalesOfficer:
-
             Layout = "_SalesOfficerLayout";
-
             break;
 
-        // HR layout will be added later
         case RoleKeys.HR:
-
-            Layout = "_Layout";
-
-            break;
-
-        // Account layout will be added later
         case RoleKeys.Account:
-
-            Layout = "_Layout";
-
-            break;
-
         default:
-
             Layout = "_Layout";
-
             break;
+    }
+
+    var totalCount = Model?.Count ?? 0;
+    var unreadCount = Model?.Count(n => !n.IsRead) ?? 0;
+    var readCount = totalCount - unreadCount;
+
+    string GetLeadUrl(long leadId)
+    {
+        if (roleKey == RoleKeys.SalesOfficer)
+        {
+            return Url.Action("LeadDetails", "SalesOfficer", new { id = leadId }) ?? $"/SalesOfficer/LeadDetails/{leadId}";
+        }
+        if (roleKey == RoleKeys.TeamLead)
+        {
+            return Url.Action("LeadDetails", "TeamLead", new { id = leadId }) ?? $"/TeamLead/LeadDetails/{leadId}";
+        }
+        if (roleKey == RoleKeys.SalesManager)
+        {
+            return Url.Action("LeadDetails", "SalesManager", new { id = leadId }) ?? $"/SalesManager/LeadDetails/{leadId}";
+        }
+        return Url.Action("Details", "Lead", new { id = leadId }) ?? $"/Lead/Details/{leadId}";
+    }
+
+    (string IconClass, string BgColor, string TextColor, string BadgeLabel, string BadgeClass) GetNotificationMeta(NotificationType type)
+    {
+        return type switch
+        {
+            NotificationType.AcceptanceSLAMissed => 
+                ("bi-clock-history", "#FEF2F2", "#DC2626", "Acceptance SLA", "bg-danger-subtle text-danger border border-danger-subtle"),
+            
+            NotificationType.FirstFeedbackSLAMissed => 
+                ("bi-chat-left-text-fill", "#FEF2F2", "#DC2626", "Feedback SLA", "bg-danger-subtle text-danger border border-danger-subtle"),
+            
+            NotificationType.NextFeedbackOverdue => 
+                ("bi-calendar-x-fill", "#FFFBEB", "#D97706", "Feedback Overdue", "bg-warning-subtle text-warning border border-warning-subtle"),
+            
+            NotificationType.LeadAssigned => 
+                ("bi-person-plus-fill", "#EFF6FF", "#2563EB", "Lead Assigned", "bg-primary-subtle text-primary border border-primary-subtle"),
+            
+            NotificationType.TargetAssigned => 
+                ("bi-bullseye", "#F5F3FF", "#7C3AED", "Target Assigned", "bg-purple-subtle text-purple border border-purple-subtle"),
+            
+            NotificationType.ProfileChangeApproved => 
+                ("bi-check-circle-fill", "#ECFDF5", "#059669", "Profile Approved", "bg-success-subtle text-success border border-success-subtle"),
+            
+            NotificationType.ProfileChangeRejected => 
+                ("bi-x-circle-fill", "#FEF2F2", "#E11D48", "Profile Rejected", "bg-danger-subtle text-danger border border-danger-subtle"),
+            
+            NotificationType.AutoAssignmentApproved => 
+                ("bi-patch-check-fill", "#ECFDF5", "#059669", "Auto-Assign Approved", "bg-success-subtle text-success border border-success-subtle"),
+            
+            NotificationType.AutoAssignmentRejected => 
+                ("bi-slash-circle-fill", "#FEF2F2", "#E11D48", "Auto-Assign Rejected", "bg-danger-subtle text-danger border border-danger-subtle"),
+            
+            _ => 
+                ("bi-bell-fill", "#F1F5F9", "#64748B", "Notification", "bg-secondary-subtle text-secondary border border-secondary-subtle")
+        };
     }
 }
 
+<style>
+    /* ============================================================
+       Notification Page Specific Styles
+       Defensive scoping to prevent collisions with global classes
+    ============================================================ */
+    .notif-container {
+        max-width: 1140px;
+        margin: 0 auto;
+    }
 
-<div class="container-fluid py-4">
+    /* Card Shell */
+    .notif-card {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 14px;
+        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+        overflow: hidden;
+    }
 
-    <!-- Page Header -->
+    /* Filter Toolbar Header */
+    .notif-toolbar {
+        background: #FFFFFF;
+        border-bottom: 1px solid #E2E8F0;
+        padding: 12px 20px;
+    }
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    .notif-nav-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #64748B;
+        text-decoration: none;
+        background: transparent;
+        border: 1px solid transparent;
+        cursor: pointer;
+        transition: all 0.15s ease-in-out;
+    }
 
+    .notif-nav-pill:hover {
+        background: #F8FAFC;
+        color: #1E293B;
+    }
+
+    .notif-nav-pill.active {
+        background: #EFF6FF;
+        color: #2563EB;
+        border-color: #BFDBFE;
+        font-weight: 600;
+    }
+
+    .notif-count-pill {
+        display: inline-block;
+        font-size: 0.72rem;
+        padding: 2px 7px;
+        border-radius: 9999px;
+        background: #E2E8F0;
+        color: #475569;
+        font-weight: 600;
+        line-height: 1.2;
+    }
+
+    .notif-nav-pill.active .notif-count-pill {
+        background: #2563EB;
+        color: #FFFFFF;
+    }
+
+    /* Notification Row Item */
+    .notif-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 16px 20px;
+        border-bottom: 1px solid #F1F5F9;
+        background: #FFFFFF;
+        transition: background-color 0.18s ease;
+        position: relative;
+    }
+
+    .notif-row:last-child {
+        border-bottom: none;
+    }
+
+    .notif-row:hover {
+        background-color: #F8FAFC;
+    }
+
+    .notif-row.notif-unread {
+        background-color: #F8FAFF;
+        border-left: 3.5px solid #2563EB;
+    }
+
+    .notif-row.notif-read {
+        border-left: 3.5px solid transparent;
+    }
+
+    /* Reset any inherited global .flex-grow-1 rules */
+    .notif-row .notif-body {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        margin-left: 0 !important;
+        min-height: auto !important;
+        display: block !important;
+    }
+
+    /* Icon Avatar */
+    .notif-icon-box {
+        width: 42px;
+        height: 42px;
+        min-width: 42px;
+        max-width: 42px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.15rem;
+        flex-shrink: 0;
+    }
+
+    /* Title & Meta */
+    .notif-title {
+        font-size: 0.925rem;
+        font-weight: 600;
+        color: #0F172A;
+        line-height: 1.4;
+        margin-bottom: 0;
+    }
+
+    .notif-time {
+        font-size: 0.775rem;
+        color: #94A3B8;
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    /* Message Body */
+    .notif-text {
+        font-size: 0.85rem;
+        color: #475569;
+        line-height: 1.5;
+        margin-top: 4px;
+        margin-bottom: 8px;
+    }
+
+    /* Actions */
+    .notif-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 6px;
+    }
+
+    .notif-btn-read {
+        font-size: 0.78rem;
+        font-weight: 500;
+        padding: 4px 10px;
+        border-radius: 6px;
+        color: #2563EB;
+        background: #EFF6FF;
+        border: 1px solid #DBEAFE;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+
+    .notif-btn-read:hover {
+        background: #2563EB;
+        color: #FFFFFF;
+        border-color: #2563EB;
+    }
+
+    .notif-btn-view {
+        font-size: 0.78rem;
+        font-weight: 500;
+        padding: 4px 10px;
+        border-radius: 6px;
+        color: #475569;
+        background: #F1F5F9;
+        border: 1px solid #E2E8F0;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        transition: all 0.15s ease;
+    }
+
+    .notif-btn-view:hover {
+        background: #E2E8F0;
+        color: #1E293B;
+    }
+
+    /* Empty state */
+    .notif-empty-state {
+        text-align: center;
+        padding: 60px 20px;
+    }
+
+    .notif-empty-icon {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 16px;
+        border-radius: 50%;
+        background: #F1F5F9;
+        color: #94A3B8;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+    }
+
+    /* Search Box */
+    .notif-search-box {
+        position: relative;
+        max-width: 260px;
+        width: 100%;
+    }
+
+    .notif-search-box input {
+        border-radius: 8px;
+        font-size: 0.85rem;
+        padding-left: 34px;
+        border: 1px solid #E2E8F0;
+        background-color: #F8FAFC;
+    }
+
+    .notif-search-box input:focus {
+        background-color: #FFFFFF;
+        border-color: #2563EB;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .notif-search-box .search-icon {
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94A3B8;
+        font-size: 0.85rem;
+        pointer-events: none;
+    }
+</style>
+
+<div class="notif-container py-2">
+
+    <!-- Header Section -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
-
-            <h2 class="fw-bold mb-1">
-                Notifications
-            </h2>
-
-            <p class="text-muted mb-0">
-                View your latest CRM notifications and alerts.
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <h3 class="fw-bold mb-0 text-dark">Notifications</h3>
+                @if (unreadCount > 0)
+                {
+                    <span id="headerUnreadBadge" class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2 py-1" style="font-size: 0.75rem;">
+                        @unreadCount Unread
+                    </span>
+                }
+            </div>
+            <p class="text-muted small mb-0">
+                View your latest CRM alerts, lead assignments, and SLA reminders.
             </p>
-
         </div>
 
-
-        @if (Model.Any(n => !n.IsRead))
-        {
+        <div class="d-flex align-items-center gap-2">
             <button type="button"
-                    class="btn btn-outline-primary"
+                    class="btn btn-sm btn-outline-primary px-3 py-2 d-inline-flex align-items-center gap-2 @(unreadCount == 0 ? "d-none" : "")"
                     id="markAllReadBtn">
-
-                <i class="bi bi-check2-all me-1"></i>
-
-                Mark All as Read
-
+                <i class="bi bi-check2-all fs-6"></i>
+                <span>Mark All as Read</span>
             </button>
-        }
-
+        </div>
     </div>
 
+    <!-- Notification Card Shell -->
+    <div class="notif-card">
 
-    <!-- Notification Card -->
+        <!-- Toolbar: Filter Tabs + Search -->
+        <div class="notif-toolbar d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div class="d-flex align-items-center gap-1" id="notifFilterTabs">
+                <button type="button" class="notif-nav-pill active" data-filter="all">
+                    <span>All</span>
+                    <span class="notif-count-pill" id="tabCountAll">@totalCount</span>
+                </button>
+                <button type="button" class="notif-nav-pill" data-filter="unread">
+                    <span>Unread</span>
+                    <span class="notif-count-pill" id="tabCountUnread">@unreadCount</span>
+                </button>
+                <button type="button" class="notif-nav-pill" data-filter="read">
+                    <span>Read</span>
+                    <span class="notif-count-pill" id="tabCountRead">@readCount</span>
+                </button>
+            </div>
 
-    <div class="card border-0 shadow-sm">
+            <!-- Search box -->
+            <div class="notif-search-box">
+                <i class="bi bi-search search-icon"></i>
+                <input type="text" id="notifSearchInput" class="form-control form-control-sm" placeholder="Search notifications..." autocomplete="off" />
+            </div>
+        </div>
 
-        <div class="card-body p-0">
-
-            @if (!Model.Any())
+        <!-- Notification List Container -->
+        <div id="notifListContainer">
+            @if (Model == null || !Model.Any())
             {
-                <div class="text-center py-5">
-
-                    <i class="bi bi-bell-slash fs-1 text-muted d-block mb-3"></i>
-
-                    <h5 class="fw-semibold">
-                        No Notifications
-                    </h5>
-
-                    <p class="text-muted mb-0">
-                        You don't have any notifications yet.
+                <div class="notif-empty-state" id="emptyStateGlobal">
+                    <div class="notif-empty-icon">
+                        <i class="bi bi-bell-slash"></i>
+                    </div>
+                    <h6 class="fw-bold text-dark mb-1">No Notifications Yet</h6>
+                    <p class="text-muted small mb-0">
+                        You're all caught up! Important alerts and updates will show up here.
                     </p>
-
                 </div>
             }
             else
             {
-                <div class="list-group list-group-flush">
+                @foreach (var notification in Model)
+                {
+                    var meta = GetNotificationMeta(notification.NotificationType);
+                    var formattedTime = notification.CreatedAt.ToBangladeshTime().ToString("dd MMM yyyy, hh:mm tt");
 
-                    @foreach (var notification in Model)
-                    {
-                        <div class="list-group-item
-                            notification-item
-                            @(notification.IsRead ? "" : "bg-light")"
-                             data-notification-id="@notification.NotificationId">
+                    <div class="notif-row @(notification.IsRead ? "notif-read" : "notif-unread")"
+                         data-notification-id="@notification.NotificationId"
+                         data-is-read="@(notification.IsRead ? "true" : "false")"
+                         data-search="@(notification.Title.ToLower()) @(notification.Message.ToLower())">
 
-                            <div class="d-flex align-items-start gap-3">
+                        <!-- Icon Avatar -->
+                        <div class="notif-icon-box" style="background-color: @meta.BgColor; color: @meta.TextColor;">
+                            <i class="bi @meta.IconClass"></i>
+                        </div>
 
-                                <!-- Icon -->
+                        <!-- Content Body -->
+                        <div class="notif-body">
 
-                                <div class="notification-icon">
+                            <!-- Top Line: Title, Badges, Time -->
+                            <div class="d-flex flex-wrap justify-content-between align-items-baseline gap-2">
+                                <div class="d-flex flex-wrap align-items-center gap-2">
+                                    <h6 class="notif-title">@notification.Title</h6>
 
-                                    @switch (notification.NotificationType)
-                                    {
-                                        case NotificationType.LeadAssigned:
-
-                                            <i class="bi bi-person-plus-fill text-primary"></i>
-
-                                            break;
-
-                                        case NotificationType.AcceptanceSLAMissed:
-
-                                            <i class="bi bi-clock-history text-danger"></i>
-
-                                            break;
-
-                                        case NotificationType.FirstFeedbackSLAMissed:
-
-                                            <i class="bi bi-chat-left-text-fill text-danger"></i>
-
-                                            break;
-
-                                        case NotificationType.NextFeedbackOverdue:
-
-                                            <i class="bi bi-calendar-x-fill text-warning"></i>
-
-                                            break;
-
-                                        default:
-
-                                            <i class="bi bi-bell-fill text-secondary"></i>
-
-                                            break;
-                                    }
-
-                                </div>
-
-
-                                <!-- Content -->
-
-                                <div class="flex-grow-1">
-
-                                    <div class="d-flex justify-content-between">
-
-                                        <h6 class="mb-1 fw-semibold">
-
-                                            @notification.Title
-
-                                            @if (!notification.IsRead)
-                                            {
-                                                <span class="badge bg-primary ms-2">
-                                                    New
-                                                </span>
-                                            }
-
-                                        </h6>
-
-
-                                        <small class="text-muted">
-
-                                            @notification.CreatedAt
-                                            .ToLocalTime()
-                                            .ToString("dd MMM yyyy hh:mm tt")
-
-                                        </small>
-
-                                    </div>
-
-
-                                    <p class="mb-2 text-muted">
-
-                                        @notification.Message
-
-                                    </p>
-
+                                    <span class="badge @meta.BadgeClass rounded-pill" style="font-size: 0.7rem; font-weight: 500;">
+                                        @meta.BadgeLabel
+                                    </span>
 
                                     @if (!notification.IsRead)
                                     {
-                                        <button type="button"
-                                                class="btn btn-sm btn-outline-secondary mark-read-btn"
-                                                data-id="@notification.NotificationId">
-
-                                            <i class="bi bi-check2 me-1"></i>
-
-                                            Mark as Read
-
-                                        </button>
+                                        <span class="badge bg-primary text-white rounded-pill notif-new-badge" style="font-size: 0.68rem; font-weight: 500; padding: 3px 8px;">
+                                            New
+                                        </span>
                                     }
-
                                 </div>
 
+                                <span class="notif-time">
+                                    <i class="bi bi-clock"></i>
+                                    @formattedTime
+                                </span>
+                            </div>
+
+                            <!-- Notification Message -->
+                            <p class="notif-text">
+                                @notification.Message
+                            </p>
+
+                            <!-- Inline Actions -->
+                            <div class="notif-actions">
+                                @if (!notification.IsRead)
+                                {
+                                    <button type="button"
+                                            class="notif-btn-read mark-read-btn"
+                                            data-id="@notification.NotificationId">
+                                        <i class="bi bi-check2"></i>
+                                        <span>Mark as read</span>
+                                    </button>
+                                }
+
+                                @if (notification.LeadId.HasValue)
+                                {
+                                    <a href="@GetLeadUrl(notification.LeadId.Value)"
+                                       class="notif-btn-view">
+                                        <i class="bi bi-box-arrow-up-right"></i>
+                                        <span>View Lead</span>
+                                    </a>
+                                }
                             </div>
 
                         </div>
-                    }
 
+                    </div>
+                }
+
+                <!-- Empty filter state -->
+                <div class="notif-empty-state d-none" id="emptyStateFiltered">
+                    <div class="notif-empty-icon">
+                        <i class="bi bi-inbox"></i>
+                    </div>
+                    <h6 class="fw-bold text-dark mb-1" id="emptyStateFilteredTitle">No Notifications Found</h6>
+                    <p class="text-muted small mb-0" id="emptyStateFilteredText">
+                        There are no notifications matching your current filter.
+                    </p>
                 </div>
             }
-
         </div>
 
     </div>
 
 </div>
 
-
-<!-- Anti-Forgery Token -->
-
-<form id="notificationAntiForgeryForm"
-      class="d-none">
-
+<!-- Anti-Forgery Token Form -->
+<form id="notificationAntiForgeryForm" class="d-none">
     @Html.AntiForgeryToken()
-
 </form>
-
 
 @section Scripts
 {
     <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const antiForgeryToken = document.querySelector('#notificationAntiForgeryForm input[name="__RequestVerificationToken"]')?.value;
 
-        // ============================================================
-        // Mark Individual Notification as Read
-        // ============================================================
+            // ============================================================
+            // Tab Filtering (All / Unread / Read)
+            // ============================================================
+            let currentFilter = "all";
+            let searchQuery = "";
 
-        document.querySelectorAll(".mark-read-btn")
-            .forEach(button => {
+            const filterTabs = document.querySelectorAll("#notifFilterTabs .notif-nav-pill");
+            const searchInput = document.getElementById("notifSearchInput");
+            const notifRows = document.querySelectorAll(".notif-row");
+            const emptyStateFiltered = document.getElementById("emptyStateFiltered");
+            const emptyStateFilteredTitle = document.getElementById("emptyStateFilteredTitle");
+            const emptyStateFilteredText = document.getElementById("emptyStateFilteredText");
 
-                button.addEventListener("click", async function () {
-
-                    const notificationId =
-                        this.dataset.id;
-
-
-                    const token =
-                        document.querySelector(
-                            '#notificationAntiForgeryForm input[name="__RequestVerificationToken"]'
-                        )?.value;
-
-
-                    if (!token) {
-
-                        console.error(
-                            "Anti-forgery token not found.");
-
-                        return;
-                    }
-
-
-                    const response =
-                        await fetch(
-                            '@Url.Action("MarkAsRead", "Notification")',
-                            {
-                                method: "POST",
-
-                                headers: {
-                                    "Content-Type":
-                                        "application/x-www-form-urlencoded"
-                                },
-
-                                body:
-                                    `notificationId=${encodeURIComponent(notificationId)}` +
-                                    `&__RequestVerificationToken=${encodeURIComponent(token)}`
-                            });
-
-
-                    if (response.ok) {
-
-                        location.reload();
-
-                    }
-
+            filterTabs.forEach(tab => {
+                tab.addEventListener("click", function () {
+                    filterTabs.forEach(t => t.classList.remove("active"));
+                    this.classList.add("active");
+                    currentFilter = this.dataset.filter;
+                    applyFilter();
                 });
-
             });
 
+            if (searchInput) {
+                searchInput.addEventListener("input", function () {
+                    searchQuery = this.value.trim().toLowerCase();
+                    applyFilter();
+                });
+            }
 
-        // ============================================================
-        // Mark All Notifications as Read
-        // ============================================================
+            function applyFilter() {
+                let visibleCount = 0;
 
-        const markAllButton =
-            document.getElementById("markAllReadBtn");
+                notifRows.forEach(row => {
+                    const isRead = row.dataset.isRead === "true";
+                    const searchText = row.dataset.search || "";
 
+                    // Filter match
+                    let filterMatch = true;
+                    if (currentFilter === "unread") {
+                        filterMatch = !isRead;
+                    } else if (currentFilter === "read") {
+                        filterMatch = isRead;
+                    }
 
-        if (markAllButton) {
+                    // Search match
+                    let searchMatch = true;
+                    if (searchQuery.length > 0) {
+                        searchMatch = searchText.includes(searchQuery);
+                    }
 
-            markAllButton.addEventListener(
-                "click",
-                async function () {
+                    if (filterMatch && searchMatch) {
+                        row.classList.remove("d-none");
+                        visibleCount++;
+                    } else {
+                        row.classList.add("d-none");
+                    }
+                });
 
-                    const token =
-                        document.querySelector(
-                            '#notificationAntiForgeryForm input[name="__RequestVerificationToken"]'
-                        )?.value;
+                // Show/hide empty state
+                if (emptyStateFiltered) {
+                    if (visibleCount === 0 && notifRows.length > 0) {
+                        emptyStateFiltered.classList.remove("d-none");
+                        if (searchQuery.length > 0) {
+                            emptyStateFilteredTitle.textContent = "No Matches Found";
+                            emptyStateFilteredText.textContent = `No notifications matched "${searchQuery}". Try a different keyword.`;
+                        } else if (currentFilter === "unread") {
+                            emptyStateFilteredTitle.textContent = "No Unread Notifications";
+                            emptyStateFilteredText.textContent = "You've read all your notifications. Good job!";
+                        } else if (currentFilter === "read") {
+                            emptyStateFilteredTitle.textContent = "No Read Notifications";
+                            emptyStateFilteredText.textContent = "You have not marked any notifications as read yet.";
+                        }
+                    } else {
+                        emptyStateFiltered.classList.add("d-none");
+                    }
+                }
+            }
 
+            // ============================================================
+            // Update UI Counters & Navbar Badge
+            // ============================================================
+            function updateCounts() {
+                let unread = 0;
+                let read = 0;
+                let total = notifRows.length;
 
-                    if (!token) {
+                notifRows.forEach(row => {
+                    if (row.dataset.isRead === "true") {
+                        read++;
+                    } else {
+                        unread++;
+                    }
+                });
 
-                        console.error(
-                            "Anti-forgery token not found.");
+                // Update tab pill badges
+                const tabUnread = document.getElementById("tabCountUnread");
+                const tabRead = document.getElementById("tabCountRead");
+                const tabAll = document.getElementById("tabCountAll");
+                if (tabUnread) tabUnread.textContent = unread;
+                if (tabRead) tabRead.textContent = read;
+                if (tabAll) tabAll.textContent = total;
 
+                // Update header badge
+                const headerBadge = document.getElementById("headerUnreadBadge");
+                if (headerBadge) {
+                    if (unread > 0) {
+                        headerBadge.textContent = `${unread} Unread`;
+                        headerBadge.classList.remove("d-none");
+                    } else {
+                        headerBadge.classList.add("d-none");
+                    }
+                }
+
+                // Update "Mark All as Read" button
+                const markAllBtn = document.getElementById("markAllReadBtn");
+                if (markAllBtn) {
+                    if (unread === 0) {
+                        markAllBtn.classList.add("d-none");
+                    } else {
+                        markAllBtn.classList.remove("d-none");
+                    }
+                }
+
+                // Update TopNavbar Bell Badge if it exists
+                const navBadge = document.getElementById("notificationBadge");
+                if (navBadge) {
+                    if (unread > 0) {
+                        navBadge.textContent = unread > 99 ? "99+" : unread;
+                        navBadge.classList.remove("d-none");
+                    } else {
+                        navBadge.classList.add("d-none");
+                    }
+                }
+            }
+
+            // ============================================================
+            // Mark Individual Notification as Read (AJAX)
+            // ============================================================
+            document.querySelectorAll(".mark-read-btn").forEach(button => {
+                button.addEventListener("click", async function (e) {
+                    e.preventDefault();
+                    const notificationId = this.dataset.id;
+                    const row = this.closest(".notif-row");
+
+                    if (!antiForgeryToken || !notificationId) {
+                        console.error("Missing token or notification ID.");
                         return;
                     }
 
+                    // Visual loading state
+                    const originalHtml = this.innerHTML;
+                    this.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Updating...';
+                    this.disabled = true;
 
-                    const response =
-                        await fetch(
-                            '@Url.Action("MarkAllAsRead", "Notification")',
-                            {
-                                method: "POST",
+                    try {
+                        const response = await fetch('@Url.Action("MarkAsRead", "Notification")', {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/x-www-form-urlencoded"
+                            },
+                            body: `notificationId=${encodeURIComponent(notificationId)}&__RequestVerificationToken=${encodeURIComponent(antiForgeryToken)}`
+                        });
 
-                                headers: {
-                                    "Content-Type":
-                                        "application/x-www-form-urlencoded"
-                                },
+                        if (response.ok) {
+                            if (row) {
+                                row.classList.remove("notif-unread");
+                                row.classList.add("notif-read");
+                                row.dataset.isRead = "true";
 
-                                body:
-                                    `__RequestVerificationToken=${encodeURIComponent(token)}`
-                            });
+                                // Remove "New" badge
+                                const newBadge = row.querySelector(".notif-new-badge");
+                                if (newBadge) newBadge.remove();
 
+                                // Remove mark-read button smoothly
+                                this.remove();
 
-                    if (response.ok) {
+                                // Re-filter if viewing "unread" tab
+                                updateCounts();
+                                applyFilter();
+                            }
+                        } else {
+                            this.innerHTML = originalHtml;
+                            this.disabled = false;
+                            console.error("Failed to mark notification as read.");
+                        }
+                    } catch (err) {
+                        this.innerHTML = originalHtml;
+                        this.disabled = false;
+                        console.error("Error marking notification as read:", err);
+                    }
+                });
+            });
 
-                        location.reload();
-
+            // ============================================================
+            // Mark All Notifications as Read (AJAX)
+            // ============================================================
+            const markAllBtn = document.getElementById("markAllReadBtn");
+            if (markAllBtn) {
+                markAllBtn.addEventListener("click", async function () {
+                    if (!antiForgeryToken) {
+                        console.error("Missing anti-forgery token.");
+                        return;
                     }
 
-                });
-        }
+                    const originalHtml = this.innerHTML;
+                    this.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Marking all...';
+                    this.disabled = true;
 
+                    try {
+                        const response = await fetch('@Url.Action("MarkAllAsRead", "Notification")', {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/x-www-form-urlencoded"
+                            },
+                            body: `__RequestVerificationToken=${encodeURIComponent(antiForgeryToken)}`
+                        });
+
+                        if (response.ok) {
+                            // Update all rows in the DOM
+                            notifRows.forEach(row => {
+                                row.classList.remove("notif-unread");
+                                row.classList.add("notif-read");
+                                row.dataset.isRead = "true";
+
+                                const newBadge = row.querySelector(".notif-new-badge");
+                                if (newBadge) newBadge.remove();
+
+                                const readBtn = row.querySelector(".mark-read-btn");
+                                if (readBtn) readBtn.remove();
+                            });
+
+                            updateCounts();
+                            applyFilter();
+                        } else {
+                            this.innerHTML = originalHtml;
+                            this.disabled = false;
+                            console.error("Failed to mark all notifications as read.");
+                        }
+                    } catch (err) {
+                        this.innerHTML = originalHtml;
+                        this.disabled = false;
+                        console.error("Error marking all as read:", err);
+                    }
+                });
+            }
+        });
     </script>
 }

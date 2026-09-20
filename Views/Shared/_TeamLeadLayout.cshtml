@@ -1,4 +1,4 @@
-﻿@using Microsoft.AspNetCore.Http
+@using Microsoft.AspNetCore.Http
 
 <!DOCTYPE html>
 
@@ -227,397 +227,194 @@
 
 
             /* =====================================================
-                       TOPBAR RIGHT AREA
+                       BUTTONS
                        ===================================================== */
 
-            .teamlead-topbar-right {
-                display: flex;
-                align-items: center;
-                gap: 12px;
+            .btn {
+                border-radius: 8px;
             }
 
 
             /* =====================================================
-                       NOTIFICATION
+                       NOTIFICATION DROPDOWN (Admin Style)
                        ===================================================== */
 
-            .teamlead-notification-wrapper {
-                position: relative;
-            }
-
-
-            .teamlead-notification-btn {
-                width: 42px;
-                height: 42px;
-                border: none;
-                background: #ffffff;
-                border-radius: 10px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: #334155;
-                font-size: 19px;
-                position: relative;
-                transition: all 0.2s ease;
-            }
-
-
-                .teamlead-notification-btn:hover {
-                    background: #f1f5f9;
-                    color: #2563eb;
-                }
-
-
-            .teamlead-notification-badge {
-                position: absolute;
-                top: 2px;
-                right: 2px;
-                min-width: 18px;
-                height: 18px;
-                padding: 0 5px;
-                border-radius: 50px;
-                background: #ef4444;
-                color: white;
-                font-size: 10px;
-                font-weight: 700;
-                display: none;
-                align-items: center;
-                justify-content: center;
-                line-height: 18px;
-            }
-
-
-            /* Notification Dropdown */
-
-            .teamlead-notification-dropdown {
-                width: 370px;
+            .notification-dropdown {
+                width: 380px;
+                min-width: 380px;
                 max-width: calc(100vw - 30px);
                 padding: 0;
-                border: 1px solid #e5e7eb;
+                overflow: hidden;
+                box-sizing: border-box;
                 border-radius: 12px;
-                box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
+            }
+
+            .notification-list {
+                max-height: 420px;
+                overflow-y: auto;
+                overflow-x: hidden;
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            .notification-dropdown-item {
+                width: 100%;
+                padding: 14px 16px;
+                border-bottom: 1px solid #E2E8F0;
+                transition: background-color 0.2s ease;
+                box-sizing: border-box;
                 overflow: hidden;
             }
 
-
-            .teamlead-notification-header {
-                padding: 15px 18px;
-                border-bottom: 1px solid #e5e7eb;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                background: #ffffff;
-            }
-
-
-            .teamlead-notification-title {
-                font-size: 15px;
-                font-weight: 700;
-                color: #1f2937;
-            }
-
-
-            .teamlead-mark-all-btn {
-                border: none;
-                background: transparent;
-                color: #2563eb;
-                font-size: 12px;
-                font-weight: 600;
-                padding: 0;
-            }
-
-
-                .teamlead-mark-all-btn:hover {
-                    text-decoration: underline;
+                .notification-dropdown-item:hover {
+                    background-color: #F8FAFC;
                 }
 
-
-            .teamlead-notification-list {
-                max-height: 390px;
-                overflow-y: auto;
-                background: #ffffff;
-            }
-
-
-            .teamlead-notification-empty {
-                padding: 35px 20px;
-                text-align: center;
-                color: #94a3b8;
-                font-size: 13px;
-            }
-
-
-                .teamlead-notification-empty i {
-                    display: block;
-                    font-size: 28px;
-                    margin-bottom: 10px;
-                }
-
-
-
-
-
-            /* =====================================================
-               TEAM LEAD NOTIFICATION ITEMS
-               ===================================================== */
-
-            .teamlead-notification-dropdown .notification-dropdown-item {
-                padding: 14px 16px;
-                border-bottom: 1px solid #eef2f7;
-                background: #ffffff;
-                transition: background 0.2s ease;
-            }
-
-                .teamlead-notification-dropdown .notification-dropdown-item:hover {
-                    background: #f8fafc;
-                }
-
-                .teamlead-notification-dropdown .notification-dropdown-item:last-child {
+                .notification-dropdown-item:last-child {
                     border-bottom: none;
                 }
 
+            .notification-unread {
+                background-color: #F5F8FF;
+            }
 
-                /* =====================================================
-               UNREAD NOTIFICATION
-               ===================================================== */
-
-                .teamlead-notification-dropdown .notification-dropdown-item.notification-unread {
-                    background: #f8fbff;
-                }
-
-
-            /* =====================================================
-               NOTIFICATION CONTENT
-               ===================================================== */
-
-            .teamlead-notification-dropdown .notification-content {
+            .notification-content {
                 display: flex;
                 align-items: flex-start;
                 gap: 12px;
             }
 
-
-            /* =====================================================
-               NOTIFICATION ICON
-               ===================================================== */
-
-            .teamlead-notification-dropdown .notification-dropdown-icon {
-                width: 34px;
-                height: 34px;
-                min-width: 34px;
+            .notification-dropdown-icon {
+                width: 36px;
+                height: 36px;
+                min-width: 36px;
+                max-width: 36px;
                 border-radius: 50%;
-                background: #eef2ff;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                margin-top: 1px;
+                background-color: #F1F3F5;
+                box-sizing: border-box;
             }
 
-                .teamlead-notification-dropdown .notification-dropdown-icon i {
-                    font-size: 15px;
+                .notification-dropdown-icon i {
+                    font-size: 16px;
                 }
 
-
-            /* =====================================================
-               NOTIFICATION BODY
-               ===================================================== */
-
-            .teamlead-notification-dropdown .notification-body {
+            .notification-body {
                 flex: 1;
                 min-width: 0;
             }
 
-
-            /* =====================================================
-               TITLE ROW
-               ===================================================== */
-
-            .teamlead-notification-dropdown .notification-title-row {
+            .notification-title-row {
                 display: flex;
                 align-items: center;
-                gap: 7px;
+                justify-content: space-between;
+                gap: 8px;
                 margin-bottom: 4px;
             }
 
-            .teamlead-notification-dropdown .notification-title {
-                font-size: 13px;
-                font-weight: 700;
+            .notification-title {
+                display: block;
+                flex: 1 1 auto;
+                min-width: 0;
+                max-width: 100%;
+                font-size: 0.875rem;
                 line-height: 1.4;
-                color: #1f2937;
+                font-weight: 600;
+                color: #1E293B;
+                white-space: normal;
+                overflow-wrap: anywhere;
+                word-break: normal;
             }
 
-
-            /* =====================================================
-               NEW BADGE
-               ===================================================== */
-
-            .teamlead-notification-dropdown .notification-new-badge {
-                font-size: 9px;
+            .notification-new-badge {
+                flex: 0 0 auto;
+                font-size: 0.7rem;
                 font-weight: 600;
-                padding: 3px 6px;
+                padding: 4px 7px;
                 border-radius: 10px;
                 line-height: 1;
             }
 
-
-            /* =====================================================
-               MESSAGE
-               ===================================================== */
-
-            .teamlead-notification-dropdown .notification-message {
-                font-size: 12px;
-                line-height: 1.55;
-                color: #64748b;
-                margin-bottom: 6px;
-                word-break: break-word;
+            .notification-message {
+                display: block;
+                width: 100%;
+                max-width: 100%;
+                margin-top: 5px;
+                font-size: 0.8125rem;
+                line-height: 1.5;
+                color: #64748B !important;
+                white-space: normal;
+                overflow-wrap: anywhere;
+                word-break: normal;
+                box-sizing: border-box;
             }
 
-
-            /* =====================================================
-               DATE
-               ===================================================== */
-
-            .teamlead-notification-dropdown .notification-date {
-                font-size: 10px;
-                color: #94a3b8;
-                margin-bottom: 5px;
+            .notification-date {
+                display: block;
+                width: 100%;
+                margin-top: 5px;
+                font-size: 0.72rem;
+                line-height: 1.4;
+                color: #94A3B8 !important;
             }
 
-
-            /* =====================================================
-               MARK AS READ
-               ===================================================== */
-
-            .teamlead-notification-dropdown .notification-read-button {
-                font-size: 11px;
+            .notification-read-button,
+            .mark-notification-read {
+                display: inline-block;
+                margin-top: 4px;
+                padding: 0;
+                font-size: 0.75rem;
+                line-height: 1.4;
                 color: #2563eb;
                 text-decoration: none;
                 font-weight: 600;
+                white-space: nowrap;
             }
 
-                .teamlead-notification-dropdown .notification-read-button:hover {
+                .notification-read-button:hover,
+                .mark-notification-read:hover {
                     color: #1d4ed8;
                     text-decoration: underline;
                 }
 
+            .notification-dropdown > .border-top {
+                background-color: #FFFFFF;
+                width: 100%;
+            }
 
-            /* =====================================================
-               SCROLLBAR
-               ===================================================== */
+                .notification-dropdown > .border-top .dropdown-item {
+                    width: 100%;
+                    white-space: nowrap;
+                    text-align: center;
+                    box-sizing: border-box;
+                }
 
-            .teamlead-notification-list::-webkit-scrollbar {
+            .notification-list::-webkit-scrollbar {
                 width: 6px;
             }
 
-            .teamlead-notification-list::-webkit-scrollbar-track {
-                background: #f8fafc;
+            .notification-list::-webkit-scrollbar-track {
+                background: #F8FAFC;
             }
 
-            .teamlead-notification-list::-webkit-scrollbar-thumb {
-                background: #cbd5e1;
+            .notification-list::-webkit-scrollbar-thumb {
+                background: #CBD5E1;
                 border-radius: 10px;
             }
 
-                .teamlead-notification-list::-webkit-scrollbar-thumb:hover {
-                    background: #94a3b8;
+                .notification-list::-webkit-scrollbar-thumb:hover {
+                    background: #94A3B8;
                 }
 
-
-
-
-            /* =====================================================
-                       USER DROPDOWN
-                       ===================================================== */
-
-            .teamlead-user-dropdown {
-                border: none;
-                background: transparent;
-                padding: 0;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                color: #1f2937;
-            }
-
-
-                .teamlead-user-dropdown:hover,
-                .teamlead-user-dropdown:focus {
-                    background: transparent;
-                    color: #1f2937;
+            @@media (max-width: 576px) {
+                .notification-dropdown {
+                    width: 340px;
+                    min-width: 340px;
+                    max-width: calc(100vw - 20px);
                 }
-
-
-                .teamlead-user-dropdown::after {
-                    margin-left: 2px;
-                }
-
-
-            .teamlead-user-icon {
-                width: 38px;
-                height: 38px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border-radius: 50%;
-                background: #eef2ff;
-                color: #2563eb;
-                font-size: 18px;
             }
-
-
-            .teamlead-user-details {
-                text-align: left;
-            }
-
-
-            .teamlead-user-name {
-                font-size: 14px;
-                font-weight: 600;
-                color: #1f2937;
-            }
-
-
-            .teamlead-role {
-                font-size: 11px;
-                color: #6b7280;
-            }
-
-
-            .teamlead-user-menu {
-                min-width: 190px;
-                padding: 8px;
-                border: 1px solid #e5e7eb;
-                border-radius: 10px;
-                box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
-            }
-
-
-                .teamlead-user-menu .dropdown-item {
-                    padding: 10px 12px;
-                    border-radius: 7px;
-                    font-size: 13px;
-                }
-
-
-                    .teamlead-user-menu .dropdown-item:hover {
-                        background: #f1f5f9;
-                    }
-
-
-                .teamlead-user-menu .profile-item {
-                    color: #334155;
-                }
-
-
-                .teamlead-user-menu .logout-item {
-                    color: #dc2626;
-                }
-
-
-                    .teamlead-user-menu .logout-item:hover {
-                        background: #fef2f2;
-                        color: #dc2626;
-                    }
 
 
             /* =====================================================
@@ -702,22 +499,7 @@
                 }
 
 
-                .teamlead-user-details {
-                    display: none;
-                }
-
-
-                .teamlead-content {
-                    padding: 20px;
-                }
-
-
-                .teamlead-footer {
-                    padding: 15px 20px;
-                }
-
-
-                .teamlead-notification-dropdown {
+                .notification-dropdown {
                     position: fixed !important;
                     top: 65px !important;
                     right: 10px !important;
@@ -732,15 +514,6 @@
 
 
 <body>
-
-
-    
-    <!-- =====================================================
-         Form for Anti-Forgery Token
-         ===================================================== -->
-    <form id="notificationAntiForgeryToken" style="display:none;">
-        @Html.AntiForgeryToken()
-    </form>
 
 
     <!-- =====================================================
@@ -1002,136 +775,170 @@
 
 
             <!-- =================================================
-                 TOPBAR RIGHT
+                 TOPBAR RIGHT (Admin Style)
                  ================================================= -->
 
-            <div class="teamlead-topbar-right">
+            <div class="d-flex align-items-center">
 
+                <!-- Search -->
+                <div class="me-4">
 
-                <!-- =================================================
-                     NOTIFICATION
-                     ================================================= -->
+                    <input type="text"
+                           class="form-control"
+                           placeholder="Search..." />
 
-                <div class="dropdown teamlead-notification-wrapper">
+                </div>
 
-                    <button class="teamlead-notification-btn"
+                <!-- Notification Bell -->
+
+                <div class="dropdown me-3">
+
+                    <button class="btn btn-light position-relative"
                             type="button"
                             id="notificationBell"
                             data-bs-toggle="dropdown"
-                            data-bs-auto-close="outside"
-                            aria-expanded="false"
-                            title="Notifications">
+                            aria-expanded="false">
 
-                        <i class="bi bi-bell"></i>
+                        <i class="bi bi-bell fs-5"></i>
 
                         <span id="notificationBadge"
-                              class="teamlead-notification-badge">
+                              class="position-absolute
+                            top-0
+                            start-100
+                            translate-middle
+                            badge
+                            rounded-pill
+                            bg-danger
+                            d-none">
+
                             0
+
                         </span>
 
                     </button>
 
 
-                    <!-- Notification Dropdown -->
-
-                    <div class="dropdown-menu dropdown-menu-end teamlead-notification-dropdown"
+                    <div class="dropdown-menu
+                        dropdown-menu-end
+                        shadow
+                        border-0
+                        notification-dropdown"
                          aria-labelledby="notificationBell">
-
 
                         <!-- Header -->
 
-                        <div class="teamlead-notification-header">
+                        <div class="d-flex
+                            justify-content-between
+                            align-items-center
+                            px-3
+                            py-2
+                            border-bottom">
 
-                            <span class="teamlead-notification-title">
+                            <h6 class="mb-0 fw-semibold">
+
                                 Notifications
-                            </span>
+
+                            </h6>
 
                             <button type="button"
-                                    id="notificationMarkAllBtn"
-                                    class="teamlead-mark-all-btn">
+                                    class="btn btn-sm
+                                btn-link
+                                text-decoration-none
+                                p-0"
+                                    id="notificationMarkAllBtn">
 
-                                Mark all as read
+                                Mark all
 
                             </button>
 
                         </div>
 
 
-                        <!-- List -->
+                        <!-- Notification List -->
 
                         <div id="notificationList"
-                             class="teamlead-notification-list">
+                             class="notification-list">
 
-                            <div class="teamlead-notification-empty">
+                            <div class="text-center py-4">
 
-                                <i class="bi bi-bell-slash"></i>
+                                <div class="spinner-border
+                                    spinner-border-sm
+                                    text-primary">
+                                </div>
 
-                                No notifications
+                                <div class="small text-muted mt-2">
+
+                                    Loading notifications...
+
+                                </div>
 
                             </div>
 
                         </div>
 
+
+                        <!-- Footer -->
+
+                        <div class="border-top text-center">
+
+                            <a asp-controller="Notification"
+                               asp-action="Index"
+                               class="dropdown-item
+                                text-center
+                                py-2
+                                fw-semibold">
+
+                                View All Notifications
+
+                            </a>
+
+                        </div>
 
                     </div>
 
                 </div>
 
 
-                <!-- =================================================
-                     USER DROPDOWN
-                     ================================================= -->
+                <!-- Anti-Forgery Token -->
 
+                <div id="notificationAntiForgeryToken"
+                     class="d-none">
+
+                    @Html.AntiForgeryToken()
+
+                </div>
+
+                <!-- Profile -->
                 <div class="dropdown">
 
+                    <button class="btn btn-light dropdown-toggle"
+                            data-bs-toggle="dropdown">
 
-                    <button class="teamlead-user-dropdown"
-                            type="button"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false">
+                        <i class="bi bi-person-circle me-2"></i>
 
-
-                        <div class="teamlead-user-icon">
-
-                            <i class="bi bi-person-fill"></i>
-
-                        </div>
-
-
-                        <div class="teamlead-user-details">
-
-                            <div class="teamlead-user-name">
-
-                                @Context.Session.GetString("FullName")
-
-                            </div>
-
-                            <div class="teamlead-role">
-
-                                Team Lead
-
-                            </div>
-
-                        </div>
-
+                        @Context.Session.GetString("FullName")
 
                     </button>
 
-
-                    <!-- User Menu -->
-
-                    <ul class="dropdown-menu dropdown-menu-end teamlead-user-menu">
-
-
-                        <!-- Profile -->
+                    <ul class="dropdown-menu dropdown-menu-end">
 
                         <li>
 
-                            <a class="dropdown-item profile-item"
+                            <a class="dropdown-item"
+                               asp-controller="TeamLead"
+                               asp-action="Dashboard">
+
+                                Dashboard
+
+                            </a>
+
+                        </li>
+
+                        <li>
+
+                            <a class="dropdown-item"
                                asp-controller="TeamLead"
                                asp-action="Profile">
-
-                                <i class="bi bi-person-circle me-2"></i>
 
                                 Profile
 
@@ -1139,23 +946,17 @@
 
                         </li>
 
-
                         <li>
 
-                            <hr class="dropdown-divider" />
+                            <hr class="dropdown-divider">
 
                         </li>
 
-
-                        <!-- Logout -->
-
                         <li>
 
-                            <a class="dropdown-item logout-item"
+                            <a class="dropdown-item text-danger"
                                asp-controller="Auth"
                                asp-action="Logout">
-
-                                <i class="bi bi-box-arrow-right me-2"></i>
 
                                 Logout
 
@@ -1163,11 +964,9 @@
 
                         </li>
 
-
                     </ul>
 
                 </div>
-
 
             </div>
 

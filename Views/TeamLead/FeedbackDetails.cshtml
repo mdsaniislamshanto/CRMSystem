@@ -1,4 +1,4 @@
-﻿@model CRMSystem.Models.ViewModels.FeedbackDetailsViewModel
+@model CRMSystem.Models.ViewModels.FeedbackDetailsViewModel
 
 @{
     ViewData["Title"] = "Feedback Details";
@@ -171,7 +171,7 @@
 
                 <div class="col-md-8">
 
-                    @Model.SubmittedAt.ToString(
+                    @Model.SubmittedAt.ToBangladeshTime().ToString(
                         "dd MMM yyyy hh:mm tt")
 
                 </div>
@@ -246,7 +246,7 @@
 
                     <div class="col-md-8">
 
-                        @Model.NextFollowUpDate.Value.ToString(
+                        @Model.NextFollowUpDate.Value.ToBangladeshTime().ToString(
                             "dd MMM yyyy hh:mm tt")
 
                     </div>

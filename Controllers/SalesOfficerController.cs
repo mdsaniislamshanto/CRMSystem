@@ -1,4 +1,4 @@
-﻿using CRMSystem.Constants;
+using CRMSystem.Constants;
 using CRMSystem.Models.ViewModels;
 using CRMSystem.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -272,6 +272,29 @@ namespace CRMSystem.Controllers
             return View(performance);
         }
 
+        // =====================================================
+        // GET: SalesOfficer/LeadDetails/{id}
+        // =====================================================
+        [HttpGet]
+        public async Task<IActionResult> LeadDetails(long id)
+        {
+            var userId = HttpContext.Session.GetString(SessionKeys.UserId);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var lead = await _leadService.GetLeadByIdAsync(id);
+            if (lead == null)
+            {
+                return NotFound();
+            }
+
+            ViewData["Title"] = "Lead Details";
+            ViewData["Breadcrumb"] = "Lead Details";
+
+            return View(lead);
+        }
 
     }
 }

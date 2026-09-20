@@ -1,4 +1,4 @@
-﻿
+
 
 
 
@@ -694,24 +694,6 @@
 
 
         <div class="lead-actions">
-
-            <form asp-action="GenerateDemoLead"
-                  method="post"
-                  class="d-inline">
-
-                @Html.AntiForgeryToken()
-
-                <button type="submit"
-                        class="btn btn-outline-success">
-
-                    <i class="bi bi-lightning-charge-fill me-1"></i>
-
-                    Generate Demo Lead
-
-                </button>
-
-            </form>
-
 
             <a asp-action="Create"
                class="btn btn-primary">
@@ -1639,11 +1621,11 @@
                                         <div class="assignment-time">
 
                                             <div>
-                                                @lead.AssignedAt.Value.ToLocalTime().ToString("dd MMM yyyy")
+                                                @lead.AssignedAt.Value.ToBangladeshTime().ToString("dd MMM yyyy")
                                             </div>
 
                                             <div>
-                                                @lead.AssignedAt.Value.ToLocalTime().ToString("hh:mm tt")
+                                                @lead.AssignedAt.Value.ToBangladeshTime().ToString("hh:mm tt")
                                             </div>
 
                                         </div>
@@ -1713,11 +1695,9 @@
 
                                 <td class="lead-actions-cell">
 
-
                                     <!-- View -->
-
-                                    <a asp-controller="SalesManager"
-                                       asp-action="LeadDetails"
+                                    <a asp-controller="Lead"
+                                       asp-action="Details"
                                        asp-route-id="@lead.LeadId"
                                        class="lead-action-btn action-view"
                                        title="View Lead">
@@ -1728,12 +1708,12 @@
 
 
                                     @if (lead.Status ==
-                                        CRMSystem.Enums.LeadStatus.New)
+                                         CRMSystem.Enums.LeadStatus.New)
                                     {
                                         <!-- Assign -->
 
-                                        <a asp-controller="SalesManager"
-                                           asp-action="AssignLead"
+                                        <a asp-controller="Lead"
+                                           asp-action="Assign"
                                            asp-route-id="@lead.LeadId"
                                            class="lead-action-btn action-assign"
                                            title="Assign Lead">
@@ -1745,8 +1725,8 @@
 
                                         <!-- Edit -->
 
-                                        <a asp-controller="SalesManager"
-                                           asp-action="EditLead"
+                                        <a asp-controller="Lead"
+                                           asp-action="Edit"
                                            asp-route-id="@lead.LeadId"
                                            class="lead-action-btn action-edit"
                                            title="Edit Lead">
@@ -1761,8 +1741,8 @@
                                     {
                                         <!-- Edit -->
 
-                                        <a asp-controller="SalesManager"
-                                           asp-action="EditLead"
+                                        <a asp-controller="Lead"
+                                           asp-action="Edit"
                                            asp-route-id="@lead.LeadId"
                                            class="lead-action-btn action-edit"
                                            title="Edit Lead">
@@ -1774,8 +1754,8 @@
 
                                         <!-- Reassign -->
 
-                                        <a asp-controller="SalesManager"
-                                           asp-action="ReassignLead"
+                                        <a asp-controller="Lead"
+                                           asp-action="Assign"
                                            asp-route-id="@lead.LeadId"
                                            class="lead-action-btn action-reassign"
                                            title="Reassign Lead">
@@ -1788,7 +1768,7 @@
 
                                     <!-- Archive -->
 
-                                    <form asp-controller="SalesManager"
+                                    <form asp-controller="Lead"
                                           asp-action="Archive"
                                           asp-route-id="@lead.LeadId"
                                           method="post"

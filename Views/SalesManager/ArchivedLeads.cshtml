@@ -1,4 +1,4 @@
-﻿@model IEnumerable<CRMSystem.Models.ViewModels.LeadViewModel>
+@model IEnumerable<CRMSystem.Models.ViewModels.LeadViewModel>
 
 @{
     ViewData["Title"] = "Archived Leads";
@@ -714,13 +714,13 @@
                                     {
                                         <div class="archive-date">
 
-                                            @lead.ArchivedAt.Value.ToLocalTime().ToString("dd MMM yyyy")
+                                            @lead.ArchivedAt.Value.ToBangladeshTime().ToString("dd MMM yyyy")
 
                                         </div>
 
                                         <div class="archive-time">
 
-                                            @lead.ArchivedAt.Value.ToLocalTime().ToString("hh:mm tt")
+                                            @lead.ArchivedAt.Value.ToBangladeshTime().ToString("hh:mm tt")
 
                                         </div>
                                     }

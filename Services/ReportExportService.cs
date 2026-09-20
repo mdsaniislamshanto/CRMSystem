@@ -1,4 +1,4 @@
-﻿using ClosedXML.Excel;
+using ClosedXML.Excel;
 using CRMSystem.Models.ViewModels;
 using CRMSystem.Services.Interfaces;
 using QuestPDF.Fluent;
@@ -337,7 +337,7 @@ namespace CRMSystem.Services
                             .AlignCenter()
                             .Text(
                                 $"Generated on " +
-                                $"{DateTime.Now:dd MMM yyyy HH:mm}");
+                                $"{DateTime.UtcNow.ToBangladeshTime():dd MMM yyyy, hh:mm tt}");
                     });
                 });
 

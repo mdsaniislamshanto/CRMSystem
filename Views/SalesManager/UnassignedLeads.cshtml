@@ -1,4 +1,4 @@
-﻿@model CRMSystem.Models.ViewModels.UnassignedLeadFilterViewModel
+@model CRMSystem.Models.ViewModels.UnassignedLeadFilterViewModel
 
 @{
     ViewData["Title"] = "Assign Leads";
@@ -944,7 +944,7 @@
 
                                     <div class="created-date">
 
-                                        @lead.CreatedAt.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")
+                                        @lead.CreatedAt.ToBangladeshTime().ToString("dd MMM yyyy, hh:mm tt")
 
                                     </div>
 

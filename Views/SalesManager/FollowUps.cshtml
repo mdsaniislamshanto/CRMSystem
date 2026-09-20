@@ -1,4 +1,4 @@
-﻿@model CRMSystem.Models.ViewModels.FollowUpFilterViewModel
+@model CRMSystem.Models.ViewModels.FollowUpFilterViewModel
 
 @{
     ViewData["Title"] = "Follow-ups";
@@ -1018,6 +1018,10 @@
                             Current Follow-up Status
                         </th>
 
+                        <th style="min-width: 155px;">
+                            <i class="bi bi-robot me-1 text-primary"></i> AI Analysis
+                        </th>
+
                         <th class="text-center">
                             Action
                         </th>
@@ -1033,7 +1037,7 @@
                     {
                         <tr>
 
-                            <td colspan="8">
+                            <td colspan="9">
 
                                 <div class="empty-state">
 
@@ -1099,13 +1103,13 @@
 
                                     <div class="date-main">
 
-                                        @followUp.SubmittedAt.ToLocalTime().ToString("dd MMM yyyy")
+                                        @followUp.SubmittedAt.ToBangladeshTime().ToString("dd MMM yyyy")
 
                                     </div>
 
                                     <div class="date-time">
 
-                                        @followUp.SubmittedAt.ToLocalTime().ToString("hh:mm tt")
+                                        @followUp.SubmittedAt.ToBangladeshTime().ToString("hh:mm tt")
 
                                     </div>
 
@@ -1118,13 +1122,13 @@
 
                                     <div class="date-main">
 
-                                        @followUp.FollowUpDate.ToLocalTime().ToString("dd MMM yyyy")
+                                        @followUp.FollowUpDate.ToBangladeshTime().ToString("dd MMM yyyy")
 
                                     </div>
 
                                     <div class="date-time">
 
-                                        @followUp.FollowUpDate.ToLocalTime().ToString("hh:mm tt")
+                                        @followUp.FollowUpDate.ToBangladeshTime().ToString("hh:mm tt")
 
                                     </div>
 
@@ -1243,6 +1247,66 @@
                                         </span>
                                     }
 
+                                </td>
+
+
+                                <!-- AI Analysis -->
+                                <td id="ai-cell-@followUp.FeedbackId">
+                                    @if (followUp.AiAnalyzed)
+                                    {
+                                        <div class="d-flex flex-column gap-1 align-items-start">
+                                            <div class="d-flex flex-wrap gap-1">
+                                                @if (followUp.AiCustomerInterested == true)
+                                                {
+                                                    <span class="badge bg-success" title="Customer Interested">
+                                                        <i class="bi bi-check-circle me-1"></i>Interested
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger" title="Not Interested">
+                                                        <i class="bi bi-x-circle me-1"></i>Not Interested
+                                                    </span>
+                                                }
+
+                                                @if (followUp.AiBuyingIntent == "High")
+                                                {
+                                                    <span class="badge bg-success-subtle text-success border border-success" title="Purchase Likelihood: High">
+                                                        High Buy
+                                                    </span>
+                                                }
+                                                else if (followUp.AiBuyingIntent == "Low")
+                                                {
+                                                    <span class="badge bg-danger-subtle text-danger border border-danger" title="Purchase Likelihood: Low">
+                                                        Low Buy
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning-subtle text-dark border border-warning" title="Purchase Likelihood: Moderate">
+                                                        Moderate
+                                                    </span>
+                                                }
+
+                                                @if (followUp.AiSiteVisitInterested == true)
+                                                {
+                                                    <span class="badge bg-primary-subtle text-primary border border-primary" title="Interested in Site Visit">
+                                                        <i class="bi bi-geo-alt me-1"></i>Site Visit
+                                                    </span>
+                                                }
+                                            </div>
+
+                                            <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2 mt-1" style="font-size: 0.75rem;" onclick="openAiAnalysisModal(@followUp.FeedbackId)">
+                                                <i class="bi bi-sparkles me-1"></i> AI Details
+                                            </button>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" style="font-size: 0.78rem;" onclick="analyzeFromTable(@followUp.FeedbackId, this)">
+                                            <i class="bi bi-stars text-primary me-1"></i> Analyze with AI
+                                        </button>
+                                    }
                                 </td>
 
 
@@ -1421,3 +1485,5 @@
     </div>
 
 </div>
+
+<partial name="_AiAnalysisModalPartial" />

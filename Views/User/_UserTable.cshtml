@@ -1,4 +1,4 @@
-﻿@model IEnumerable<CRMSystem.Models.ViewModels.UserViewModel>
+@model IEnumerable<CRMSystem.Models.ViewModels.UserViewModel>
 
 
 
@@ -103,7 +103,7 @@
 
                                 <td>
 
-                                    @(user.LastLoginAt?.ToString("dd MMM yyyy hh:mm tt") ?? "Never")
+                                    @(user.LastLoginAt?.ToBangladeshTime().ToString("dd MMM yyyy hh:mm tt") ?? "Never")
 
                                 </td>
 

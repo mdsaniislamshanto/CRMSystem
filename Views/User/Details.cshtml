@@ -1,4 +1,4 @@
-﻿@model CRMSystem.Models.ViewModels.UserDetailsViewModel
+@model CRMSystem.Models.ViewModels.UserDetailsViewModel
 
 @{
     ViewData["Title"] = "User Details";
@@ -258,6 +258,7 @@
                 <div class="col-md-8">
 
                     @(Model.LastLoginAt?
+                        .ToBangladeshTime()
                         .ToString("dd MMM yyyy hh:mm tt")
                         ?? "Never")
 
@@ -275,6 +276,7 @@
                 <div class="col-md-8">
 
                     @(Model.LastPasswordChangedAt?
+                        .ToBangladeshTime()
                         .ToString("dd MMM yyyy hh:mm tt")
                         ?? "Never")
 

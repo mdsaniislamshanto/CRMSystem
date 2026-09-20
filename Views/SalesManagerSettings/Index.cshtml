@@ -1,4 +1,4 @@
-﻿@model CRMSystem.Models.ViewModels.ProfileViewModel
+@model CRMSystem.Models.ViewModels.ProfileViewModel
 
 @{
     ViewData["Title"] = "Settings";
@@ -51,7 +51,7 @@
     {
         requestedAtText =
             currentAutoAssignmentRequest.RequestedAt
-                .ToLocalTime()
+                .ToBangladeshTime()
                 .ToString("dd MMM yyyy, hh:mm tt");
 
 
@@ -59,7 +59,7 @@
         {
             reviewedAtText =
                 currentAutoAssignmentRequest.ReviewedAt.Value
-                    .ToLocalTime()
+                    .ToBangladeshTime()
                     .ToString("dd MMM yyyy, hh:mm tt");
         }
     }

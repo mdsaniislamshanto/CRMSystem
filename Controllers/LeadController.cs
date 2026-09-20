@@ -1,4 +1,4 @@
-﻿using CRMSystem.Constants;
+using CRMSystem.Constants;
 using CRMSystem.Enums;
 using CRMSystem.Models.ViewModels;
 using CRMSystem.Services.Interfaces;
@@ -10,16 +10,13 @@ namespace CRMSystem.Controllers
     public class LeadController : Controller
     {
         private readonly ILeadService _leadService;
-        private readonly ILeadCaptureService _leadCaptureService;
         private readonly IAssignmentService _assignmentService;
 
         public LeadController(
             ILeadService leadService,
-            ILeadCaptureService leadCaptureService,
             IAssignmentService assignmentService)
         {
             _leadService = leadService;
-            _leadCaptureService = leadCaptureService;
             _assignmentService = assignmentService;
         }
 
@@ -393,6 +390,16 @@ namespace CRMSystem.Controllers
 
             if (lead == null)
             {
+                var archivedLead =
+                    await _leadService.GetArchivedLeadByIdAsync(id);
+
+                if (archivedLead != null)
+                {
+                    return RedirectToAction(
+                        nameof(ArchivedDetails),
+                        new { id });
+                }
+
                 return NotFound();
             }
 
@@ -629,56 +636,6 @@ namespace CRMSystem.Controllers
         }
 
 
-        // =====================================================
-        // POST: Generate Demo Lead
-        // =====================================================
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> GenerateDemoLead()
-        {
-            var model =
-                new AutoLeadCreateViewModel
-                {
-                    LeadName =
-                        "Demo Customer",
-
-                    CompanyName =
-                        "Facebook Demo Ltd.",
-
-                    Email =
-                        "demo@example.com",
-
-                    Phone =
-                        "01712345678",
-
-                    Profession =
-                        "Business Owner",
-
-                    Address =
-                        "Dhaka",
-
-                    Source =
-                        LeadSource.Facebook,
-
-                    Priority =
-                        LeadPriority.Medium,
-
-                    Description =
-                        "This is a simulated Facebook Lead."
-                };
-
-            await _leadCaptureService.CaptureLeadAsync(
-                model,
-                LeadCaptureSource.FacebookLeadAds,
-                "FB-DEMO-001",
-                null);
-
-            TempData["Success"] =
-                "Demo Lead generated successfully.";
-
-            return RedirectToAction(nameof(Index));
-        }
 
 
         // =====================================================
