@@ -1,4 +1,4 @@
-﻿using CRMSystem.Constants;
+using CRMSystem.Constants;
 using CRMSystem.Data;
 using CRMSystem.Enums;
 using CRMSystem.Models.ViewModels;
@@ -488,6 +488,128 @@ namespace CRMSystem.Controllers
 
             TempData["Success"] =
                 result.Message;
+
+            return RedirectToAction(
+                nameof(Targets));
+        }
+
+
+        // =====================================================
+        // GET: Admin/EditTarget
+        // Edit Sales Manager Target
+        // =====================================================
+
+        [HttpGet]
+        public async Task<IActionResult> EditTarget(long id)
+        {
+            ViewData["Title"] =
+                "Edit Sales Manager Target";
+
+            ViewData["Breadcrumb"] =
+                "Sales Targets / Edit";
+
+            var model =
+                await _targetService
+                    .GetEditTargetViewModelAsync(id);
+
+            if (model == null)
+            {
+                TempData["Error"] =
+                    "Target not found or not eligible for editing.";
+
+                return RedirectToAction(
+                    nameof(Targets));
+            }
+
+            return View(model);
+        }
+
+
+        // =====================================================
+        // POST: Admin/EditTarget
+        // Edit Sales Manager Target
+        // =====================================================
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditTarget(
+            EditTargetViewModel model)
+        {
+            ViewData["Title"] =
+                "Edit Sales Manager Target";
+
+            ViewData["Breadcrumb"] =
+                "Sales Targets / Edit";
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var currentAdminId =
+                _authService.GetCurrentUserId();
+
+            if (!currentAdminId.HasValue)
+            {
+                return Unauthorized();
+            }
+
+            var result =
+                await _targetService
+                    .UpdateTargetAsync(
+                        model,
+                        currentAdminId.Value);
+
+            if (!result.IsSuccess)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    result.Message);
+
+                return View(model);
+            }
+
+            TempData["Success"] =
+                result.Message;
+
+            return RedirectToAction(
+                nameof(Targets));
+        }
+
+
+        // =====================================================
+        // POST: Admin/EndTarget
+        // End Sales Manager Target Early
+        // =====================================================
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EndTarget(long id)
+        {
+            var currentAdminId =
+                _authService.GetCurrentUserId();
+
+            if (!currentAdminId.HasValue)
+            {
+                return Unauthorized();
+            }
+
+            var result =
+                await _targetService
+                    .EndTargetAsync(
+                        id,
+                        currentAdminId.Value);
+
+            if (result.IsSuccess)
+            {
+                TempData["Success"] =
+                    result.Message;
+            }
+            else
+            {
+                TempData["Error"] =
+                    result.Message;
+            }
 
             return RedirectToAction(
                 nameof(Targets));

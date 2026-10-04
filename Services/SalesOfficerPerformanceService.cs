@@ -1,8 +1,12 @@
-﻿using CRMSystem.Data;
+using CRMSystem.Constants;
+using CRMSystem.Data;
 using CRMSystem.Enums;
+using CRMSystem.Models.Entities;
 using CRMSystem.Models.ViewModels;
 using CRMSystem.Services.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -12,11 +16,14 @@ namespace CRMSystem.Services
         : ISalesOfficerPerformanceService
     {
         private readonly ApplicationDbContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public SalesOfficerPerformanceService(
-            ApplicationDbContext context)
+            ApplicationDbContext context,
+            IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
 
 
@@ -43,17 +50,11 @@ namespace CRMSystem.Services
 
 
             // =================================================
-            // 2. Load Active Sales Officers
+            // 2. Load Active Sales Officers (Role-Filtered)
             // =================================================
 
             var salesOfficers =
-                await _context.Users
-                    .AsNoTracking()
-                    .Where(u =>
-                        u.Role != null &&
-                        u.Role.RoleKey == "SALES_OFFICER" &&
-                        u.IsActive &&
-                        !u.IsDeleted)
+                await GetBaseSalesOfficersQuery()
                     .OrderBy(u => u.FirstName)
                     .ThenBy(u => u.LastName)
                     .Select(u => new
@@ -878,17 +879,11 @@ namespace CRMSystem.Services
 
 
             // =================================================
-            // 2. Load Active Sales Officers
+            // 2. Load Active Sales Officers (Role-Filtered)
             // =================================================
 
             var salesOfficerIds =
-                await _context.Users
-                    .AsNoTracking()
-                    .Where(u =>
-                        u.Role != null &&
-                        u.Role.RoleKey == "SALES_OFFICER" &&
-                        u.IsActive &&
-                        !u.IsDeleted)
+                await GetBaseSalesOfficersQuery()
                     .Select(u => u.UserId)
                     .ToListAsync();
 
@@ -2161,6 +2156,58 @@ namespace CRMSystem.Services
         // Get Sales Officer IDs Under A Sales Manager
         // =====================================================
 
+        // =====================================================
+        // Get Base Sales Officers Query (Role-based Hierarchy)
+        // =====================================================
+
+        private IQueryable<User> GetBaseSalesOfficersQuery()
+        {
+            var query = _context.Users
+                .AsNoTracking()
+                .Where(u =>
+                    u.Role != null &&
+                    u.Role.RoleKey == RoleKeys.SalesOfficer &&
+                    u.IsActive &&
+                    !u.IsDeleted);
+
+            var httpContext = _httpContextAccessor.HttpContext;
+            if (httpContext == null)
+            {
+                return query;
+            }
+
+            var currentRole = httpContext.Session?.GetString(SessionKeys.RoleKey);
+            var isSalesManager = string.Equals(currentRole, RoleKeys.SalesManager, StringComparison.OrdinalIgnoreCase)
+                || httpContext.User.IsInRole(RoleKeys.SalesManager);
+
+            if (isSalesManager)
+            {
+                long? salesManagerId = null;
+                var sessionUserId = httpContext.Session?.GetString(SessionKeys.UserId);
+                if (long.TryParse(sessionUserId, out var parsedSessionUserId))
+                {
+                    salesManagerId = parsedSessionUserId;
+                }
+                else
+                {
+                    var claimUserId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    if (long.TryParse(claimUserId, out var parsedClaimUserId))
+                    {
+                        salesManagerId = parsedClaimUserId;
+                    }
+                }
+
+                if (salesManagerId.HasValue)
+                {
+                    query = query.Where(u =>
+                        (u.TeamLead != null && u.TeamLead.SalesManagerId == salesManagerId.Value) ||
+                        u.SalesManagerId == salesManagerId.Value);
+                }
+            }
+
+            return query;
+        }
+
         private async Task<HashSet<long>>
             GetSalesOfficerIdsForSalesManagerAsync(
                 long salesManagerId)
@@ -2170,12 +2217,12 @@ namespace CRMSystem.Services
                     .AsNoTracking()
                     .Where(u =>
                         u.Role != null &&
-                        u.Role.RoleKey == "SALES_OFFICER" &&
+                        u.Role.RoleKey == RoleKeys.SalesOfficer &&
                         u.IsActive &&
                         !u.IsDeleted &&
-                        u.TeamLead != null &&
-                        u.TeamLead.SalesManagerId ==
-                            salesManagerId)
+                        ((u.TeamLead != null &&
+                          u.TeamLead.SalesManagerId == salesManagerId) ||
+                         u.SalesManagerId == salesManagerId))
                     .Select(u => u.UserId)
                     .ToListAsync();
 

@@ -1,4 +1,4 @@
-﻿@model CRMSystem.Models.ViewModels.CreateLeadViewModel
+@model CRMSystem.Models.ViewModels.CreateLeadViewModel
 
 @{
     ViewData["Title"] = "Create Lead";
@@ -159,18 +159,6 @@
     </textarea>
 
         <span asp-validation-for="Description" class="text-danger"></span>
-
-    </div>
-
-    <div class="mb-3">
-
-        <label asp-for="FollowUpDate" class="form-label"></label>
-
-        <input asp-for="FollowUpDate"
-               type="date"
-               class="form-control" />
-
-        <span asp-validation-for="FollowUpDate" class="text-danger"></span>
 
     </div>
 

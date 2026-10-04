@@ -1557,6 +1557,138 @@ namespace CRMSystem.Controllers
         }
 
         // =====================================================
+        // GET: Edit Team Lead Target
+        // =====================================================
+        [HttpGet]
+        [Authorize(Roles = RoleKeys.SalesManager)]
+        public async Task<IActionResult> EditTeamLeadTarget(long id)
+        {
+            var salesManagerId =
+                _GetCurrentUserId();
+
+            if (!salesManagerId.HasValue)
+            {
+                return RedirectToAction(
+                    "Login",
+                    "Auth");
+            }
+
+            var model =
+                await _targetService
+                    .GetEditTeamLeadTargetViewModelAsync(
+                        id,
+                        salesManagerId.Value);
+
+            if (model == null)
+            {
+                TempData["Error"] =
+                    "Team Lead target not found or not eligible for editing.";
+
+                return RedirectToAction(
+                    nameof(TeamLeadTargets));
+            }
+
+            ViewData["Title"] =
+                "Edit Team Lead Target";
+
+            ViewData["Breadcrumb"] =
+                "Edit Team Lead Target";
+
+            return View(model);
+        }
+
+        // =====================================================
+        // POST: Edit Team Lead Target
+        // =====================================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = RoleKeys.SalesManager)]
+        public async Task<IActionResult> EditTeamLeadTarget(
+            EditTargetViewModel model)
+        {
+            var salesManagerId =
+                _GetCurrentUserId();
+
+            if (!salesManagerId.HasValue)
+            {
+                return RedirectToAction(
+                    "Login",
+                    "Auth");
+            }
+
+            ViewData["Title"] =
+                "Edit Team Lead Target";
+
+            ViewData["Breadcrumb"] =
+                "Edit Team Lead Target";
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var result =
+                await _targetService
+                    .UpdateTeamLeadTargetAsync(
+                        model,
+                        salesManagerId.Value);
+
+            if (!result.IsSuccess)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    result.Message);
+
+                return View(model);
+            }
+
+            TempData["Success"] =
+                result.Message;
+
+            return RedirectToAction(
+                nameof(TeamLeadTargets));
+        }
+
+        // =====================================================
+        // POST: End Team Lead Target Early
+        // =====================================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = RoleKeys.SalesManager)]
+        public async Task<IActionResult> EndTeamLeadTarget(long id)
+        {
+            var salesManagerId =
+                _GetCurrentUserId();
+
+            if (!salesManagerId.HasValue)
+            {
+                return RedirectToAction(
+                    "Login",
+                    "Auth");
+            }
+
+            var result =
+                await _targetService
+                    .EndTeamLeadTargetAsync(
+                        id,
+                        salesManagerId.Value);
+
+            if (result.IsSuccess)
+            {
+                TempData["Success"] =
+                    result.Message;
+            }
+            else
+            {
+                TempData["Error"] =
+                    result.Message;
+            }
+
+            return RedirectToAction(
+                nameof(TeamLeadTargets));
+        }
+
+        // =====================================================
         // Performance Trend
         // =====================================================
         [HttpGet]

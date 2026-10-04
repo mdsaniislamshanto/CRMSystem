@@ -1,8 +1,8 @@
-@model CRMSystem.Models.ViewModels.CreateTargetViewModel
+@model CRMSystem.Models.ViewModels.EditTargetViewModel
 
 @{
-    ViewData["Title"] = "Create Sales Manager Target";
-    ViewData["Breadcrumb"] = "Sales Targets / Create";
+    ViewData["Title"] = "Edit Sales Manager Target";
+    ViewData["Breadcrumb"] = "Sales Targets / Edit";
     Layout = "_AdminLayout";
 }
 
@@ -15,12 +15,11 @@
     <div class="mb-4">
 
         <h2 class="fw-bold mb-1">
-            Create Sales Manager Target
+            Edit Sales Manager Target
         </h2>
 
         <p class="text-muted mb-0">
-            Set a weekly or monthly completed-lead target
-            for a Sales Manager.
+            Update target count or period for @Model.UserName.
         </p>
 
     </div>
@@ -39,11 +38,11 @@
                 <div class="card-header bg-white border-0 py-3">
 
                     <h5 class="fw-bold mb-1">
-                        Target Information
+                        Edit Target Details
                     </h5>
 
                     <p class="text-muted small mb-0">
-                        Enter the target details below.
+                        Modify target count or period below.
                     </p>
 
                 </div>
@@ -52,12 +51,16 @@
                 <div class="card-body p-4">
 
                     <form asp-controller="Admin"
-                          asp-action="CreateTarget"
+                          asp-action="EditTarget"
                           method="post"
                           autocomplete="off">
 
                         @Html.AntiForgeryToken()
 
+                        <input type="hidden" asp-for="TargetId" />
+                        <input type="hidden" asp-for="UserId" />
+                        <input type="hidden" asp-for="UserName" />
+                        <input type="hidden" asp-for="UserRole" />
 
                         <!-- Validation Summary -->
 
@@ -68,43 +71,23 @@
 
 
                         <!-- =================================================
-                             Sales Manager
+                             Sales Manager (Read-only Display)
                              ================================================= -->
 
                         <div class="mb-4">
 
-                            <label asp-for="UserId"
-                                   class="form-label fw-semibold">
-
+                            <label class="form-label fw-semibold">
                                 Sales Manager
-
                             </label>
 
-                            <select asp-for="UserId"
-                                    asp-items="Model.Users"
-                                    class="form-select"
-                                    id="UserId">
-
-                                <option value="">
-                                    -- Select Sales Manager --
-                                </option>
-
-                            </select>
-
-                            <span asp-validation-for="UserId"
-                                  class="text-danger">
-                            </span>
-
-                            <div id="activeTargetAlert"
-                                 class="alert alert-warning border-0 mt-2 d-none"
-                                 role="alert">
-                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                                <span id="activeTargetText"></span>
-                            </div>
+                            <input type="text"
+                                   class="form-control"
+                                   value="@Model.UserName"
+                                   readonly
+                                   style="background-color: #e9ecef;" />
 
                             <div class="form-text">
-                                Select the Sales Manager who will receive
-                                this target.
+                                Target recipient cannot be changed. To assign a target to another manager, create a new target.
                             </div>
 
                         </div>
@@ -130,10 +113,6 @@
                                 <select asp-for="PeriodType"
                                         class="form-select"
                                         id="PeriodType">
-
-                                    <option value="">
-                                        -- Select Period --
-                                    </option>
 
                                     <option value="1">
                                         Weekly (7 Days)
@@ -187,7 +166,7 @@
 
 
                         <!-- =================================================
-                             Date Range (Auto-calculated & Readonly)
+                             Date Range (Editable)
                              ================================================= -->
 
                         <div class="row">
@@ -199,17 +178,14 @@
                                 <label asp-for="StartDate"
                                        class="form-label fw-semibold">
 
-                                    Start Date (Today)
+                                    Start Date
 
                                 </label>
 
                                 <input asp-for="StartDate"
                                        type="date"
                                        id="StartDate"
-                                       class="form-control"
-                                       readonly
-                                       tabindex="-1"
-                                       style="background-color: #e9ecef; cursor: not-allowed; pointer-events: none;" />
+                                       class="form-control" />
 
                                 <span asp-validation-for="StartDate"
                                       class="text-danger">
@@ -225,17 +201,14 @@
                                 <label asp-for="EndDate"
                                        class="form-label fw-semibold">
 
-                                    End Date (Auto-calculated)
+                                    End Date
 
                                 </label>
 
                                 <input asp-for="EndDate"
                                        type="date"
                                        id="EndDate"
-                                       class="form-control"
-                                       readonly
-                                       tabindex="-1"
-                                       style="background-color: #e9ecef; cursor: not-allowed; pointer-events: none;" />
+                                       class="form-control" />
 
                                 <span asp-validation-for="EndDate"
                                       class="text-danger">
@@ -245,8 +218,8 @@
 
                             <div class="col-12 mb-3">
                                 <small class="text-muted">
-                                    <i class="bi bi-lock me-1"></i>
-                                    Dates are automatically calculated from current date based on target period (7 days for Weekly, 1 month for Monthly) and cannot be changed manually.
+                                    <i class="bi bi-calendar-event me-1"></i>
+                                    You can manually select or adjust the Start Date and End Date as needed.
                                 </small>
                             </div>
 
@@ -271,15 +244,12 @@
                                 <div>
 
                                     <strong>
-                                        Target Calculation
+                                        Editing Active Target
                                     </strong>
 
                                     <div class="small mt-1">
 
-                                        Achievement will be calculated
-                                        automatically from the number of
-                                        completed leads during the target period.
-                                        Only one active target can run per Sales Manager at a time.
+                                        Modifying this target will adjust the goal for the current active period. Completed leads in this period will count against the updated goal.
 
                                     </div>
 
@@ -311,12 +281,11 @@
 
 
                             <button type="submit"
-                                    id="btnSubmitTarget"
                                     class="btn btn-primary">
 
                                 <i class="bi bi-check-circle me-1"></i>
 
-                                Create Target
+                                Save Changes
 
                             </button>
 
@@ -340,14 +309,10 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            const activeTargets = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ActiveTargetDetails));
-            const userSelect = document.getElementById("UserId");
             const periodSelect = document.getElementById("PeriodType");
             const startDateInput = document.getElementById("StartDate");
             const endDateInput = document.getElementById("EndDate");
-            const activeAlert = document.getElementById("activeTargetAlert");
-            const activeText = document.getElementById("activeTargetText");
-            const submitBtn = document.getElementById("btnSubmitTarget");
+            const form = document.querySelector("form");
 
             function formatDate(d) {
                 const year = d.getFullYear();
@@ -356,51 +321,39 @@
                 return `${year}-${month}-${day}`;
             }
 
-            function updateDates() {
+            function updateEndDateOnPeriodChange() {
                 const val = periodSelect.value;
-                const now = new Date();
-                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                if (!startDateInput.value) return;
 
-                startDateInput.value = formatDate(today);
+                const parts = startDateInput.value.split('-');
+                if (parts.length !== 3) return;
+                const start = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
 
                 if (val === "1" || val === "Weekly") {
-                    const end = new Date(today);
+                    const end = new Date(start);
                     end.setDate(end.getDate() + 7);
                     endDateInput.value = formatDate(end);
                 } else if (val === "2" || val === "Monthly") {
-                    const end = new Date(today);
+                    const end = new Date(start);
                     end.setMonth(end.getMonth() + 1);
                     endDateInput.value = formatDate(end);
                 }
             }
 
-            function checkActiveTarget() {
-                const userId = userSelect.value;
-                if (userId && activeTargets && activeTargets[userId]) {
-                    activeText.textContent = activeTargets[userId] + ". This user already has an active target. You cannot create a new target until the current one ends. You can edit the existing target or end it first.";
-                    activeAlert.classList.remove("d-none");
-                    submitBtn.disabled = true;
-                    submitBtn.classList.add("disabled");
-                } else {
-                    activeAlert.classList.add("d-none");
-                    submitBtn.disabled = false;
-                    submitBtn.classList.remove("disabled");
-                }
-            }
-
-            if (userSelect) {
-                userSelect.addEventListener("change", checkActiveTarget);
-                checkActiveTarget();
-            }
-
             if (periodSelect) {
-                periodSelect.addEventListener("change", updateDates);
-                if (periodSelect.value) {
-                    updateDates();
-                } else {
-                    const now = new Date();
-                    startDateInput.value = formatDate(new Date(now.getFullYear(), now.getMonth(), now.getDate()));
-                }
+                periodSelect.addEventListener("change", updateEndDateOnPeriodChange);
+            }
+
+            if (form) {
+                form.addEventListener("submit", function (e) {
+                    if (startDateInput.value && endDateInput.value) {
+                        if (startDateInput.value > endDateInput.value) {
+                            e.preventDefault();
+                            alert("Start date cannot be after end date.");
+                            return false;
+                        }
+                    }
+                });
             }
         });
     </script>

@@ -1,8 +1,8 @@
-@model CRMSystem.Models.ViewModels.CreateTargetViewModel
+@model CRMSystem.Models.ViewModels.EditTargetViewModel
 
 @{
-    ViewData["Title"] = "Create Team Lead Target";
-    ViewData["Breadcrumb"] = "Create Team Lead Target";
+    ViewData["Title"] = "Edit Team Lead Target";
+    ViewData["Breadcrumb"] = "Edit Team Lead Target";
     Layout = "_SalesManagerLayout";
 }
 
@@ -17,11 +17,11 @@
 
         <div>
             <h2 class="fw-bold mb-1">
-                Create Team Lead Target
+                Edit Team Lead Target
             </h2>
 
             <p class="text-muted mb-0">
-                Assign a performance target to one of your Team Leads.
+                Update performance target for @Model.UserName.
             </p>
         </div>
 
@@ -52,7 +52,7 @@
 
 
     <!-- ===================================================== -->
-    <!-- Create Target Card -->
+    <!-- Edit Target Card -->
     <!-- ===================================================== -->
 
     <div class="row justify-content-center">
@@ -73,7 +73,7 @@
                             text-primary
                             p-3 me-3">
 
-                            <i class="bi bi-bullseye fs-4"></i>
+                            <i class="bi bi-pencil-square fs-4"></i>
 
                         </div>
 
@@ -84,7 +84,7 @@
                             </h5>
 
                             <small class="text-muted">
-                                Define the target period and target count.
+                                Modify target count or period for the active target.
                             </small>
 
                         </div>
@@ -99,53 +99,34 @@
                 <div class="card-body p-4 p-md-5">
 
                     <form asp-controller="SalesManager"
-                          asp-action="CreateTeamLeadTarget"
+                          asp-action="EditTeamLeadTarget"
                           method="post">
 
                         @Html.AntiForgeryToken()
 
+                        <input type="hidden" asp-for="TargetId" />
+                        <input type="hidden" asp-for="UserId" />
+                        <input type="hidden" asp-for="UserName" />
+                        <input type="hidden" asp-for="UserRole" />
 
                         <!-- ================================================= -->
-                        <!-- Team Lead -->
+                        <!-- Team Lead (Readonly Display) -->
                         <!-- ================================================= -->
 
                         <div class="mb-4">
 
-                            <label asp-for="UserId"
-                                   class="form-label fw-semibold">
-
+                            <label class="form-label fw-semibold">
                                 Team Lead
-
-                                <span class="text-danger">
-                                    *
-                                </span>
-
                             </label>
 
-                            <select asp-for="UserId"
-                                    asp-items="Model.Users"
-                                    class="form-select"
-                                    id="UserId">
-
-                                <option value="">
-                                    -- Select Team Lead --
-                                </option>
-
-                            </select>
-
-                            <span asp-validation-for="UserId"
-                                  class="text-danger small">
-                            </span>
-
-                            <div id="activeTargetAlert"
-                                 class="alert alert-warning border-0 mt-2 d-none"
-                                 role="alert">
-                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                                <span id="activeTargetText"></span>
-                            </div>
+                            <input type="text"
+                                   class="form-control"
+                                   value="@Model.UserName"
+                                   readonly
+                                   style="background-color: #e9ecef;" />
 
                             <div class="form-text">
-                                Only Team Leads assigned to you are shown.
+                                Target recipient cannot be changed.
                             </div>
 
                         </div>
@@ -171,10 +152,6 @@
                             <select asp-for="PeriodType"
                                     class="form-select"
                                     id="PeriodType">
-
-                                <option value="">
-                                    -- Select Target Period --
-                                </option>
 
                                 <option value="1">
                                     Weekly (7 Days)
@@ -240,7 +217,7 @@
 
 
                         <!-- ================================================= -->
-                        <!-- Date Range (Auto-calculated & Readonly) -->
+                        <!-- Date Range (Editable) -->
                         <!-- ================================================= -->
 
                         <div class="row">
@@ -252,21 +229,14 @@
                                 <label asp-for="StartDate"
                                        class="form-label fw-semibold">
 
-                                    Start Date (Today)
-
-                                    <span class="text-danger">
-                                        *
-                                    </span>
+                                    Start Date
 
                                 </label>
 
                                 <input asp-for="StartDate"
                                        type="date"
                                        id="StartDate"
-                                       class="form-control"
-                                       readonly
-                                       tabindex="-1"
-                                       style="background-color: #e9ecef; cursor: not-allowed; pointer-events: none;" />
+                                       class="form-control" />
 
                                 <span asp-validation-for="StartDate"
                                       class="text-danger small">
@@ -282,21 +252,14 @@
                                 <label asp-for="EndDate"
                                        class="form-label fw-semibold">
 
-                                    End Date (Auto-calculated)
-
-                                    <span class="text-danger">
-                                        *
-                                    </span>
+                                    End Date
 
                                 </label>
 
                                 <input asp-for="EndDate"
                                        type="date"
                                        id="EndDate"
-                                       class="form-control"
-                                       readonly
-                                       tabindex="-1"
-                                       style="background-color: #e9ecef; cursor: not-allowed; pointer-events: none;" />
+                                       class="form-control" />
 
                                 <span asp-validation-for="EndDate"
                                       class="text-danger small">
@@ -306,8 +269,8 @@
 
                             <div class="col-12 mb-3">
                                 <small class="text-muted">
-                                    <i class="bi bi-lock me-1"></i>
-                                    Dates are automatically calculated from current date based on target period (7 days for Weekly, 1 month for Monthly) and cannot be changed manually.
+                                    <i class="bi bi-calendar-event me-1"></i>
+                                    You can manually select or adjust the Start Date and End Date as needed.
                                 </small>
                             </div>
 
@@ -327,15 +290,12 @@
                                 <div>
 
                                     <strong>
-                                        Important
+                                        Note
                                     </strong>
 
                                     <div class="small mt-1">
 
-                                        You can only assign targets to
-                                        Team Leads who belong to your team.
-                                        Only one active target can run per Team Lead at a time.
-                                        To assign a new target, the existing one must end or be ended early.
+                                        Modifying this target will adjust the goal for the current period. Completed leads achieved by this Team Lead's team during this period will be evaluated against the updated target.
 
                                     </div>
 
@@ -363,12 +323,11 @@
                             </a>
 
                             <button type="submit"
-                                    id="btnSubmitTarget"
                                     class="btn btn-primary">
 
                                 <i class="bi bi-check-lg me-1"></i>
 
-                                Create Target
+                                Save Changes
 
                             </button>
 
@@ -392,15 +351,11 @@
     <partial name="_ValidationScriptsPartial" />
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const activeTargets = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ActiveTargetDetails));
-            const userSelect = document.getElementById("UserId");
+        document.addEventListener("DOMContentLoaded", function () {
             const periodSelect = document.getElementById("PeriodType");
-            const startDate = document.getElementById("StartDate");
-            const endDate = document.getElementById("EndDate");
-            const activeAlert = document.getElementById("activeTargetAlert");
-            const activeText = document.getElementById("activeTargetText");
-            const submitBtn = document.getElementById("btnSubmitTarget");
+            const startDateInput = document.getElementById("StartDate");
+            const endDateInput = document.getElementById("EndDate");
+            const form = document.querySelector("form");
 
             function formatDate(d) {
                 const year = d.getFullYear();
@@ -409,51 +364,39 @@
                 return `${year}-${month}-${day}`;
             }
 
-            function updateDates() {
+            function updateEndDateOnPeriodChange() {
                 const val = periodSelect.value;
-                const now = new Date();
-                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                if (!startDateInput.value) return;
 
-                startDate.value = formatDate(today);
+                const parts = startDateInput.value.split('-');
+                if (parts.length !== 3) return;
+                const start = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
 
                 if (val === "1" || val === "Weekly") {
-                    const end = new Date(today);
+                    const end = new Date(start);
                     end.setDate(end.getDate() + 7);
-                    endDate.value = formatDate(end);
+                    endDateInput.value = formatDate(end);
                 } else if (val === "2" || val === "Monthly") {
-                    const end = new Date(today);
+                    const end = new Date(start);
                     end.setMonth(end.getMonth() + 1);
-                    endDate.value = formatDate(end);
+                    endDateInput.value = formatDate(end);
                 }
-            }
-
-            function checkActiveTarget() {
-                const userId = userSelect.value;
-                if (userId && activeTargets && activeTargets[userId]) {
-                    activeText.textContent = activeTargets[userId] + ". This Team Lead already has an active target. You cannot create a new target until the current one ends. You can edit the existing target or end it first.";
-                    activeAlert.classList.remove("d-none");
-                    submitBtn.disabled = true;
-                    submitBtn.classList.add("disabled");
-                } else {
-                    activeAlert.classList.add("d-none");
-                    submitBtn.disabled = false;
-                    submitBtn.classList.remove("disabled");
-                }
-            }
-
-            if (userSelect) {
-                userSelect.addEventListener("change", checkActiveTarget);
-                checkActiveTarget();
             }
 
             if (periodSelect) {
-                periodSelect.addEventListener("change", updateDates);
-                if (periodSelect.value) {
-                    updateDates();
-                } else {
-                    const now = new Date();
-                    startDate.value = formatDate(new Date(now.getFullYear(), now.getMonth(), now.getDate()));
-                }
+                periodSelect.addEventListener("change", updateEndDateOnPeriodChange);
+            }
+
+            if (form) {
+                form.addEventListener("submit", function (e) {
+                    if (startDateInput.value && endDateInput.value) {
+                        if (startDateInput.value > endDateInput.value) {
+                            e.preventDefault();
+                            alert("Start date cannot be after end date.");
+                            return false;
+                        }
+                    }
+                });
             }
         });
     </script>

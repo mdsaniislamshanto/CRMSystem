@@ -76,5 +76,7 @@ namespace CRMSystem.Models.ViewModels
         public string? AiSynthesisSummary { get; set; }
 
         public DateTime? AiAnalyzedAt { get; set; }
+
+
     }
 }

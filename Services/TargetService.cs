@@ -1,4 +1,4 @@
-﻿using CRMSystem.Data;
+using CRMSystem.Data;
 using CRMSystem.Enums;
 using CRMSystem.Models.DTOs;
 using CRMSystem.Models.Entities;
@@ -71,6 +71,24 @@ namespace CRMSystem.Services
                                 : $"{u.FirstName} {u.LastName}"
                     });
 
+            var activeTargets = await _context.SalesTargets
+                .AsNoTracking()
+                .Where(t =>
+                    !t.IsDeleted &&
+                    t.IsActive &&
+                    t.EndDate.Date >= DateTime.Today &&
+                    t.User != null &&
+                    t.User.Role != null &&
+                    t.User.Role.RoleKey == "SALES_MANAGER")
+                .ToListAsync();
+
+            model.ActiveUserIds = activeTargets.Select(t => t.UserId).Distinct().ToList();
+            model.ActiveTargetDetails = activeTargets
+                .GroupBy(t => t.UserId)
+                .ToDictionary(
+                    g => g.Key,
+                    g => $"Active target ({g.OrderByDescending(x => x.EndDate).First().TargetCount} leads) until {g.OrderByDescending(x => x.EndDate).First().EndDate:dd MMM yyyy}");
+
             return model;
         }
 
@@ -96,15 +114,16 @@ namespace CRMSystem.Services
                 };
             }
 
-            if (model.StartDate.Date >
-                model.EndDate.Date)
+            // Auto-calculate dates based on period type
+            var today = DateTime.Today;
+            model.StartDate = today;
+            if (model.PeriodType == TargetPeriodType.Weekly)
             {
-                return new ServiceResult
-                {
-                    IsSuccess = false,
-                    Message =
-                        "Start date cannot be after end date."
-                };
+                model.EndDate = today.AddDays(7);
+            }
+            else if (model.PeriodType == TargetPeriodType.Monthly)
+            {
+                model.EndDate = today.AddMonths(1);
             }
 
             var targetUser =
@@ -229,7 +248,30 @@ namespace CRMSystem.Services
 
 
             // -------------------------------------------------
-            // Prevent overlapping targets
+            // Prevent duplicate active targets
+            // -------------------------------------------------
+
+            var activeTarget =
+                await _context.SalesTargets
+                    .FirstOrDefaultAsync(t =>
+                        t.UserId == model.UserId &&
+                        !t.IsDeleted &&
+                        t.IsActive &&
+                        t.EndDate.Date >= today);
+
+            if (activeTarget != null)
+            {
+                return new ServiceResult
+                {
+                    IsSuccess = false,
+                    Message =
+                        $"This Sales Manager already has an active target ({activeTarget.TargetCount} leads) until {activeTarget.EndDate:dd MMM yyyy}. You cannot assign a new target until the current target ends. You can edit the existing target or end it first."
+                };
+            }
+
+
+            // -------------------------------------------------
+            // Prevent overlapping active targets
             // -------------------------------------------------
 
             var overlappingTarget =
@@ -237,6 +279,7 @@ namespace CRMSystem.Services
                     .AnyAsync(t =>
                         t.UserId == model.UserId &&
                         !t.IsDeleted &&
+                        t.IsActive &&
                         t.StartDate.Date <=
                             model.EndDate.Date &&
                         t.EndDate.Date >=
@@ -248,7 +291,7 @@ namespace CRMSystem.Services
                 {
                     IsSuccess = false,
                     Message =
-                        "An overlapping target already exists for this user."
+                        "An overlapping active target already exists for this user."
                 };
             }
 
@@ -486,6 +529,22 @@ namespace CRMSystem.Services
                                 : $"{u.FirstName} {u.LastName}"
                     });
 
+            var activeTargets = await _context.SalesTargets
+                .AsNoTracking()
+                .Where(t =>
+                    !t.IsDeleted &&
+                    t.IsActive &&
+                    t.EndDate.Date >= DateTime.Today &&
+                    t.CreatedBy == salesManagerId)
+                .ToListAsync();
+
+            model.ActiveUserIds = activeTargets.Select(t => t.UserId).Distinct().ToList();
+            model.ActiveTargetDetails = activeTargets
+                .GroupBy(t => t.UserId)
+                .ToDictionary(
+                    g => g.Key,
+                    g => $"Active target ({g.OrderByDescending(x => x.EndDate).First().TargetCount} leads) until {g.OrderByDescending(x => x.EndDate).First().EndDate:dd MMM yyyy}");
+
             return model;
         }
 
@@ -510,15 +569,16 @@ namespace CRMSystem.Services
                 };
             }
 
-            if (model.StartDate.Date >
-                model.EndDate.Date)
+            // Auto-calculate dates based on period type
+            var today = DateTime.Today;
+            model.StartDate = today;
+            if (model.PeriodType == TargetPeriodType.Weekly)
             {
-                return new ServiceResult
-                {
-                    IsSuccess = false,
-                    Message =
-                        "Start date cannot be after end date."
-                };
+                model.EndDate = today.AddDays(7);
+            }
+            else if (model.PeriodType == TargetPeriodType.Monthly)
+            {
+                model.EndDate = today.AddMonths(1);
             }
 
             var salesManager =
@@ -580,7 +640,30 @@ namespace CRMSystem.Services
 
 
             // -------------------------------------------------
-            // Prevent overlapping targets
+            // Prevent duplicate active targets
+            // -------------------------------------------------
+
+            var activeTarget =
+                await _context.SalesTargets
+                    .FirstOrDefaultAsync(t =>
+                        t.UserId == model.UserId &&
+                        !t.IsDeleted &&
+                        t.IsActive &&
+                        t.EndDate.Date >= today);
+
+            if (activeTarget != null)
+            {
+                return new ServiceResult
+                {
+                    IsSuccess = false,
+                    Message =
+                        $"This Team Lead already has an active target ({activeTarget.TargetCount} leads) until {activeTarget.EndDate:dd MMM yyyy}. You cannot assign a new target until the current target ends. You can edit the existing target or end it first."
+                };
+            }
+
+
+            // -------------------------------------------------
+            // Prevent overlapping active targets
             // -------------------------------------------------
 
             var overlappingTarget =
@@ -588,6 +671,7 @@ namespace CRMSystem.Services
                     .AnyAsync(t =>
                         t.UserId == model.UserId &&
                         !t.IsDeleted &&
+                        t.IsActive &&
                         t.StartDate.Date <=
                             model.EndDate.Date &&
                         t.EndDate.Date >=
@@ -599,7 +683,7 @@ namespace CRMSystem.Services
                 {
                     IsSuccess = false,
                     Message =
-                        "An overlapping target already exists for this Team Lead."
+                        "An overlapping active target already exists for this Team Lead."
                 };
             }
 
@@ -934,7 +1018,10 @@ namespace CRMSystem.Services
                 Status =
                     GetTargetStatus(
                         completedCount,
-                        target.TargetCount)
+                        target.TargetCount),
+
+                IsActive =
+                    target.IsActive
             };
         }
 
@@ -982,6 +1069,7 @@ namespace CRMSystem.Services
         public async Task<(int TotalTarget, int TargetFulfilled)>
             GetAdminTargetSummaryAsync()
         {
+            var today = DateTime.Today;
             var salesManagerTargets =
                 await _context.SalesTargets
                     .AsNoTracking()
@@ -989,6 +1077,9 @@ namespace CRMSystem.Services
                     .ThenInclude(u => u!.Role)
                     .Where(t =>
                         !t.IsDeleted &&
+                        t.IsActive &&
+                        t.StartDate.Date <= today &&
+                        t.EndDate.Date >= today &&
                         t.User != null &&
                         t.User.Role != null &&
                         t.User.Role.RoleKey == "SALES_MANAGER")
@@ -1010,8 +1101,7 @@ namespace CRMSystem.Services
 
             // =====================================================
             // Total Target
-            // Include ALL Sales Manager targets
-            // regardless of current user active status
+            // Include active Sales Manager targets
             // =====================================================
 
             var totalTarget =
@@ -1045,6 +1135,374 @@ namespace CRMSystem.Services
                 totalTarget,
                 totalFulfilled
             );
+        }
+
+
+        // =====================================================
+        // Edit & End Target: Admin → Sales Manager
+        // =====================================================
+
+        public async Task<EditTargetViewModel?>
+            GetEditTargetViewModelAsync(long targetId)
+        {
+            var target = await _context.SalesTargets
+                .AsNoTracking()
+                .Include(t => t.User)
+                    .ThenInclude(u => u!.Role)
+                .FirstOrDefaultAsync(t =>
+                    t.TargetId == targetId &&
+                    !t.IsDeleted &&
+                    t.User != null &&
+                    t.User.Role != null &&
+                    t.User.Role.RoleKey == "SALES_MANAGER");
+
+            if (target == null)
+            {
+                return null;
+            }
+
+            return new EditTargetViewModel
+            {
+                TargetId = target.TargetId,
+                UserId = target.UserId,
+                UserName = target.User?.FullName ?? "Unknown",
+                UserRole = "Sales Manager",
+                PeriodType = target.PeriodType,
+                TargetCount = target.TargetCount,
+                StartDate = target.StartDate,
+                EndDate = target.EndDate
+            };
+        }
+
+        public async Task<ServiceResult>
+            UpdateTargetAsync(
+                EditTargetViewModel model,
+                long currentAdminId)
+        {
+            if (model.TargetCount <= 0)
+            {
+                return new ServiceResult
+                {
+                    IsSuccess = false,
+                    Message = "Target count must be greater than zero."
+                };
+            }
+
+            var target = await _context.SalesTargets
+                .Include(t => t.User)
+                    .ThenInclude(u => u!.Role)
+                .FirstOrDefaultAsync(t =>
+                    t.TargetId == model.TargetId &&
+                    !t.IsDeleted &&
+                    t.User != null &&
+                    t.User.Role != null &&
+                    t.User.Role.RoleKey == "SALES_MANAGER");
+
+            if (target == null)
+            {
+                return new ServiceResult
+                {
+                    IsSuccess = false,
+                    Message = "Target not found."
+                };
+            }
+
+            if (!target.IsActive || target.EndDate.Date < DateTime.Today)
+            {
+                return new ServiceResult
+                {
+                    IsSuccess = false,
+                    Message = "Only active targets can be edited."
+                };
+            }
+
+            if (model.StartDate.Date > model.EndDate.Date)
+            {
+                return new ServiceResult
+                {
+                    IsSuccess = false,
+                    Message = "Start date cannot be after end date."
+                };
+            }
+
+            var overlappingTarget = await _context.SalesTargets
+                .AnyAsync(t =>
+                    t.UserId == target.UserId &&
+                    t.TargetId != target.TargetId &&
+                    !t.IsDeleted &&
+                    t.IsActive &&
+                    t.StartDate.Date <= model.EndDate.Date &&
+                    t.EndDate.Date >= model.StartDate.Date);
+
+            if (overlappingTarget)
+            {
+                return new ServiceResult
+                {
+                    IsSuccess = false,
+                    Message = "Another active target already overlaps with this date range."
+                };
+            }
+
+            target.TargetCount = model.TargetCount;
+            target.PeriodType = model.PeriodType;
+            target.StartDate = model.StartDate.Date;
+            target.EndDate = model.EndDate.Date;
+
+            target.UpdatedAt = DateTime.UtcNow;
+            target.UpdatedBy = currentAdminId;
+
+            await _context.SaveChangesAsync();
+
+            return new ServiceResult
+            {
+                IsSuccess = true,
+                Message = "Target updated successfully."
+            };
+        }
+
+        public async Task<ServiceResult>
+            EndTargetAsync(
+                long targetId,
+                long currentAdminId)
+        {
+            var target = await _context.SalesTargets
+                .Include(t => t.User)
+                    .ThenInclude(u => u!.Role)
+                .FirstOrDefaultAsync(t =>
+                    t.TargetId == targetId &&
+                    !t.IsDeleted &&
+                    t.User != null &&
+                    t.User.Role != null &&
+                    t.User.Role.RoleKey == "SALES_MANAGER");
+
+            if (target == null)
+            {
+                return new ServiceResult
+                {
+                    IsSuccess = false,
+                    Message = "Target not found."
+                };
+            }
+
+            if (!target.IsActive || target.EndDate.Date < DateTime.Today)
+            {
+                return new ServiceResult
+                {
+                    IsSuccess = false,
+                    Message = "Target is already ended or expired."
+                };
+            }
+
+            target.IsActive = false;
+            var today = DateTime.Today;
+            if (target.StartDate.Date >= today)
+            {
+                target.EndDate = target.StartDate.Date;
+            }
+            else
+            {
+                target.EndDate = today.AddDays(-1);
+            }
+
+            target.UpdatedAt = DateTime.UtcNow;
+            target.UpdatedBy = currentAdminId;
+
+            await _context.SaveChangesAsync();
+
+            return new ServiceResult
+            {
+                IsSuccess = true,
+                Message = $"Target for {target.User?.FullName ?? "Sales Manager"} ended successfully. You can now assign a new target."
+            };
+        }
+
+        // =====================================================
+        // Edit & End Target: Sales Manager → Team Lead
+        // =====================================================
+
+        public async Task<EditTargetViewModel?>
+            GetEditTeamLeadTargetViewModelAsync(
+                long targetId,
+                long salesManagerId)
+        {
+            var target = await _context.SalesTargets
+                .AsNoTracking()
+                .Include(t => t.User)
+                    .ThenInclude(u => u!.Role)
+                .FirstOrDefaultAsync(t =>
+                    t.TargetId == targetId &&
+                    !t.IsDeleted &&
+                    t.User != null &&
+                    t.User.SalesManagerId == salesManagerId &&
+                    t.User.Role != null &&
+                    t.User.Role.RoleKey == "TEAM_LEAD");
+
+            if (target == null)
+            {
+                return null;
+            }
+
+            return new EditTargetViewModel
+            {
+                TargetId = target.TargetId,
+                UserId = target.UserId,
+                UserName = target.User?.FullName ?? "Unknown",
+                UserRole = "Team Lead",
+                PeriodType = target.PeriodType,
+                TargetCount = target.TargetCount,
+                StartDate = target.StartDate,
+                EndDate = target.EndDate
+            };
+        }
+
+        public async Task<ServiceResult>
+            UpdateTeamLeadTargetAsync(
+                EditTargetViewModel model,
+                long salesManagerId)
+        {
+            if (model.TargetCount <= 0)
+            {
+                return new ServiceResult
+                {
+                    IsSuccess = false,
+                    Message = "Target count must be greater than zero."
+                };
+            }
+
+            var target = await _context.SalesTargets
+                .Include(t => t.User)
+                    .ThenInclude(u => u!.Role)
+                .FirstOrDefaultAsync(t =>
+                    t.TargetId == model.TargetId &&
+                    !t.IsDeleted &&
+                    t.User != null &&
+                    t.User.SalesManagerId == salesManagerId &&
+                    t.User.Role != null &&
+                    t.User.Role.RoleKey == "TEAM_LEAD");
+
+            if (target == null)
+            {
+                return new ServiceResult
+                {
+                    IsSuccess = false,
+                    Message = "Team Lead target not found or you are not authorized to edit it."
+                };
+            }
+
+            if (!target.IsActive || target.EndDate.Date < DateTime.Today)
+            {
+                return new ServiceResult
+                {
+                    IsSuccess = false,
+                    Message = "Only active targets can be edited."
+                };
+            }
+
+            if (model.StartDate.Date > model.EndDate.Date)
+            {
+                return new ServiceResult
+                {
+                    IsSuccess = false,
+                    Message = "Start date cannot be after end date."
+                };
+            }
+
+            var overlappingTarget = await _context.SalesTargets
+                .AnyAsync(t =>
+                    t.UserId == target.UserId &&
+                    t.TargetId != target.TargetId &&
+                    !t.IsDeleted &&
+                    t.IsActive &&
+                    t.StartDate.Date <= model.EndDate.Date &&
+                    t.EndDate.Date >= model.StartDate.Date);
+
+            if (overlappingTarget)
+            {
+                return new ServiceResult
+                {
+                    IsSuccess = false,
+                    Message = "Another active target already overlaps with this date range."
+                };
+            }
+
+            target.TargetCount = model.TargetCount;
+            target.PeriodType = model.PeriodType;
+            target.StartDate = model.StartDate.Date;
+            target.EndDate = model.EndDate.Date;
+
+            target.UpdatedAt = DateTime.UtcNow;
+            target.UpdatedBy = salesManagerId;
+
+            await _context.SaveChangesAsync();
+
+            return new ServiceResult
+            {
+                IsSuccess = true,
+                Message = "Team Lead target updated successfully."
+            };
+        }
+
+        public async Task<ServiceResult>
+            EndTeamLeadTargetAsync(
+                long targetId,
+                long salesManagerId)
+        {
+            var target = await _context.SalesTargets
+                .Include(t => t.User)
+                    .ThenInclude(u => u!.Role)
+                .FirstOrDefaultAsync(t =>
+                    t.TargetId == targetId &&
+                    !t.IsDeleted &&
+                    t.User != null &&
+                    t.User.SalesManagerId == salesManagerId &&
+                    t.User.Role != null &&
+                    t.User.Role.RoleKey == "TEAM_LEAD");
+
+            if (target == null)
+            {
+                return new ServiceResult
+                {
+                    IsSuccess = false,
+                    Message = "Team Lead target not found or you are not authorized to end it."
+                };
+            }
+
+            if (!target.IsActive || target.EndDate.Date < DateTime.Today)
+            {
+                return new ServiceResult
+                {
+                    IsSuccess = false,
+                    Message = "Target is already ended or expired."
+                };
+            }
+
+            target.IsActive = false;
+            var today = DateTime.Today;
+            if (target.StartDate.Date >= today)
+            {
+                target.EndDate = target.StartDate.Date;
+            }
+            else
+            {
+                target.EndDate = today.AddDays(-1);
+            }
+
+            target.UpdatedAt = DateTime.UtcNow;
+            target.UpdatedBy = salesManagerId;
+
+            await _context.SaveChangesAsync();
+
+            await _notificationService.CreateNotificationAsync(
+                target.UserId,
+                NotificationType.TargetAssigned,
+                "Target Ended Early",
+                $"Your target of {target.TargetCount} leads has been ended early by your Sales Manager. You can now receive a new target.");
+
+            return new ServiceResult
+            {
+                IsSuccess = true,
+                Message = $"Target for {target.User?.FullName ?? "Team Lead"} ended successfully. You can now assign a new target."
+            };
         }
     }
 }

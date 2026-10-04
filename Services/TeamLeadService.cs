@@ -214,6 +214,8 @@ namespace CRMSystem.Services
                         t.UserId ==
                         teamLeadId &&
 
+                        t.IsActive &&
+
                         !t.IsDeleted &&
 
                         t.StartDate <=

@@ -22,6 +22,7 @@ builder.Services.Configure<EmailSettings>(
 builder.Services.Configure<GoogleFormsSettings>(
     builder.Configuration.GetSection("GoogleForms"));
 
+
 // Configure Gemini AI Settings
 builder.Services.Configure<GeminiSettings>(
     builder.Configuration.GetSection("GeminiSettings"));

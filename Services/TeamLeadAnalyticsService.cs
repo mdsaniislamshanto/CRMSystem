@@ -1,4 +1,4 @@
-﻿using CRMSystem.Constants;
+using CRMSystem.Constants;
 using CRMSystem.Data;
 using CRMSystem.Enums;
 using CRMSystem.Models.ViewModels;
@@ -83,6 +83,8 @@ namespace CRMSystem.Services
                         !t.IsDeleted &&
                         t.UserId == teamLeadId)
                     .OrderByDescending(t =>
+                        t.IsActive)
+                    .ThenByDescending(t =>
                         t.StartDate)
                     .ToListAsync();
 
@@ -746,6 +748,8 @@ namespace CRMSystem.Services
                         !t.IsDeleted &&
                         t.UserId == teamLeadId)
                     .OrderByDescending(t =>
+                        t.IsActive)
+                    .ThenByDescending(t =>
                         t.StartDate)
                     .ToListAsync();
 

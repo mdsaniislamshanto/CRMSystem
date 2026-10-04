@@ -1,4 +1,4 @@
-﻿@model List<CRMSystem.Models.ViewModels.TargetAchievementViewModel>
+@model List<CRMSystem.Models.ViewModels.TargetAchievementViewModel>
 
 @{
     ViewData["Title"] = "Team Lead Targets";
@@ -86,9 +86,15 @@
             Model.Count(x =>
                 x.Status == "Target Achieved");
 
-        var activeTargets =
-            Model.Count(x =>
-                x.Status != "Target Achieved");
+        var activeTargetsList = Model
+            .Where(x => x.IsActive && x.EndDate.Date >= DateTime.Today)
+            .OrderByDescending(x => x.StartDate)
+            .ToList();
+
+        var pastTargetsList = Model
+            .Where(x => !x.IsActive || x.EndDate.Date < DateTime.Today)
+            .OrderByDescending(x => x.EndDate)
+            .ToList();
 
         var averageAchievement =
             Model.Count == 0
@@ -171,7 +177,7 @@
         </div>
 
 
-        <!-- Pending -->
+        <!-- Active Targets -->
 
         <div class="col-md-6 col-xl-3">
 
@@ -183,11 +189,11 @@
 
                         <div>
                             <p class="text-muted mb-1">
-                                Pending Targets
+                                Active Targets
                             </p>
 
-                            <h3 class="fw-bold mb-0">
-                                @activeTargets
+                            <h3 class="fw-bold mb-0 text-warning">
+                                @activeTargetsList.Count
                             </h3>
                         </div>
 
@@ -246,28 +252,29 @@
 
 
     <!-- ===================================================== -->
-    <!-- Target Table -->
+    <!-- 1. Active Team Lead Targets Table -->
     <!-- ===================================================== -->
 
-    <div class="card border-0 shadow-sm">
+    <div class="card border-0 shadow-sm mb-4">
 
         <div class="card-header bg-white border-0 py-3">
 
             <div class="d-flex justify-content-between align-items-center">
 
                 <div>
-                    <h5 class="fw-bold mb-1">
-                        Team Lead Target Overview
-                    </h5>
+                    <div class="d-flex align-items-center gap-2">
+                        <h5 class="fw-bold mb-0">
+                            Active Team Lead Targets
+                        </h5>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle">
+                            @activeTargetsList.Count Active
+                        </span>
+                    </div>
 
                     <small class="text-muted">
-                        Targets assigned to your Team Leads
+                        Active targets currently in progress for your Team Leads
                     </small>
                 </div>
-
-                <span class="badge bg-light text-dark">
-                    @Model.Count Target(s)
-                </span>
 
             </div>
 
@@ -276,7 +283,7 @@
 
         <div class="card-body p-0">
 
-            @if (Model.Any())
+            @if (activeTargetsList.Any())
             {
                 <div class="table-responsive">
 
@@ -322,6 +329,10 @@
                                     End Date
                                 </th>
 
+                                <th class="text-end px-4">
+                                    Actions
+                                </th>
+
                             </tr>
 
                         </thead>
@@ -329,7 +340,7 @@
 
                         <tbody>
 
-                            @foreach (var target in Model)
+                            @foreach (var target in activeTargetsList)
                             {
                                 var progress =
                                     Math.Min(
@@ -440,11 +451,19 @@
 
                                     <td>
 
-                                        <span class="badge @statusClass">
+                                        <div class="d-flex flex-column gap-1">
 
-                                            @target.Status
+                                            <span class="badge @statusClass">
 
-                                        </span>
+                                                @target.Status
+
+                                            </span>
+
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">
+                                                <i class="bi bi-circle-fill me-1" style="font-size: 6px;"></i>Active
+                                            </span>
+
+                                        </div>
 
                                     </td>
 
@@ -462,6 +481,49 @@
                                         @target.EndDate.ToString("dd MMM yyyy")
                                     </td>
 
+
+                                    <!-- Actions -->
+
+                                    <td class="text-end px-4">
+
+                                        <div class="d-flex justify-content-end gap-2">
+
+                                            <a asp-controller="SalesManager"
+                                               asp-action="EditTeamLeadTarget"
+                                               asp-route-id="@target.TargetId"
+                                               class="btn btn-sm btn-outline-primary"
+                                               title="Edit Target">
+
+                                                <i class="bi bi-pencil me-1"></i>Edit
+
+                                            </a>
+
+                                            <form asp-controller="SalesManager"
+                                                  asp-action="EndTeamLeadTarget"
+                                                  method="post"
+                                                  class="d-inline"
+                                                  onsubmit="return confirm('Are you sure you want to end this target early for @target.UserName? Once ended, this target will stop counting further leads, and you will be able to assign a new target.');">
+
+                                                @Html.AntiForgeryToken()
+
+                                                <input type="hidden"
+                                                       name="id"
+                                                       value="@target.TargetId" />
+
+                                                <button type="submit"
+                                                        class="btn btn-sm btn-outline-danger"
+                                                        title="End Target Early">
+
+                                                    <i class="bi bi-stop-circle me-1"></i>End
+
+                                                </button>
+
+                                            </form>
+
+                                        </div>
+
+                                    </td>
+
                                 </tr>
                             }
 
@@ -473,30 +535,288 @@
             }
             else
             {
-                <div class="text-center py-5">
+                <div class="text-center py-4 px-3">
 
-                    <div class="mb-3">
-
-                        <i class="bi bi-bullseye display-4 text-muted"></i>
-
-                    </div>
-
-                    <h5 class="fw-semibold">
-                        No Team Lead Targets Found
-                    </h5>
-
-                    <p class="text-muted mb-4">
-                        You have not assigned any targets to your Team Leads yet.
+                    <p class="text-muted mb-0">
+                        <i class="bi bi-info-circle me-1"></i>
+                        No active targets currently assigned to your Team Leads. Click <strong>Create Team Lead Target</strong> above to assign a target.
                     </p>
 
-                    <a asp-controller="SalesManager"
-                       asp-action="CreateTeamLeadTarget"
-                       class="btn btn-primary">
+                </div>
+            }
 
-                        <i class="bi bi-plus-lg me-1"></i>
-                        Create First Target
+        </div>
 
-                    </a>
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- 2. Past & Ended Team Lead Targets Table -->
+    <!-- ===================================================== -->
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-white border-0 py-3">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+                    <div class="d-flex align-items-center gap-2">
+                        <h5 class="fw-bold mb-0">
+                            Past & Ended Targets
+                        </h5>
+                        <span class="badge bg-secondary-subtle text-secondary border">
+                            @pastTargetsList.Count Past / Ended
+                        </span>
+                    </div>
+
+                    <small class="text-muted">
+                        History of Team Lead targets that completed or were ended early
+                    </small>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="card-body p-0">
+
+            @if (pastTargetsList.Any())
+            {
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead class="table-light">
+
+                            <tr>
+
+                                <th class="px-4">
+                                    Team Lead
+                                </th>
+
+                                <th>
+                                    Period
+                                </th>
+
+                                <th>
+                                    Target
+                                </th>
+
+                                <th>
+                                    Completed
+                                </th>
+
+                                <th>
+                                    Remaining
+                                </th>
+
+                                <th style="min-width: 180px;">
+                                    Achievement
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th>
+                                    Start Date
+                                </th>
+
+                                <th>
+                                    End Date
+                                </th>
+
+                                <th class="text-end px-4">
+                                    State
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            @foreach (var target in pastTargetsList)
+                            {
+                                var progress =
+                                    Math.Min(
+                                        (double)target.AchievementPercentage,
+                                        100);
+
+                                var progressClass =
+                                    target.AchievementPercentage >= 100
+                                        ? "bg-success"
+                                        : target.AchievementPercentage >= 75
+                                            ? "bg-info"
+                                            : target.AchievementPercentage >= 50
+                                                ? "bg-warning"
+                                                : "bg-danger";
+
+                                var statusClass =
+                                    target.Status ==
+                                        "Target Achieved"
+                                            ? "bg-success"
+                                            : "bg-warning text-dark";
+
+                                <tr>
+
+                                    <!-- Team Lead -->
+
+                                    <td class="px-4">
+
+                                        <div class="fw-semibold">
+                                            @target.UserName
+                                        </div>
+
+                                        <small class="text-muted">
+                                            @target.Role
+                                        </small>
+
+                                    </td>
+
+
+                                    <!-- Period -->
+
+                                    <td>
+                                        <span class="badge bg-light text-dark">
+                                            @target.PeriodType
+                                        </span>
+                                    </td>
+
+
+                                    <!-- Target -->
+
+                                    <td>
+                                        <span class="fw-semibold">
+                                            @target.TargetCount
+                                        </span>
+                                    </td>
+
+
+                                    <!-- Completed -->
+
+                                    <td>
+
+                                        <span class="fw-semibold text-success">
+                                            @target.CompletedCount
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- Remaining -->
+
+                                    <td>
+
+                                        <span class="fw-semibold">
+                                            @target.RemainingCount
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- Achievement -->
+
+                                    <td>
+
+                                        <div class="d-flex justify-content-between mb-1">
+
+                                            <small class="fw-semibold">
+                                                @target.AchievementPercentage.ToString("0.00")%
+                                            </small>
+
+                                        </div>
+
+                                        <div class="progress"
+                                             style="height: 7px;">
+
+                                            <div class="progress-bar @progressClass"
+                                                 role="progressbar"
+                                                 style="width: @progress%;"
+                                                 aria-valuenow="@progress"
+                                                 aria-valuemin="0"
+                                                 aria-valuemax="100">
+                                            </div>
+
+                                        </div>
+
+                                    </td>
+
+
+                                    <!-- Status -->
+
+                                    <td>
+
+                                        <div class="d-flex flex-column gap-1">
+
+                                            <span class="badge @statusClass">
+
+                                                @target.Status
+
+                                            </span>
+
+                                            @if (!target.IsActive)
+                                            {
+                                                <span class="badge bg-secondary bg-opacity-10 text-secondary border">
+                                                    Ended Early
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-light text-muted border">
+                                                    Completed Period
+                                                </span>
+                                            }
+
+                                        </div>
+
+                                    </td>
+
+
+                                    <!-- Start Date -->
+
+                                    <td>
+                                        @target.StartDate.ToString("dd MMM yyyy")
+                                    </td>
+
+
+                                    <!-- End Date -->
+
+                                    <td>
+                                        @target.EndDate.ToString("dd MMM yyyy")
+                                    </td>
+
+
+                                    <!-- State -->
+
+                                    <td class="text-end px-4">
+
+                                        <span class="text-muted small">
+                                            <i class="bi bi-clock-history me-1"></i>Archived
+                                        </span>
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-4 px-3">
+
+                    <p class="text-muted mb-0">
+                        <i class="bi bi-clock-history me-1"></i>
+                        No past or ended targets recorded yet.
+                    </p>
 
                 </div>
             }

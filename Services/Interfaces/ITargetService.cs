@@ -1,4 +1,4 @@
-﻿using CRMSystem.Models.DTOs;
+using CRMSystem.Models.DTOs;
 using CRMSystem.Models.ViewModels;
 
 namespace CRMSystem.Services.Interfaces
@@ -66,5 +66,44 @@ namespace CRMSystem.Services.Interfaces
                 long userId,
                 DateTime startDate,
                 DateTime endDate);
+
+
+        // =====================================================
+        // Edit & End Target (Admin → Sales Manager)
+        // =====================================================
+
+        Task<EditTargetViewModel?>
+            GetEditTargetViewModelAsync(
+                long targetId);
+
+        Task<ServiceResult>
+            UpdateTargetAsync(
+                EditTargetViewModel model,
+                long currentAdminId);
+
+        Task<ServiceResult>
+            EndTargetAsync(
+                long targetId,
+                long currentAdminId);
+
+
+        // =====================================================
+        // Edit & End Target (Sales Manager → Team Lead)
+        // =====================================================
+
+        Task<EditTargetViewModel?>
+            GetEditTeamLeadTargetViewModelAsync(
+                long targetId,
+                long salesManagerId);
+
+        Task<ServiceResult>
+            UpdateTeamLeadTargetAsync(
+                EditTargetViewModel model,
+                long salesManagerId);
+
+        Task<ServiceResult>
+            EndTeamLeadTargetAsync(
+                long targetId,
+                long salesManagerId);
     }
 }

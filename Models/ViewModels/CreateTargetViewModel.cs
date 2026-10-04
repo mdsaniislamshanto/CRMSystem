@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using CRMSystem.Enums;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -33,5 +33,11 @@ namespace CRMSystem.Models.ViewModels
 
         public IEnumerable<SelectListItem> Users { get; set; } =
             new List<SelectListItem>();
+
+        public List<long> ActiveUserIds { get; set; } =
+            new List<long>();
+
+        public Dictionary<long, string> ActiveTargetDetails { get; set; } =
+            new Dictionary<long, string>();
     }
 }

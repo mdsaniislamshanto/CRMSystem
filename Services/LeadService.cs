@@ -314,6 +314,7 @@ namespace CRMSystem.Services
                                     : null)
                             .FirstOrDefault(),
 
+
                     AssignedAt =
                         _context.LeadAssignments
                             .Where(a =>
@@ -450,7 +451,7 @@ namespace CRMSystem.Services
                                     remaining.TotalMinutes));
 
                         lead.AcceptanceSLAStatus =
-                            $"Pending • {remainingMinutes} min left";
+                            $"Pending â€¢ {remainingMinutes} min left";
 
                         lead.AcceptanceSLAMissed =
                             false;
@@ -687,47 +688,6 @@ namespace CRMSystem.Services
         }
 
 
-        //// =========================================================
-        //// CREATE MANUAL LEAD
-        //// =========================================================
-
-        //public async Task CreateLeadAsync(CreateLeadViewModel model)
-        //{
-        //    var lead = CreateLeadEntity(model);
-
-        //    _context.Leads.Add(lead);
-
-        //    await _context.SaveChangesAsync();
-
-        //    lead.LeadCode =
-        //        $"L{lead.LeadId:D6}";
-
-        //    await _context.SaveChangesAsync();
-
-        //    // =====================================================
-        //    // Current Logged-in User
-        //    // =====================================================
-
-        //    var httpContext =
-        //        _httpContextAccessor.HttpContext;
-
-        //    if (httpContext == null)
-        //    {
-        //        throw new InvalidOperationException(
-        //            "HTTP context is not available.");
-        //    }
-
-        //    var userIdClaim =
-        //        httpContext.User.FindFirstValue(
-        //            ClaimTypes.NameIdentifier);
-
-        //    if (!long.TryParse(
-        //            userIdClaim,
-        //            out long userId))
-        //    {
-        //        throw new InvalidOperationException(
-        //            "Current logged-in user could not be identified.");
-        //    }
 
 
 
@@ -749,7 +709,7 @@ namespace CRMSystem.Services
             }
 
             // =========================================================
-            // LEVEL 1 — SourceReferenceId Duplicate Check
+            // LEVEL 1 â€” SourceReferenceId Duplicate Check
             // =========================================================
 
             var existingLead =
@@ -798,7 +758,7 @@ namespace CRMSystem.Services
             }
 
             // =========================================================
-            // LEVEL 2 — Phone Number Duplicate Check
+            // LEVEL 2 â€” Phone Number Duplicate Check
             // =========================================================
 
             var normalizedIncomingPhone =
@@ -1014,6 +974,8 @@ namespace CRMSystem.Services
                     Description = l.Description,
                     FollowUpDate = l.FollowUpDate,
 
+
+                    //FOR GIMINI API
                     AiAnalyzed = l.AiAnalyzedAt.HasValue,
                     AiBuyingDecision = l.AiBuyingDecision,
                     AiInterestLevel = l.AiInterestLevel,
@@ -1096,8 +1058,7 @@ namespace CRMSystem.Services
         // =========================================================
         // GET LEAD FOR SALES MANAGER Only
         // =========================================================
-        public async Task<LeadViewModel?>
-     GetLeadForSalesManagerAsync(
+        public async Task<LeadViewModel?>GetLeadForSalesManagerAsync(
          long leadId,
          long salesManagerId)
         {
@@ -1258,10 +1219,7 @@ namespace CRMSystem.Services
 
                     FollowUpDate = l.FollowUpDate,
 
-                    // ==========================================
                     // Archive Information
-                    // ==========================================
-
                     IsArchived = l.IsArchived,
 
                     ArchivedAt = l.ArchivedAt,
@@ -1271,10 +1229,8 @@ namespace CRMSystem.Services
                         .Select(u => u.FullName)
                         .FirstOrDefault(),
 
-                    // ==========================================
-                    // Assignment Information
-                    // ==========================================
 
+                    // Assignment Information
                     AssignedOfficerName =
                         _context.LeadAssignments
                             .Where(a =>
@@ -1566,7 +1522,7 @@ namespace CRMSystem.Services
 
 
         // =========================================================
-        // UPDATE Genaral
+        // UPDATE Genaral/Admin
         // =========================================================
 
         public async Task UpdateLeadAsync(
@@ -1749,8 +1705,6 @@ namespace CRMSystem.Services
             // ORB
             // C. Lead is assigned to an Officer
             //    under himself/herself
-            //
-            // =====================================================
 
             var hasAccess =
                 lead.CreatedBy == salesManagerId
@@ -1803,7 +1757,7 @@ namespace CRMSystem.Services
 
 
         // =========================================================
-        // ARCHIVED LEADS For admin
+        // Get ARCHIVED LEADS For admin
         // =========================================================
 
         public async Task<List<LeadViewModel>> GetArchivedLeadsAsync()
@@ -2109,9 +2063,8 @@ namespace CRMSystem.Services
                     "Lead not found.");
             }
 
-            // =====================================================
+
             // Deactivate Existing Assignment
-            // =====================================================
 
             var activeAssignment =
                 await _context.LeadAssignments
@@ -2128,10 +2081,8 @@ namespace CRMSystem.Services
                     AssignmentStatus.Reassigned;
             }
 
-            // =====================================================
-            // New Assignment
-            // =====================================================
 
+            // New Assignment
             var assignment =
                 new LeadAssignment
                 {
@@ -2161,10 +2112,8 @@ namespace CRMSystem.Services
 
             await _context.SaveChangesAsync();
 
-            // =====================================================
-            // Sales Officer
-            // =====================================================
 
+            // Sales Officer
             var salesOfficer =
                 await _context.Users
                     .FirstOrDefaultAsync(
@@ -2193,11 +2142,8 @@ namespace CRMSystem.Services
                     "Admin not found.");
             }
 
-            // =====================================================
             // Email
-            // =====================================================
-
-            await _emailService
+           await _emailService
                 .SendLeadAssignmentEmailAsync(
                     salesOfficer.Email,
                     $"{salesOfficer.FirstName} {salesOfficer.LastName}",
@@ -2206,10 +2152,7 @@ namespace CRMSystem.Services
                     $"{admin.FirstName} {admin.LastName}",
                     assignment.AssignedAt);
 
-            // =====================================================
             // Notification
-            // =====================================================
-
             await _notificationService
                 .CreateNotificationAsync(
                     salesOfficer.UserId,
@@ -2233,9 +2176,8 @@ namespace CRMSystem.Services
                 long leadId,
                 long salesManagerId)
         {
-            // =====================================================
+
             // 1. Find Lead
-            // =====================================================
 
             var lead =
                 await _context.Leads
@@ -2282,10 +2224,8 @@ namespace CRMSystem.Services
                 return null;
             }
 
-            // =====================================================
-            // 3. Get Only Sales Officers Under This Manager
-            // =====================================================
 
+            // 3. Get Only Sales Officers Under This Manager
             var salesOfficers =
                 await _context.Users
                     .Include(u => u.Role)
@@ -2309,9 +2249,8 @@ namespace CRMSystem.Services
                         })
                     .ToListAsync();
 
-            // =====================================================
+
             // 4. Return View Model
-            // =====================================================
 
             return new AssignLeadViewModel
             {
@@ -2339,10 +2278,8 @@ namespace CRMSystem.Services
                 AssignLeadViewModel model,
                 long salesManagerId)
         {
-            // =====================================================
-            // 1. Find Lead
-            // =====================================================
 
+            // 1. Find Lead
             var lead =
                 await _context.Leads
                     .FirstOrDefaultAsync(l =>
@@ -2355,10 +2292,8 @@ namespace CRMSystem.Services
                 return false;
             }
 
-            // =====================================================
-            // 2. Check Sales Manager Access
-            // =====================================================
 
+            // 2. Check Sales Manager Access
             var hasLeadAccess =
                 lead.CreatedBy == salesManagerId
                 ||
@@ -2379,10 +2314,8 @@ namespace CRMSystem.Services
                 return false;
             }
 
-            // =====================================================
-            // 3. Validate Selected Sales Officer
-            // =====================================================
 
+            // 3. Validate Selected Sales Officer
             var salesOfficer =
                 await _context.Users
                     .Include(u => u.Role)
@@ -2400,9 +2333,7 @@ namespace CRMSystem.Services
                 return false;
             }
 
-            // =====================================================
             // 4. Officer Must Belong to Current Sales Manager
-            // =====================================================
 
             if (salesOfficer.TeamLead == null ||
                 salesOfficer.TeamLead.SalesManagerId !=
@@ -2411,10 +2342,8 @@ namespace CRMSystem.Services
                 return false;
             }
 
-            // =====================================================
-            // 5. Find Existing Active Assignment
-            // =====================================================
 
+            // 5. Find Existing Active Assignment
             var existingAssignment =
                 await _context.LeadAssignments
                     .FirstOrDefaultAsync(a =>
@@ -2422,11 +2351,9 @@ namespace CRMSystem.Services
                         a.IsActive &&
                         !a.IsDeleted);
 
-            // =====================================================
+
             // 6. If Existing Assignment Exists,
             //    Deactivate It
-            // =====================================================
-
             if (existingAssignment != null)
             {
                 existingAssignment.IsActive = false;
@@ -2435,10 +2362,8 @@ namespace CRMSystem.Services
                     AssignmentStatus.Reassigned;
             }
 
-            // =====================================================
-            // 7. Create New Assignment
-            // =====================================================
 
+            // 7. Create New Assignment
             var assignment =
                 new LeadAssignment
                 {
@@ -2475,165 +2400,21 @@ namespace CRMSystem.Services
                     salesManagerId;
             }
 
-            // =====================================================
+
             // 9. Update Lead Status
-            // =====================================================
+
 
             lead.Status =
                 LeadStatus.Assigned;
 
-            // =====================================================
+
             // 10. Save
-            // =====================================================
+
 
             await _context.SaveChangesAsync();
 
             return true;
         }
-        //// =========================================================
-        //// SALES MANAGER ASSIGN LEAD
-        //// =========================================================
-
-        //public async Task<bool>
-        //    AssignLeadForSalesManagerAsync(
-        //        AssignLeadViewModel model,
-        //        long salesManagerId)
-        //{
-        //    // =====================================================
-        //    // 1. Find Lead
-        //    // =====================================================
-
-        //    var lead =
-        //        await _context.Leads
-        //            .FirstOrDefaultAsync(l =>
-        //                l.LeadId == model.LeadId &&
-        //                !l.IsDeleted &&
-        //                !l.IsArchived);
-
-        //    if (lead == null)
-        //    {
-        //        return false;
-        //    }
-
-        //    // =====================================================
-        //    // 2. Check Sales Manager Access to Lead
-        //    //
-        //    // Lead must either:
-        //    // - be created by this Sales Manager
-        //    // OR
-        //    // - be assigned to an Officer under this Manager
-        //    // =====================================================
-
-        //    var hasLeadAccess =
-        //        lead.CreatedBy == salesManagerId
-        //        ||
-        //        await _context.LeadAssignments
-        //            .AnyAsync(a =>
-        //                a.LeadId == model.LeadId &&
-        //                a.IsActive &&
-        //                !a.IsDeleted &&
-        //                a.SalesOfficer != null &&
-        //                a.SalesOfficer.TeamLead != null &&
-        //                a.SalesOfficer.TeamLead.SalesManagerId
-        //                    == salesManagerId);
-
-        //    if (!hasLeadAccess)
-        //    {
-        //        return false;
-        //    }
-
-        //    // =====================================================
-        //    // 3. Validate Selected Sales Officer
-        //    // =====================================================
-
-        //    var salesOfficer =
-        //        await _context.Users
-        //            .Include(u => u.Role)
-        //            .Include(u => u.TeamLead)
-        //            .FirstOrDefaultAsync(u =>
-        //                u.UserId == model.SalesOfficerId &&
-        //                u.IsActive &&
-        //                !u.IsDeleted &&
-        //                u.Role != null &&
-        //                u.Role.RoleKey == RoleKeys.SalesOfficer);
-
-        //    if (salesOfficer == null)
-        //    {
-        //        return false;
-        //    }
-
-        //    // =====================================================
-        //    // 4. IMPORTANT:
-        //    //    Officer must belong to current Sales Manager
-        //    // =====================================================
-
-        //    if (salesOfficer.TeamLead == null ||
-        //        salesOfficer.TeamLead.SalesManagerId !=
-        //            salesManagerId)
-        //    {
-        //        return false;
-        //    }
-
-        //    // =====================================================
-        //    // 5. Check Existing Active Assignment
-        //    // =====================================================
-
-        //    var existingAssignment =
-        //        await _context.LeadAssignments
-        //            .FirstOrDefaultAsync(a =>
-        //                a.LeadId == model.LeadId &&
-        //                a.IsActive &&
-        //                !a.IsDeleted);
-
-        //    if (existingAssignment != null)
-        //    {
-        //        return false;
-        //    }
-
-        //    // =====================================================
-        //    // 6. Create Assignment
-        //    // =====================================================
-
-        //    var assignment =
-        //        new LeadAssignment
-        //        {
-        //            LeadId =
-        //                model.LeadId,
-
-        //            SalesOfficerId =
-        //                model.SalesOfficerId,
-
-        //            AssignedBy =
-        //                salesManagerId,
-
-        //            AssignedAt =
-        //                DateTime.UtcNow,
-
-        //            AssignmentStatus =
-        //                AssignmentStatus.Pending,
-
-        //            IsActive =
-        //                true
-        //        };
-
-        //    _context.LeadAssignments.Add(
-        //        assignment);
-
-        //    // =====================================================
-        //    // 7. Update Lead Status
-        //    // =====================================================
-
-        //    lead.Status =
-        //        LeadStatus.Assigned;
-
-        //    // =====================================================
-        //    // 8. Save
-        //    // =====================================================
-
-        //    await _context.SaveChangesAsync();
-
-        //    return true;
-        //}
 
 
 
@@ -3000,12 +2781,7 @@ namespace CRMSystem.Services
             ReassignLeadViewModel model,
             long salesManagerId)
         {
-            //var currentAssignment =
-            //    await _context.LeadAssignments
-            //        .FirstOrDefaultAsync(
-            //            a =>
-            //                a.AssignmentId ==
-            //                model.AssignmentId);
+
             var currentAssignment =
                    await _context.LeadAssignments
                     .Include(a => a.Lead)
@@ -3025,9 +2801,9 @@ namespace CRMSystem.Services
                 return;
             }
 
-            // =========================================================
+
             // SALES MANAGER HIERARCHY VALIDATION
-            // =========================================================
+
             if (currentAssignment.SalesOfficer?.TeamLead?.SalesManagerId
                 != salesManagerId)
             {
@@ -3285,7 +3061,7 @@ namespace CRMSystem.Services
 
                     // Sales Manager ownership
                     (
-                        l.CreatedBy == salesManagerId 
+                        l.CreatedBy == salesManagerId
                         //|| l.SalesManagerId == salesManagerId
                     ));
 
@@ -3436,7 +3212,7 @@ namespace CRMSystem.Services
                                 remaining.TotalMinutes));
 
                     lead.AcceptanceSLAStatus =
-                        $"Pending • {minutes} min left";
+                        $"Pending â€¢ {minutes} min left";
 
                     lead.AcceptanceSLAMissed =
                         false;

@@ -1,4 +1,4 @@
-﻿using CRMSystem.Data;
+using CRMSystem.Data;
 using CRMSystem.Enums;
 using CRMSystem.Models.ViewModels;
 using CRMSystem.Services.Interfaces;
@@ -62,6 +62,7 @@ namespace CRMSystem.Services
                 .AsNoTracking()
                 .Where(t =>
                     t.UserId == salesOfficerId &&
+                    t.IsActive &&
                     !t.IsDeleted &&
                     t.StartDate <= today &&
                     t.EndDate >= today)

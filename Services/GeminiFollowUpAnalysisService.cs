@@ -32,6 +32,8 @@ namespace CRMSystem.Services
             _logger = logger;
         }
 
+
+        //check previous analysis result
         public async Task<GeminiAiAnalysisResultViewModel?> GetFeedbackAnalysisAsync(long feedbackId)
         {
             var feedback = await _context.Feedbacks
@@ -117,6 +119,8 @@ namespace CRMSystem.Services
                 var summary = feedback.Summary ?? string.Empty;
                 var notes = string.IsNullOrWhiteSpace(feedback.Notes) ? "None" : feedback.Notes;
 
+
+                //prompt for Gemini AI analysis
                 var promptText = $@"You are an expert CRM sales intelligence analyst.
 Analyze the following sales officer followup details and any attached proof image:
 
@@ -133,6 +137,8 @@ Based on the conversation summary, notes, and visual proof image (if attached), 
 3. sentiment: (string) Overall customer sentiment - strictly one of: 'Positive', 'Neutral', 'Negative'
 4. siteVisitInterested: (boolean) Is the customer interested in or planning a site visit / project visit?
 5. aiSummary: (string) A concise 1-2 sentence executive summary explaining the assessment (mention observations from the proof image if provided).
+
+
 
 Return ONLY valid JSON matching this schema:
 {{
@@ -352,6 +358,9 @@ Return ONLY valid JSON matching this schema:
             };
         }
 
+
+
+        //Lead analyze
         public async Task<GeminiLeadAnalysisResultViewModel> AnalyzeLeadAsync(long leadId, bool forceReanalysis = false)
         {
             try

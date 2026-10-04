@@ -1,4 +1,4 @@
-﻿namespace CRMSystem.Models.ViewModels
+namespace CRMSystem.Models.ViewModels
 {
     public class TargetAchievementViewModel
     {
@@ -29,5 +29,7 @@
 
         public string Status { get; set; } =
             string.Empty;
+
+        public bool IsActive { get; set; } = true;
     }
 }
