@@ -1,6 +1,10 @@
-﻿# Build output
+# Build output
 bin/
 obj/
+publish/
+appsettings.Production.json
+Properties/PublishProfiles/
+*.publishsettings
 
 # Visual Studio
 .vs/

@@ -8,7 +8,11 @@
 [![AI Integration](https://img.shields.io/badge/AI-Google%20Gemini-4285F4?logo=google&logoColor=white)](https://ai.google.dev/)
 [![Reports](https://img.shields.io/badge/Reports-QuestPDF%20%7C%20ClosedXML-FF6F00)](https://www.questpdf.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-crm--system--demo.runasp.net-00C853?logo=googlechrome&logoColor=white)](http://crm-system-demo.runasp.net)
 
+> 🌐 **Live Web Application:** [crm-system-demo.runasp.net](http://crm-system-demo.runasp.net)  
+> 🔑 **Demo Login:** `admin@crm.com` | `Admin@123`  
+>
 > **A Web-Based Customer Relationship Management (CRM) System for Lead Management and Sales Performance Monitoring**  
 > *Developed for **Flora Real Capita Group** to centralize multi-tier lead management, automate SLA compliance, and provide real-time sales performance intelligence.*
 
