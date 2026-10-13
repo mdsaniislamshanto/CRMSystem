@@ -7,10 +7,10 @@
 [![ORM](https://img.shields.io/badge/ORM-Entity%20Framework%20Core%209-512BD4)](https://learn.microsoft.com/en-us/ef/core/)
 [![AI Integration](https://img.shields.io/badge/AI-Google%20Gemini-4285F4?logo=google&logoColor=white)](https://ai.google.dev/)
 [![Reports](https://img.shields.io/badge/Reports-QuestPDF%20%7C%20ClosedXML-FF6F00)](https://www.questpdf.com/)
-[![License](https://img.shields.io/badge/License-Academic%20%2F%20Practicum-green.svg)](#)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 > **A Web-Based Customer Relationship Management (CRM) System for Lead Management and Sales Performance Monitoring**  
-> *Developed for Flora Real Capita Group as a Practicum Defense Project (CSC 490) at IUBAT — International University of Business Agriculture and Technology.*
+> *Developed for **Flora Real Capita Group** to centralize multi-tier lead management, automate SLA compliance, and provide real-time sales performance intelligence.*
 
 ---
 
@@ -241,18 +241,18 @@ The database seeder automatically initializes the master system administrator:
 
 ---
 
-## 👨‍💻 Project & Academic Credits
+## 👨‍💻 Author & Contact
 
-* **Author:** Md. Sani Islam Shanto
-* **Student ID:** 22303248
-* **Program:** Bachelor of Science in Computer Science & Engineering (BCSE)
-* **Institution:** IUBAT — International University of Business Agriculture and Technology
-* **Course:** Practicum (CSC 490)
-* **Client / Organization:** Flora Real Capita Group
-* **Supervised By:** Dr. Md. Abdul Awal (Associate Professor, Dept. of CSE, IUBAT)
-* **Co-Supervised By:** Shahinur Alam (Assistant Professor, Dept. of CSE, IUBAT)
+**Md. Sani Islam Shanto**  
+*Software Engineer | ASP.NET Core & Full-Stack Web Development*
+
+* 🏢 **Client / Industry Partner:** Flora Real Capita Group
+* 🌐 **GitHub:** [@mdsaniislamshanto](https://github.com/mdsaniislamshanto)
+* 📧 **Email:** [mdsaniislamshanto@gmail.com](mailto:mdsaniislamshanto@gmail.com)
+* 💼 **LinkedIn:** [Md. Sani Islam Shanto](https://www.linkedin.com/in/mdsaniislamshanto)
 
 ---
 
 ## 📄 License
-This project was developed for academic practicum research and defense purposes. All rights reserved.
+
+This project is open-source and licensed under the [MIT License](LICENSE) - see the [LICENSE](LICENSE) file for details.
